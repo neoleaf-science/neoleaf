@@ -1,0 +1,39 @@
+/target
+.env
+
+sessions.json
+sessions.tmp
+
+# gerados por scripts/build_font_packs.py (mise run fonts)
+static/texlive/texmf-core-neoleaf.tar.gz
+static/texlive/fonts/
+
+# gerados por scripts/fetch_bibtex_assets.py (mise run bibtex)
+static/texlive/bibtexu/
+static/texlive/icudt78l.dat
+
+# agente local (scripts: mise run agent)
+agent/target/
+static/agent/
+
+# gerados por scripts/fetch_xelatex_assets.py (mise run xelatex)
+static/texlive/xelatex/
+static/texlive/xdvipdfmx/
+static/texlive/texmf-core-xelatex.tar.gz
+
+# gerados por scripts/fetch_lualatex_assets.py (mise run lualatex)
+static/texlive/lualatex/
+static/texlive/texmf-core-lualatex.tar.gz
+
+__pycache__/
+*.pyc
+blocked.json
+templates.json
+templates.tmp
+static/texlive/biber/
+
+# cache em disco dos pacotes do TeX Live 2023 (public, refeito sob demanda)
+tlcache/
+
+# Pyodide (Python em WebAssembly), gerado por scripts/fetch_pyodide.py
+static/pyodide/

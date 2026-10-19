@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Virgínio"
+    given-names: "Tássio"
+title: "NeoLeaf: collaborative online LaTeX editor"
+version: 1.23.1
+date-released: 2026-10-19
+url: "https://neoleaf.science"
+license: "MIT OR Apache-2.0"

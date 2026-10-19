@@ -1,0 +1,6 @@
+shared/capture*
+shared/*.exe
+shared/install.ps1
+shared/result*
+shared/version.json
+storage/

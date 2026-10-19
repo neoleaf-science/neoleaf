@@ -1,0 +1,3 @@
+@echo off
+echo Restarting Windows in 5 seconds to test the agent automatic startup...
+shutdown /r /t 5

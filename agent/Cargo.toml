@@ -1,0 +1,30 @@
+[package]
+name = "neoleaf-agent"
+version = "0.4.14"
+edition = "2024"
+description = "NeoLeaf local agent: compiles LaTeX projects with the TeX Live (or Tectonic) installed on this machine"
+
+# outside the server workspace: it has its own Cargo.lock and few dependencies
+[workspace]
+
+[dependencies]
+tiny_http = "0.12"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+base64 = "0.22"
+sha2 = "0.10"
+rand = "0.9"
+[target.'cfg(target_os = "linux")'.dependencies]
+ksni = { version = "0.3", default-features = false, features = ["async-io", "blocking"] }
+# to check on D-Bus that the icon is really registered in the tray (same version ksni already uses)
+zbus = { version = "5", default-features = false, features = ["async-io", "blocking-api"] }
+
+[target.'cfg(windows)'.dependencies]
+# Windows tray icon (notification area) and the message loop it needs
+tray-icon = { version = "0.26", default-features = false }
+windows-sys = { version = "0.60", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging"] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeoLeaf - The Free and Open Collaborative LaTeX Editor</title>
+    <link rel="icon" type="image/png" href="/static/img/favicon.png">
+    <script src="/static/js/theme.js"></script>
+    <script src="/static/js/i18n.js"></script>
+    <link rel="stylesheet" href="/static/css/editor.css">
+    <link rel="stylesheet" href="/site/home.css">
+</head>
+<body class="dashboard-body">
+
+    <!-- Top navigation -->
+    <header class="nl-navbar">
+        <div class="nl-nav-container">
+            <a href="/" class="nl-nav-brand" aria-label="NeoLeaf Home">
+                <img src="/static/img/logo.png" alt="NeoLeaf Logo">
+                <span class="nl-brand-gradient">NeoLeaf</span>
+                <span class="nl-nav-badge">Open Beta</span>
+            </a>
+
+            <nav>
+                <ul class="nl-nav-menu" id="nl-nav-collapse">
+                    <li class="nl-nav-item"><a href="#features">Features</a></li>
+                    <li class="nl-nav-item"><a href="#compilation">Free Compilation</a></li>
+                    <li class="nl-nav-item"><a href="#templates">Templates</a></li>
+                    <li class="nl-nav-item"><a href="#plans">Plans <span class="nl-pill-free">$0</span></a></li>
+                    <li class="nl-nav-item"><a href="/agent">Local Agent</a></li>
+                </ul>
+            </nav>
+
+            <div class="nl-nav-actions">
+                <span data-lang-picker></span>
+                <span data-theme-picker></span>
+                <div class="nl-nav-auth">
+                    {{NAV_AUTH_ACTION}}
+                </div>
+                <button class="nl-nav-toggle" id="nl-nav-toggle" aria-label="Navigation Menu">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="nl-main-content">
+
+        <!-- Hero section with the LaTeX command animation -->
+        <section class="nl-hero-section">
+            <div class="nl-latex-anim-container">
+                <span class="nl-latex-keyword">\begin</span><span class="nl-latex-brace">{</span><span id="home-animation-text">papers</span><span class="nl-latex-brace">}</span>
+            </div>
+
+            <h1 class="nl-hero-title">
+                <span data-i18n-html>Write like a scientist with <em>NeoLeaf</em>,</span>
+                <span data-i18n-html>the online collaborative LaTeX editor that charges you <em>absolutely nothing</em>.</span>
+            </h1>
+
+            <p class="nl-hero-subtitle">
+                Unlimited real-time collaboration, native version control (Git) on GitHub or Codeberg, and compilation on your own machine, with no waiting queues, no artificial timeout limits, and no monthly fees.
+            </p>
+
+            <div class="nl-hero-cta-area">
+                {{HERO_AUTH_ACTION}}
+                <div class="nl-hero-terms-notice">
+                    By continuing, you agree to the <a href="/terms">Terms of Service</a> and the <a href="/privacy">Privacy Policy (GDPR/LGPD)</a>.
+                </div>
+            </div>
+
+            <!-- Highlighted pillars -->
+            <div class="nl-pillars-grid">
+                <div class="nl-pillar-item"><span class="nl-pillar-dot"></span> 👥 Unlimited Sharing (Zero Fees)</div>
+                <div class="nl-pillar-item"><span class="nl-pillar-dot"></span> ⚡ Free Compilation (WASM or Agent)</div>
+                <div class="nl-pillar-item"><span class="nl-pillar-dot"></span> 🐙 Your Files in Your GitHub or Codeberg</div>
+                <div class="nl-pillar-item"><span class="nl-pillar-dot"></span> 🔒 Zero Lock-in to Proprietary Servers</div>
+            </div>
+        </section>
+
+        <!-- Showcase mockup of the editor and synchronized PDF -->
+        <section class="nl-showcase-container">
+            <div class="nl-mockup-window">
+                <div class="nl-mockup-titlebar">
+                    <div class="nl-mockup-dots">
+                        <div class="nl-mockup-dot nl-dot-red"></div>
+                        <div class="nl-mockup-dot nl-dot-yellow"></div>
+                        <div class="nl-mockup-dot nl-dot-green"></div>
+                    </div>
+                    <div class="nl-mockup-title">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span>main.tex · NeoLeaf</span>
+                    </div>
+                    <div class="nl-mockup-sync">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M13.78 4.22a.75.75 0 010 1.06l-7.25 7.25a.75.75 0 01-1.06 0L2.22 9.28a.75.75 0 011.06-1.06L6 10.94l6.72-6.72a.75.75 0 011.06 0z"/></svg>
+                        <span>GitHub: main (up-to-date)</span>
+                    </div>
+                </div>
+
+                <div class="nl-mockup-image-wrap">
+                    <img src="/static/img/editor_preview.webp" alt="Real NeoLeaf editor interface: LaTeX editing with Monaco Editor and PDF compilation side by side" class="nl-mockup-img nl-fade-1" width="1859" height="988">
+                    <img src="/static/img/editor_preview_claro.webp" alt="NeoLeaf editor in the light theme: LaTeX code and PDF side by side" class="nl-mockup-img nl-fade-2" width="1859" height="988" decoding="async">
+                    <img src="/static/img/editor_preview_2.webp" alt="NeoLeaf Map tab: the paper in the center, with sections and figures as branches" class="nl-mockup-img nl-fade-3" width="1859" height="988" decoding="async">
+                    <img src="/static/img/editor_preview_claro_2.webp" alt="NeoLeaf Map tab in the light theme: paper structure as a mind map" class="nl-mockup-img nl-fade-4" width="1859" height="988" decoding="async">
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Free technologies / trust band -->
+        <section class="nl-ecosystem-section">
+            <p class="nl-ecosystem-lead">
+                Built for scientists, researchers, and universities that demand academic freedom, data sovereignty, and zero recurring costs.
+            </p>
+            <div class="nl-ecosystem-grid">
+                <div class="nl-tech-item">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                    <span>Native GitHub</span>
+                </div>
+                <div class="nl-tech-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11.955.49A12 12 0 0 0 0 12.49a12 12 0 0 0 1.832 6.373L11.838 5.928a.187.187 0 0 1 .324 0l10.006 12.935A12 12 0 0 0 24 12.49a12 12 0 0 0-12-12 12 12 0 0 0-.045 0zm.375 6.467l4.416 16.553a12 12 0 0 0 5.137-4.213z"/></svg>
+                    <span>Native Codeberg</span>
+                </div>
+                <div class="nl-tech-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.6 10.3c-.6-.6-1.5-.6-2.1 0l-3.3 3.3c-.5-.2-1.1-.3-1.7-.3-1.1 0-2.1.4-2.8 1.2l-3-1.7c.1-.4.1-.7.1-1.1 0-.8-.3-1.6-.8-2.2l2.6-3.8c.4.1.9.2 1.4.2 1.7 0 3.1-1.4 3.1-3.1S13.5 0 11.8 0 8.7 1.4 8.7 3.1c0 .5.1.9.3 1.3L6.2 8c-.6-.4-1.3-.6-2.1-.6C1.8 7.4 0 9.2 0 11.5s1.8 4.1 4.1 4.1c1.2 0 2.2-.5 2.9-1.3l8.8 5.1c-.1.3-.1.6-.1.9 0 2.3 1.8 4.1 4.1 4.1s4.1-1.8 4.1-4.1c0-1.1-.4-2.1-1.1-2.9l3.3-3.3c.6-.6.6-1.5 0-2.1z"/></svg>
+                    <span>Decentralized Git</span>
+                </div>
+                <div class="nl-tech-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                    <span>WebAssembly (Wasm)</span>
+                </div>
+                <div class="nl-tech-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14h2v2h-2v-2zm0-10h2v8h-2V6z"/></svg>
+                    <span>Complete TeX Live</span>
+                </div>
+                <div class="nl-tech-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                    <span>Rust Performance</span>
+                </div>
+                <div class="nl-tech-item">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 14.93V17a1 1 0 0 1-2 0v-.07A7.07 7.07 0 0 1 5.07 11H5a1 1 0 0 1 0-2h.07A7.07 7.07 0 0 1 11 3.07V3a1 1 0 0 1 2 0v.07A7.07 7.07 0 0 1 18.93 9H19a1 1 0 0 1 0 2h-.07A7.07 7.07 0 0 1 13 16.93z"/></svg>
+                    <span>Linux · macOS · Windows</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features section -->
+        <section id="features" class="nl-fx-section">
+            <div class="nl-section-header">
+                <div class="nl-eyebrow"><span>{</span><span>features</span><span>}</span></div>
+                <h2>The home of unconstrained, free scientific writing</h2>
+                <p>Create complex, impeccably formatted documents with ease. Collaborate with anyone, without paying per collaborator seat.</p>
+            </div>
+
+            <div class="nl-value-strip">
+                <div class="nl-value">
+                    <div class="nl-value-ico">⚡</div>
+                    <div><h3>Free and unlimited</h3><p>Compile in the browser or on your own machine, with no subscription and no queue.</p></div>
+                </div>
+                <div class="nl-value">
+                    <div class="nl-value-ico">👥</div>
+                    <div><h3>Collaborate with no per-collaborator cost</h3><p>Invite whoever you want: we do not charge per collaborator seat.</p></div>
+                </div>
+                <div class="nl-value">
+                    <div class="nl-value-ico">🔒</div>
+                    <div><h3>Your data, your repository</h3><p>The project lives in your browser and your repository. The server neither stores nor logs the content.</p></div>
+                </div>
+            </div>
+
+            <h3 class="nl-fx-subtitle">What you find inside the editor</h3>
+
+            <div class="nl-fx-grid">
+
+                <article class="nl-fx-card fx-live" style="--fx:#ff7aa2">
+                    <div class="nl-fx-bg" aria-hidden="true"><i></i><i></i><i></i></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="8" y="6" width="284" height="118" rx="10"/>
+                            <circle cx="22" cy="19" r="3" fill="#ff5f56"/><circle cx="33" cy="19" r="3" fill="#ffbd2e"/><circle cx="44" cy="19" r="3" fill="#27c93f"/>
+                            <rect class="fx-l" x="22" y="38" width="120" height="6" rx="3"/>
+                            <rect class="fx-l" x="22" y="54" width="170" height="6" rx="3"/>
+                            <rect class="fx-l" x="22" y="70" width="95" height="6" rx="3"/>
+                            <rect class="fx-l" x="22" y="86" width="150" height="6" rx="3"/>
+                            <rect class="fx-l" x="22" y="102" width="70" height="6" rx="3"/>
+                            <g class="fx-caret"><rect x="194" y="50" width="2" height="14" fill="#ff7aa2"/><rect x="196" y="43" width="28" height="12" rx="3" fill="#ff7aa2"/><text x="201" y="52" class="fx-flag">Ana</text></g>
+                            <g class="fx-caret fx-d2"><rect x="119" y="83" width="2" height="14" fill="#58a6ff"/><rect x="121" y="76" width="38" height="12" rx="3" fill="#58a6ff"/><text x="126" y="85" class="fx-flag">Bruno</text></g>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Live editing</h3>
+                        <p>Several authors in the same file at the same time, with colored cursors and no version conflicts.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-wasm" style="--fx:#2fd0a8">
+                    <div class="nl-fx-bg" aria-hidden="true"><pre>\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{Introduction}
+$E = mc^2$
+\cite{silva2024}
+\end{document}
+\documentclass{article}
+\usepackage{amsmath}
+\begin{document}
+\section{Introduction}
+$E = mc^2$
+\cite{silva2024}
+\end{document}</pre></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="14" y="14" width="96" height="102" rx="8"/>
+                            <rect class="fx-l" x="26" y="30" width="60" height="6" rx="3"/><rect class="fx-l" x="26" y="46" width="72" height="6" rx="3"/><rect class="fx-l" x="26" y="62" width="48" height="6" rx="3"/><rect class="fx-l" x="26" y="78" width="66" height="6" rx="3"/><rect class="fx-l" x="26" y="94" width="40" height="6" rx="3"/>
+                            <path class="fx-flow" d="M120 65 H178" /><path class="fx-as" d="M170 56 L180 65 L170 74"/>
+                            <rect class="fx-a" x="124" y="40" width="48" height="16" rx="8" opacity=".9"/><text x="148" y="51.5" text-anchor="middle" class="fx-flag">WASM</text>
+                            <rect class="fx-s" x="190" y="10" width="96" height="110" rx="6"/>
+                            <rect x="204" y="26" width="68" height="7" rx="3.5" fill="var(--text-bright)" opacity=".7"/>
+                            <rect class="fx-l" x="204" y="44" width="68" height="4" rx="2"/><rect class="fx-l" x="204" y="54" width="68" height="4" rx="2"/><rect class="fx-l" x="204" y="64" width="52" height="4" rx="2"/>
+                            <rect class="fx-a" x="204" y="78" width="68" height="26" rx="4" opacity=".25"/><path class="fx-as" d="M210 98 L224 88 L238 94 L262 82"/>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Compiling in the browser</h3>
+                        <p>pdfLaTeX, XeLaTeX and LuaLaTeX in WebAssembly: nothing to install and no server minutes to pay for.</p>
+                        <a class="nl-fx-more" href="#compilation">Engines and local agent →</a>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-git" style="--fx:#f78166">
+                    <div class="nl-fx-bg" aria-hidden="true">
+                        <svg viewBox="0 0 400 300" preserveAspectRatio="none"><path class="fx-flow" d="M-10 220 C 100 220 120 120 220 120 S 340 60 420 60"/><path class="fx-flow fx-slow" d="M-10 90 C 90 90 140 190 240 190 S 340 250 420 250"/></svg>
+                    </div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <path d="M20 84 H280" stroke="var(--nl-teal-bright)" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M96 84 C 112 84 112 40 134 40 H196 C 214 40 214 84 232 84" stroke="var(--fx)" stroke-width="3" fill="none" stroke-linecap="round"/>
+                            <circle cx="40" cy="84" r="7" class="fx-node"/><circle cx="96" cy="84" r="7" class="fx-node"/><circle cx="232" cy="84" r="7" class="fx-node"/><circle cx="268" cy="84" r="7" class="fx-node"/>
+                            <circle cx="140" cy="40" r="7" class="fx-node fx-hot"/><circle cx="190" cy="40" r="7" class="fx-node fx-hot"/>
+                            <text x="40" y="108" text-anchor="middle" class="fx-t">main</text><text x="165" y="24" text-anchor="middle" class="fx-t">ana/introduction</text><text x="268" y="108" text-anchor="middle" class="fx-t">push</text>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Real Git</h3>
+                        <p>GitHub and Codeberg: commit, push, pull, reset, conflicts and Git Blame right in the editor.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-editor" style="--fx:#58a6ff">
+                    <div class="nl-fx-bg" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="8" y="6" width="284" height="118" rx="10"/>
+                            <text x="24" y="34" class="fx-code"><tspan fill="#c586c0">\cite</tspan><tspan>{</tspan><tspan class="fx-blink">|</tspan></text>
+                            <rect x="24" y="42" width="170" height="72" rx="6" fill="var(--bg-secondary)" stroke="var(--border-color)"/>
+                            <rect x="26" y="45" width="166" height="20" rx="4" class="fx-a" opacity=".28"/>
+                            <text x="34" y="59" class="fx-code">silva2024deep</text><text x="34" y="80" class="fx-code fx-m">souza2023networks</text><text x="34" y="101" class="fx-code fx-m">lima2022graph</text>
+                            <rect class="fx-l" x="210" y="26" width="64" height="6" rx="3"/><rect class="fx-l" x="210" y="44" width="48" height="6" rx="3"/><rect class="fx-l" x="210" y="62" width="70" height="6" rx="3"/>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Smart editor</h3>
+                        <p>The VS Code editor, with autocomplete that understands your project, global search and document structure.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-map" style="--fx:#bc8cff">
+                    <div class="nl-fx-bg" aria-hidden="true"></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <g stroke="var(--fx)" stroke-width="2" fill="none" opacity=".75">
+                                <path d="M150 65 L72 30"/><path d="M150 65 L70 98"/><path d="M150 65 L232 28"/><path d="M150 65 L236 100"/><path d="M72 30 L30 18"/><path d="M72 30 L36 46"/><path d="M232 28 L276 16"/><path d="M236 100 L280 112"/>
+                            </g>
+                            <circle cx="150" cy="65" r="17" class="fx-a"/><text x="150" y="68.5" text-anchor="middle" class="fx-flag">paper</text>
+                            <circle cx="72" cy="30" r="9" class="fx-node"/><circle cx="70" cy="98" r="9" class="fx-node"/><circle cx="232" cy="28" r="9" class="fx-node"/><circle cx="236" cy="100" r="9" class="fx-node"/>
+                            <rect x="20" y="10" width="20" height="14" rx="3" class="fx-s"/><rect x="26" y="40" width="20" height="14" rx="3" class="fx-s"/><rect x="266" y="9" width="20" height="14" rx="3" class="fx-s"/><rect x="270" y="105" width="20" height="14" rx="3" class="fx-s"/>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Project map</h3>
+                        <p>See the paper as a mind map: sections as branches and figures as leaves, with a click to jump to the text.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-review" style="--fx:#ffcf5c">
+                    <div class="nl-fx-bg" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="14" y="10" width="170" height="40" rx="10"/><rect class="fx-l" x="28" y="23" width="110" height="5" rx="2.5"/><rect class="fx-l" x="28" y="34" width="70" height="5" rx="2.5"/>
+                            <rect x="116" y="58" width="170" height="40" rx="10" class="fx-a" opacity=".25"/><rect class="fx-l" x="130" y="71" width="120" height="5" rx="2.5"/><rect class="fx-l" x="130" y="82" width="80" height="5" rx="2.5"/>
+                            <path d="M30 116 H270" stroke="var(--border-color)" stroke-width="2"/>
+                            <circle cx="50" cy="116" r="5" class="fx-node"/><circle cx="130" cy="116" r="5" class="fx-node"/><circle cx="210" cy="116" r="5" class="fx-node fx-hot"/><circle cx="270" cy="116" r="5" class="fx-node"/>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Comments and history</h3>
+                        <p>Comment threads, named milestones and a revision history with restore, per file.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-refs" style="--fx:#4dd0e1">
+                    <div class="nl-fx-bg" aria-hidden="true"></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="14" y="8" width="272" height="28" rx="14"/><circle cx="34" cy="22" r="6" fill="none" stroke="var(--muted)" stroke-width="2"/><path d="M39 27 L44 32" stroke="var(--muted)" stroke-width="2" stroke-linecap="round"/>
+                            <text x="54" y="26" class="fx-t">test smells in dart</text>
+                            <g><rect class="fx-s" x="14" y="46" width="272" height="30" rx="8"/><rect class="fx-l" x="26" y="55" width="130" height="5" rx="2.5"/><rect class="fx-l" x="26" y="65" width="90" height="4" rx="2"/><rect class="fx-a" x="218" y="53" width="56" height="16" rx="8"/><text x="246" y="64.5" text-anchor="middle" class="fx-flag">\cite</text></g>
+                            <g><rect class="fx-s" x="14" y="84" width="272" height="30" rx="8"/><rect class="fx-l" x="26" y="93" width="110" height="5" rx="2.5"/><rect class="fx-l" x="26" y="103" width="70" height="4" rx="2"/><rect x="218" y="91" width="56" height="16" rx="8" fill="none" stroke="var(--fx)" stroke-width="1.5"/><text x="246" y="102.5" text-anchor="middle" class="fx-t fx-ac">BibTeX</text></g>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Reference search</h3>
+                        <p>Ten sources (Crossref, OpenAlex, arXiv, DBLP and more) and the \cite with the BibTeX in your .bib in one click.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-nb" style="--fx:#ff9f43">
+                    <div class="nl-fx-bg" aria-hidden="true"></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="10" y="6" width="280" height="50" rx="4"/><text x="18" y="24" class="fx-t fx-ac">In [1]:</text>
+                            <text x="62" y="24" class="fx-code"><tspan fill="#ff7b72">import</tspan> pandas <tspan fill="#ff7b72">as</tspan> pd</text><text x="62" y="42" class="fx-code">df.plot.bar()</text>
+                            <text x="18" y="76" class="fx-t" fill="#d84315">Out [1]:</text>
+                            <rect x="70" y="100" width="22" height="22" class="fx-a" opacity=".85"/><rect x="100" y="84" width="22" height="38" class="fx-a" opacity=".85"/><rect x="130" y="68" width="22" height="54" class="fx-a" opacity=".85"/><rect x="160" y="90" width="22" height="32" class="fx-a" opacity=".85"/><rect x="190" y="76" width="22" height="46" class="fx-a" opacity=".85"/>
+                            <path d="M62 123 H226" stroke="var(--border-color)" stroke-width="1.5"/>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Jupyter notebooks</h3>
+                        <p>Open and run .ipynb in the browser, with Python, pandas, matplotlib and formulas, with nothing to install.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-data" style="--fx:#66d9a8">
+                    <div class="nl-fx-bg" aria-hidden="true"></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="14" y="8" width="168" height="114" rx="8"/>
+                            <rect x="14" y="8" width="168" height="24" rx="8" class="fx-a" opacity=".22"/>
+                            <text x="26" y="24" class="fx-t fx-tb">product</text><text x="92" y="24" class="fx-t fx-tb">qty ▲</text><text x="138" y="24" class="fx-t fx-tb">value</text>
+                            <g class="fx-t"><text x="26" y="50">laptop</text><text x="98" y="50">10</text><text x="138" y="50">35000</text><text x="26" y="72">keyboard</text><text x="98" y="72">40</text><text x="138" y="72">6000</text><text x="26" y="94">mouse</text><text x="98" y="94">60</text><text x="138" y="94">4800</text><text x="26" y="114">monitor</text><text x="98" y="114">15</text><text x="138" y="114">13500</text></g>
+                            <rect class="fx-s" x="198" y="8" width="88" height="54" rx="8"/><rect x="208" y="20" width="28" height="12" rx="6" class="fx-a" opacity=".9"/><rect x="250" y="40" width="26" height="12" rx="6" class="fx-node"/><path d="M236 26 H250 V46" stroke="var(--fx)" stroke-width="2" fill="none"/>
+                            <rect x="198" y="72" width="88" height="50" rx="8" class="fx-s"/><rect x="210" y="104" width="14" height="10" class="fx-a" opacity=".85"/><rect x="230" y="92" width="14" height="22" class="fx-a" opacity=".85"/><rect x="250" y="82" width="14" height="32" class="fx-a" opacity=".85"/>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Python, tables and diagrams</h3>
+                        <p>Run scripts, see CSV as a table, write in Markdown and draw Mermaid diagrams in the same window.</p>
+                    </div>
+                </article>
+
+            </div>
+
+            <div class="nl-fx-banner">
+                <div class="nl-fx-swatches" aria-hidden="true">
+                    <span style="--a:#0b1f2a;--b:#0b7a9c"></span><span style="--a:#ffffff;--b:#0a6f9e"></span><span style="--a:#f3f4f7;--b:#1a6fb5"></span><span style="--a:#1e1e1e;--b:#0e639c"></span><span style="--a:#1e1e2e;--b:#89b4fa"></span><span style="--a:#eff1f5;--b:#1e66f5"></span><span style="--a:#282a36;--b:#bd93f9"></span><span style="--a:#2e3440;--b:#88c0d0"></span><span style="--a:#282828;--b:#83a598"></span><span style="--a:#fdf6e3;--b:#1b6fae"></span>
+                </div>
+                <p>Ten color themes, light and dark mode, and the interface in Portuguese, English, Spanish and Chinese.</p>
+                <div class="nl-fx-flags" aria-hidden="true"><span>🇧🇷</span><span>🇺🇸</span><span>🇪🇸</span><span>🇨🇳</span></div>
+            </div>
+        </section>
+
+        <!-- How compilation works section ({why free compilation?}) -->
+        <section id="compilation">
+            <div class="nl-section-header">
+                <div class="nl-eyebrow"><span>{</span><span>why free compilation?</span><span>}</span></div>
+                <h2>Compilation on your own machine: why pay to wait in queues?</h2>
+                <p>
+                    Other editors put you in a queue or kill your compilation after 60 seconds with a timeout error to push expensive subscriptions. On NeoLeaf, the processing power is yours:
+                </p>
+            </div>
+
+            <div class="nl-compile-deepdive">
+                <!-- Box 1: WebAssembly in the browser -->
+                <div class="nl-compile-card">
+                    <div>
+                        <div class="nl-compile-title">
+                            <span>⚡</span>
+                            <span>WebAssembly (In Your Browser)</span>
+                        </div>
+                        <p class="nl-compile-desc" data-i18n-html><strong>100% client-side compilation:</strong> runs TeX Live directly inside your browser tab using WebAssembly (texlive-wasm / BusyTeX).</p>
+                        <ul class="nl-checklist">
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span data-i18n-html><strong>Absolute privacy:</strong> your text is never sent to a remote server for compilation.</span>
+                            </li>
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span data-i18n-html><strong>Zero setup:</strong> open NeoLeaf and start compiling right away.</span>
+                            </li>
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span>Ideal for conference papers, reports, and Beamer presentations.</span>
+                            </li>
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span>Doesn't burn server quotas and doesn't rely on fast internet.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <span class="nl-pill-free" style="padding: 4px 10px;">Native Default · Zero Install</span>
+                    </div>
+                </div>
+
+                <!-- Box 2: Native local agent -->
+                <div class="nl-compile-card agent-highlight">
+                    <div>
+                        <div class="nl-compile-title" style="color: var(--green, var(--nl-teal-bright));">
+                            <span>💻</span>
+                            <span>Native Local Agent (Extreme Speed)</span>
+                        </div>
+                        <p class="nl-compile-desc" data-i18n-html><strong>Want instant compilation for large theses?</strong> The <code>neoleaf-agent</code> links the web UI directly to compilers installed on your computer (TeX Live, TinyTeX, or Tectonic).</p>
+                        <ul class="nl-checklist">
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span data-i18n-html><strong>No time limits:</strong> compile 400-page documents with zero fear of timeouts.</span>
+                            </li>
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span>Leverages all CPU cores and RAM of your own machine.</span>
+                            </li>
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span>Native support for XeLaTeX, LuaLaTeX, BibTeX, and custom packages.</span>
+                            </li>
+                            <li>
+                                <div class="nl-check-icon">✓</div>
+                                <span>Runs in the background with a single install command.</span>
+                            </li>
+                        </ul>
+                        <div class="nl-compile-cmd nl-install-cmd">
+                            <span id="install-cmd-text">curl -fsSL https://neoleaf.science/install.sh | sh</span>
+                            <button type="button" class="nl-copy-btn" onclick="copyInstallCmd(this)">Copy</button>
+                        </div>
+                        <p class="nl-install-note" data-i18n-html>Linux x86_64, no sudo. The script checks the download's SHA-256. <a href="/install.sh">View the script</a></p>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <a href="/download/agent" class="nl-btn nl-btn-primary nl-btn-sm">
+                            ⬇ Download Local Agent
+                        </a>
+                        <a href="/agent" class="nl-btn nl-btn-secondary nl-btn-sm">
+                            Agent Documentation →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Templates section ({templates}) -->
+        <section id="templates">
+            <div class="nl-section-header">
+                <div class="nl-eyebrow"><span>{</span><span>templates</span><span>}</span></div>
+                <h2>Start from a ready-made template</h2>
+                <p>Create a new project with the structure already in place. Templates added to the catalog show up here and when you create a project.</p>
+            </div>
+
+            <div class="nl-templates-grid" id="templates-grid">
+                <div class="nl-template-card">
+                    <div class="nl-template-icon">📄</div>
+                    <h4>Scientific Article</h4>
+                    <p>Article with title, sections, math and figures, ready to edit and compile.</p>
+                    <div class="nl-template-tags">
+                        <span class="nl-template-tag">Article</span>
+                        <span class="nl-template-tag">pdfLaTeX</span>
+                    </div>
+                </div>
+
+                <div class="nl-template-card">
+                    <div class="nl-template-icon">📑</div>
+                    <h4>Technical Report</h4>
+                    <p>Report with chapters and sections, for lab work, projects and longer documents.</p>
+                    <div class="nl-template-tags">
+                        <span class="nl-template-tag">Report</span>
+                        <span class="nl-template-tag">Chapters</span>
+                    </div>
+                </div>
+
+                <div class="nl-template-card">
+                    <div class="nl-template-icon">📊</div>
+                    <h4>Presentation (Beamer)</h4>
+                    <p>Beamer slides: outline, sections and frames ready for your content.</p>
+                    <div class="nl-template-tags">
+                        <span class="nl-template-tag">Slides</span>
+                        <span class="nl-template-tag">Beamer</span>
+                    </div>
+                </div>
+            </div>
+            <script>
+            // catalog templates (registered by the administrator): metadata only; the text comes from the administrator and is not translated
+            (function () {
+                const ICON = { article: '📄', thesis: '🎓', slides: '📊', report: '📑', poster: '🖼️', other: '📁' };
+                fetch('/api/templates').then(r => r.json()).then(d => {
+                    const grid = document.getElementById('templates-grid');
+                    (d.templates || []).forEach(m => {
+                        const card = document.createElement('div');
+                        card.className = 'nl-template-card';
+                        card.setAttribute('data-no-i18n', '');
+                        const ic = document.createElement('div'); ic.className = 'nl-template-icon'; ic.textContent = ICON[m.category] || ICON.other; card.appendChild(ic);
+                        const h = document.createElement('h4'); h.textContent = m.name; card.appendChild(h);
+                        if (m.description) { const p = document.createElement('p'); p.textContent = m.description; card.appendChild(p); }
+                        const tags = document.createElement('div'); tags.className = 'nl-template-tags';
+                        [m.institution, m.language, m.license].filter(Boolean).forEach(t => { const sp = document.createElement('span'); sp.className = 'nl-template-tag'; sp.textContent = t; tags.appendChild(sp); });
+                        card.appendChild(tags);
+                        grid.appendChild(card);
+                    });
+                }).catch(() => {});
+            })();
+            </script>
+        </section>
+
+        <!-- Testimonial dark green card -->
+        <section class="nl-quote-card">
+            <div class="nl-quote-icon">“</div>
+            <div class="nl-quote-body">
+                After hitting compile timeout limits and being billed in dollars every time we wanted to add another student to the same paper, we switched to NeoLeaf. Compiling directly in the browser with WebAssembly and saving commits straight to GitHub is true academic freedom.
+            </div>
+            <div class="nl-quote-author">
+                <strong>Prof. MSc. Tássio Virgínio</strong>
+                <span>Professor, Researcher and Advisor</span>
+            </div>
+        </section>
+
+        <!-- Plans section ({plans}) -->
+        <section id="plans">
+            <div class="nl-section-header">
+                <div class="nl-eyebrow"><span>{</span><span>plans</span><span>}</span></div>
+                <h2>Academic freedom shouldn't come with a monthly invoice</h2>
+                <p>Compare NeoLeaf with traditional platforms that lock essential features behind paid subscriptions.</p>
+            </div>
+
+            <div class="nl-plans-grid">
+                <!-- Card 1: NeoLeaf (the highlighted one) -->
+                <div class="nl-plan-card nl-plan-highlight">
+                    <div class="nl-plan-pill">The Open Standard</div>
+                    <div>
+                        <h3 class="nl-plan-name">NeoLeaf</h3>
+                        <div class="nl-plan-price">$0 <span>/ forever</span></div>
+                        <p class="nl-plan-desc">Everything you and your team need to produce high-impact science without restrictions.</p>
+                        <ul class="nl-plan-features">
+                            <li class="positive" data-i18n-html><span class="icon">✓</span> <strong>Unlimited collaborators</strong> on all projects</li>
+                            <li class="positive" data-i18n-html><span class="icon">✓</span> <strong>Zero-cost compilation</strong> (WASM or Local Agent)</li>
+                            <li class="positive" data-i18n-html><span class="icon">✓</span> <strong>Zero wait queue</strong> and zero 60-second timeouts</li>
+                            <li class="positive" data-i18n-html><span class="icon">✓</span> <strong>Your data in your GitHub or Codeberg</strong> (no lock-in)</li>
+                            <li class="positive" data-i18n-html><span class="icon">✓</span> <strong>Full version history</strong> via native Git</li>
+                            <li class="positive" data-i18n-html><span class="icon">✓</span> <strong>Bidirectional SyncTeX</strong> and global file search</li>
+                            <li class="positive" data-i18n-html><span class="icon">✓</span> <strong>Absolute privacy:</strong> nothing retained on third-party servers</li>
+                        </ul>
+                    </div>
+                    <div>
+                        {{BOTTOM_AUTH_ACTION}}
+                    </div>
+                </div>
+
+                <!-- Card 2: Traditional platforms ("Free" plan) -->
+                <div class="nl-plan-card">
+                    <div>
+                        <h3 class="nl-plan-name">Other Platforms</h3>
+                        <div class="nl-plan-price" style="font-size: 26px; color: var(--muted);">"Free" Plan <span>(with strings attached)</span></div>
+                        <p class="nl-plan-desc">The traditional free tier with artificial limits crafted to push paid upgrades.</p>
+                        <ul class="nl-plan-features">
+                            <li class="prohibit" data-i18n-html><span class="icon">✕</span> <strong>Only 1 collaborator</strong> (add your advisor and pay up)</li>
+                            <li class="prohibit" data-i18n-html><span class="icon">✕</span> <strong>Strict compile timeout</strong> (compile error: timed out)</li>
+                            <li class="prohibit" data-i18n-html><span class="icon">✕</span> <strong>Sluggish compile queues</strong> during peak submission hours</li>
+                            <li class="prohibit" data-i18n-html><span class="icon">✕</span> <strong>Version history restricted</strong> to just a few days</li>
+                            <li class="prohibit" data-i18n-html><span class="icon">✕</span> <strong>Files locked</strong> inside their proprietary servers</li>
+                            <li class="prohibit"><span class="icon">✕</span> Charge extra fees to sync with GitHub</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <button class="nl-btn nl-btn-secondary" style="width: 100%; opacity: 0.6; cursor: not-allowed;" disabled>
+                            Filled with Restrictions
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card 3: Traditional platforms ("Premium" plan) -->
+                <div class="nl-plan-card">
+                    <div>
+                        <h3 class="nl-plan-name">Other Platforms</h3>
+                        <div class="nl-plan-price" style="font-size: 26px; color: #f0816f;">$5 to $20+ <span>/month per user</span></div>
+                        <p class="nl-plan-desc">Hefty monthly fees in USD charged per each team member.</p>
+                        <ul class="nl-plan-features">
+                            <li class="prohibit"><span class="icon">✕</span> Recurring monthly charges for every single co-author</li>
+                            <li class="prohibit"><span class="icon">✕</span> Charge you to unlock history that Git provides for free</li>
+                            <li class="prohibit"><span class="icon">✕</span> Charge you to unlock extra CPU processing seconds</li>
+                            <li class="prohibit"><span class="icon">✕</span> If research funding is delayed, you lose your access</li>
+                            <li class="prohibit"><span class="icon">✕</span> Your research data remains trapped in their database</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <button class="nl-btn nl-btn-secondary" style="width: 100%; opacity: 0.6; cursor: not-allowed;" disabled>
+                            Why pay for this?
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final section \begin{now} -->
+        <section class="nl-final-cta-card">
+            <div class="nl-final-latex">
+                <span class="nl-latex-keyword">\begin</span><span class="nl-latex-brace">{</span><span style="color: var(--green, var(--nl-teal-bright));">freedom</span><span class="nl-latex-brace">}</span>
+            </div>
+            <h2 class="nl-final-title">Ready to write without queues, limits, or monthly fees?</h2>
+            <p class="nl-final-subtitle">
+                Join the scientific community that chose local compilation, real version control on GitHub or Codeberg, and unlimited sharing.
+            </p>
+            <div style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;">
+                {{BOTTOM_AUTH_ACTION}}
+                <a href="/agent" class="nl-btn nl-btn-secondary nl-btn-lg">
+                    Explore the Local Agent →
+                </a>
+            </div>
+        </section>
+
+        <!-- Trust points -->
+        <section id="about" class="nl-about">
+            <div class="nl-section-header" style="margin: 0 auto 28px;">
+                <div class="nl-eyebrow"><span>{</span><span>your data</span><span>}</span></div>
+                <h2>Your data, under your control</h2>
+            </div>
+            <div class="nl-about-points">
+                <div class="nl-about-point"><strong>Your projects are yours</strong><span>Each project is a repository in your GitHub or Codeberg account. If NeoLeaf goes offline, your files stay with you.</span></div>
+                <div class="nl-about-point"><strong>The server does not store your project</strong><span>Your files stay in your browser and in your repository (GitHub or Codeberg). The server keeps only what is needed for you to sign in.</span></div>
+                <div class="nl-about-point"><strong>Compilation on your machine</strong><span>LaTeX compiles in your browser (WebAssembly) or in the local agent, with no queue and no time limit imposed by us.</span></div>
+            </div>
+        </section>
+
+        <!-- Financial support (last section) -->
+        <section id="support" class="nl-support">
+            <div class="nl-section-header" style="margin: 0 auto 22px;">
+                <div class="nl-eyebrow"><span>{</span><span>support</span><span>}</span></div>
+                <h2>Support NeoLeaf.Science</h2>
+            </div>
+            <p>NeoLeaf.Science is a non-profit project. There are no paid plans, ads or per-collaborator limits, and it is free to use.</p>
+            <p>Keeping the site online has server and domain costs, besides the development hours. If NeoLeaf helps your work and you would like to contribute financially, any amount is welcome. Supporting is entirely optional and changes nothing about what you can use.</p>
+            <p class="nl-support-note">Support is made through Ko-fi, outside NeoLeaf. We do not receive or store any payment data.</p>
+            <a href="https://ko-fi.com/tassiovirginio" target="_blank" rel="noopener" class="nl-btn nl-btn-primary nl-btn-lg">☕ Support on Ko-fi</a>
+        </section>
+
+    </main>
+
+    <!-- Fat footer with 6 sections -->
+    <footer class="nl-fat-footer">
+        <div class="nl-footer-grid">
+            <!-- Column 1: NeoLeaf brand -->
+            <div class="nl-footer-brand-col">
+                <a href="/" class="nl-nav-brand" style="margin-bottom: 8px;">
+                    <img src="/static/img/logo.png" alt="NeoLeaf Logo">
+                    <span>NeoLeaf</span>
+                </a>
+                <p>
+                    The open, collaborative LaTeX editor natively integrated with your GitHub or Codeberg. No subscriptions, no lock-in, and no compilation limits.
+                </p>
+                <div style="font-size: 12px; color: var(--muted);">
+                    Public Beta Version · 2026
+                </div>
+                <!-- Green Web Foundation: verifies that the hosting runs on renewable energy (the image comes from their server) -->
+                <img src="https://app.greenweb.org/api/v3/greencheckimage/neoleaf.science?nocache=true" alt="This website runs on green hosting - verified by thegreenwebfoundation.org" width="200px" height="95px" loading="lazy" referrerpolicy="no-referrer" style="margin-top: 14px;">
+                <!-- Website Carbon: a snapshot of this site's result page (site/carbon.json, from scripts/fetch_carbon.py), shown from our own server -->
+                {{CARBON_BADGE}}
+            </div>
+
+            <!-- Column 2: About -->
+            <div>
+                <div class="nl-footer-heading">About</div>
+                <ul class="nl-footer-links">
+                    <li><a href="/terms">Terms of Service</a></li>
+                    <li><a href="/privacy">Privacy (LGPD)</a></li>
+                    <li><a href="/licenses">Licenses</a></li>
+                    <li><a href="https://github.com/neoleaf-science/neoleaf" target="_blank" rel="noopener">Open Source</a></li>
+                    <li><a href="https://www.youtube.com/@neoleaf.science" target="_blank" rel="noopener">YouTube channel</a></li>
+                    <li><a href="mailto:contact@neoleaf.science">Contact Us</a></li>
+                    <li><a href="https://ko-fi.com/tassiovirginio" target="_blank" rel="noopener">☕ Support NeoLeaf</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 3: Solutions -->
+            <div>
+                <div class="nl-footer-heading">Solutions</div>
+                <ul class="nl-footer-links">
+                    <li><a href="#features">For Students</a></li>
+                    <li><a href="#features">For Researchers</a></li>
+                    <li><a href="#features">For Research Groups</a></li>
+                    <li><a href="#features">For Universities</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 4: Features -->
+            <div>
+                <div class="nl-footer-heading">Features</div>
+                <ul class="nl-footer-links">
+                    <li><a href="#compilation">WebAssembly in Browser</a></li>
+                    <li><a href="/agent">Native Local Agent</a></li>
+                    <li><a href="#features">Bidirectional SyncTeX</a></li>
+                    <li><a href="#templates">ABNT & SBC Templates</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 5: Comparison -->
+            <div>
+                <div class="nl-footer-heading">Comparison</div>
+                <ul class="nl-footer-links">
+                    <li><a href="#plans">Why Zero Cost?</a></li>
+                    <li><a href="#features">Git Advantages</a></li>
+                    <li><a href="#compilation">Local vs Cloud Compilation</a></li>
+                    <li><a href="#plans">Limitless Collaboration</a></li>
+                </ul>
+            </div>
+
+            <!-- Column 6: Help -->
+            <div>
+                <div class="nl-footer-heading">Help</div>
+                <ul class="nl-footer-links">
+                    <li><a href="/agent">Agent Installation</a></li>
+                    <li><a href="/download/agent">Download Linux Agent</a></li>
+                    <li><a href="mailto:contact@neoleaf.science">Community Support</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="nl-footer-bottom">
+            <div class="nl-footer-legal">
+                <span>© 2026 Tássio Virgínio</span> ·
+                <span>NeoLeaf is open source (MIT or Apache-2.0)</span> ·
+                <a href="/licenses">Licenses</a> ·
+                <span>All your data belongs to you.</span>
+            </div>
+            <div class="nl-footer-pickers">
+                <span data-lang-picker></span>
+                <span data-theme-picker></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LaTeX typewriter animation & mobile nav toggle script -->
+    <script src="/site/home.js"></script>
+</body>
+</html>

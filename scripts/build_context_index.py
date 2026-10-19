@@ -1,0 +1,137 @@
+#!/usr/bin/env python3
+"""Generates static/js/context-index.js from context-en.xml (the ConTeXt interface).
+
+Usage: python3 scripts/build_context_index.py [path/context-en.xml]
+Without an argument, looks for the file in the ConTeXt installation (texmf-context/tex/context/interface/mkiv/context-en.xml).
+
+The index keeps only facts about the commands: name, category, argument shape, keys and allowed values.
+It does not copy ConTeXt code or documentation.
+"""
+import json, os, sys, xml.etree.ElementTree as ET
+from collections import OrderedDict
+
+NS = {'cd': 'http://www.pragma-ade.com/commands'}
+Q = lambda t: '{%s}%s' % (NS['cd'], t)
+CANDIDATES = [
+    '/usr/share/texmf-dist/texmf-context/tex/context/interface/mkiv/context-en.xml',
+    os.path.expanduser('~/context/tex/texmf-context/tex/context/interface/mkiv/context-en.xml'),
+]
+OUT = os.path.join(os.path.dirname(__file__), '..', 'static', 'js', 'context-index.js')
+
+
+def find_xml():
+    if len(sys.argv) > 1:
+        return sys.argv[1]
+    for c in CANDIDATES:
+        if os.path.exists(c):
+            return c
+    sys.exit('context-en.xml not found: pass the path as an argument')
+
+
+def constants(el):
+    """Allowed literal values (ignores the generic cd:... types)."""
+    out = []
+    for c in el.iter(Q('constant')):
+        t = c.get('type')
+        if t and not t.startswith('cd:') and t != '*' and t not in out:
+            out.append(t)
+    return out
+
+
+def main():
+    root = ET.parse(find_xml()).getroot()
+    raw = {}          # name -> command
+    params_of = {}    # name -> {key: [values]}
+    inherits = {}     # name -> [inherited names]
+    for c in root.iter(Q('command')):
+        name = c.get('name')
+        if not name:
+            continue
+        raw.setdefault(name, c)
+    # own parameters and inheritances of each command
+    for name, c in raw.items():
+        own = OrderedDict()
+        inh = []
+        for a in c.iter(Q('assignments')):
+            for p in a.iter(Q('parameter')):
+                k = p.get('name')
+                if k:
+                    own.setdefault(k, constants(p))
+            for i in a.iter(Q('inherit')):
+                if i.get('name'):
+                    inh.append(i.get('name'))
+        params_of[name] = own
+        inherits[name] = inh
+
+    def resolve(name, seen=()):
+        out = OrderedDict(params_of.get(name, {}))
+        for h in inherits.get(name, []):
+            if h in seen or h not in params_of:
+                continue
+            for k, v in resolve(h, seen + (name,)).items():
+                out.setdefault(k, v)
+        return out
+
+    def signature(c):
+        """Argument list: [type, optional, list?] with type = 'b' (brackets), 'c' (braces), 'n' (no delimiter), 'a' (key=value)."""
+        sig = []
+        args = c.find('cd:arguments', NS)
+        if args is None:
+            return sig
+        for e in args:
+            tag = e.tag.split('}')[1]
+            d = e.get('delimiters')
+            opt = e.get('optional') == 'yes'
+            if tag == 'assignments':
+                sig.append(['a', opt, 'braces' if d == 'braces' else ''])
+            elif tag in ('keywords', 'content', 'csname', 'dimension', 'position', 'index', 'template', 'apply', 'angles', 'delimiter'):
+                kind = 'c' if (d == 'braces' or tag == 'content') else ('n' if d == 'none' or tag == 'csname' else 'b')
+                vals = constants(e) if tag == 'keywords' else []
+                sig.append([kind, opt, vals[:40]])
+        return sig
+
+    commands = []
+    seen_names = set()
+
+    def add(name, c, sig, pairs):
+        if name in seen_names:
+            return
+        seen_names.add(name)
+        item = {'n': name, 'c': c.get('category') or '', 's': sig}
+        if pairs:
+            item['e'] = 1
+        p = resolve(c.get('name'))
+        if p:
+            item['p'] = {k: v for k, v in list(p.items())[:120]}
+        commands.append(item)
+
+    for name, c in raw.items():
+        sig = signature(c)
+        env = c.get('type') == 'environment'
+        instances = [i.get('value') for i in c.iter(Q('constant')) if c.find('cd:instances', NS) is not None and i in list(c.find('cd:instances', NS))]
+        if env:
+            add('start' + name, c, sig, True)
+        else:
+            add(name, c, sig, False)
+        for inst in instances:
+            if env:
+                add('start' + inst, c, sig, True)
+            else:
+                add(inst, c, sig, False)
+                # section titles also exist as blocks: \startsection[title={...}] ... \stopsection
+                if name == 'section':
+                    add('start' + inst, c, [['a', True, '']], True)
+                    item = next(x for x in commands if x['n'] == 'start' + inst)
+                    item['p'] = {k: [] for k in ('title', 'reference', 'bookmark', 'list', 'marking', 'label', 'number')}
+
+    commands.sort(key=lambda x: x['n'])
+    data = {'commands': commands}
+    js = '// Generated by scripts/build_context_index.py from context-en.xml (the ConTeXt interface). Do not edit by hand.\n' \
+         '// Only facts about the commands: name, category, argument shape, keys and allowed values.\n' \
+         'window.CTX_INDEX = ' + json.dumps(data, ensure_ascii=False, separators=(',', ':')) + ';\n'
+    with open(OUT, 'w', encoding='utf-8') as f:
+        f.write(js)
+    print(f'{len(commands)} commands, {len(js)//1024} KB -> {os.path.normpath(OUT)}')
+
+
+main()

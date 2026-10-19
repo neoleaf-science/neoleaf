@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  rust:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: sudo apt-get update && sudo apt-get install -y cmake
+      - run: cargo check --all-targets --locked
+      - run: cargo test --locked
+      - run: cargo test --locked --manifest-path agent/Cargo.toml
+
+  # Manual only for now: the E2E suite needs the generated WebAssembly bundles (mise run fonts bibtex biber xelatex lualatex) and was not run on GitHub Actions yet.
+  e2e:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: oven-sh/setup-bun@v2
+      - run: sudo apt-get update && sudo apt-get install -y cmake git
+      - run: cd tests/e2e && bun install && bunx playwright install --with-deps chromium
+      - run: cd tests/e2e && bun test --timeout 180000

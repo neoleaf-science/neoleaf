@@ -1,0 +1,23 @@
+# Windows 10 LTSC inside a container (dockur/windows, QEMU with KVM) to test the local agent on Windows.
+# Usage: see README.md in this folder.
+services:
+  windows:
+    image: dockurr/windows
+    container_name: neoleaf-windows
+    environment:
+      VERSION: "10l"      # Windows 10 LTSC (official, no Store or extra apps)
+      RAM_SIZE: "3G"
+      CPU_CORES: "2"
+      DISK_SIZE: "24G"
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "127.0.0.1:8006:8006"   # the Windows desktop, in the browser: http://localhost:8006
+    volumes:
+      - ./storage:/storage      # the Windows disk (large; kept out of Git)
+      - ./shared:/shared        # appears in Windows as the "Shared" folder on the desktop and as drive Z:
+    stop_grace_period: 2m
+    restart: "no"

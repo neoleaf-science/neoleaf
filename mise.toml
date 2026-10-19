@@ -1,0 +1,161 @@
+min_version = "2024.9.0"
+
+[tools]
+rust = { version = "1.99", components = "rustfmt,clippy,rust-src" }
+"cargo:cargo-watch" = "latest"
+"cargo:cargo-audit" = "latest"
+"cargo:cargo-outdated" = "latest"
+
+[env]
+# Loads GITHUB_CLIENT_ID / GITHUB_CLIENT_SECRET / REDIRECT_URI from .env (if it exists)
+_.file = { path = ".env", redact = true }
+PORT = "3000"
+HOST = "127.0.0.1"
+RUST_BACKTRACE = "1"
+_.path = ["./target/release"]
+
+[settings]
+experimental = true
+
+# ---------------------------------------------------------------- Setup
+
+[tasks.setup]
+description = "Prepare the local environment (.env and dependencies)"
+run = """
+[ -f .env ] || { cp .env.example .env && echo '.env created from .env.example: fill in the GitHub OAuth credentials'; }
+cargo fetch
+"""
+
+# ---------------------------------------------------------------- Development
+
+[tasks.dev]
+description = "Server with automatic reload when files are saved"
+run = "cargo watch -q -c -w src -w static -x run"
+
+[tasks."dev:fake"]
+description = "Local server without a GitHub account: starts a fake GitHub (API, login and Git) and points NeoLeaf at it. Sign in with the GitHub button: you become the demo user, who is also an administrator here"
+run = """
+set -e
+FAKE_ROOT="$(mktemp -d)"
+bun tests/fake-github/server.ts --port 4010 --root "$FAKE_ROOT" &
+FAKE_PID=$!
+trap 'kill $FAKE_PID 2>/dev/null; rm -rf "$FAKE_ROOT"' EXIT
+sleep 1
+ADMIN_EMAILS=demo@neoleaf.local TEMPLATES_FILE="$FAKE_ROOT/templates.json" GITHUB_API_URL=http://127.0.0.1:4010 GITHUB_WEB_URL=http://127.0.0.1:4010 CODEBERG_URL=http://127.0.0.1:4010 CODEBERG_CLIENT_ID=fake-cb-client CODEBERG_CLIENT_SECRET=fake-cb-secret GITHUB_CLIENT_ID=fake-client GITHUB_CLIENT_SECRET=fake-secret REDIRECT_URI=http://localhost:3000/auth/callback cargo run
+"""
+
+[tasks.run]
+description = "Run the server (debug)"
+run = "cargo run"
+
+[tasks.serve]
+description = "Run the server (release) on all interfaces"
+env = { HOST = "0.0.0.0" }
+run = "cargo run --release"
+
+[tasks.open]
+description = "Open the local app in the browser"
+run = "xdg-open http://localhost:${PORT}"
+
+# ---------------------------------------------------------------- Quality
+
+[tasks.fmt]
+description = "Format the code"
+run = "cargo fmt"
+
+[tasks.fmt-check]
+description = "Check formatting without changing anything"
+run = "cargo fmt --check"
+
+[tasks.lint]
+description = "Clippy with warnings as errors"
+run = "cargo clippy --all-targets -- -D warnings"
+
+[tasks.check]
+description = "Quick compile check"
+run = "cargo check --all-targets"
+
+[tasks.test]
+description = "Run the tests"
+run = "cargo test"
+
+[tasks.audit]
+description = "Look for vulnerabilities in the dependencies"
+run = "cargo audit"
+
+[tasks.outdated]
+description = "List outdated dependencies"
+run = "cargo outdated -R"
+
+[tasks."test:e2e"]
+description = "Run the automated E2E test suite in the local browser (Playwright)"
+run = "cd tests/e2e && bun test --timeout 180000"
+
+[tasks.verify]
+description = "Full local verification (check and E2E tests in the browser)"
+depends = ["check", "test:e2e"]
+
+[tasks.ci]
+description = "Everything CI should run"
+depends = ["fmt-check", "lint", "test", "test:e2e"]
+
+# ---------------------------------------------------------------- Build
+
+[tasks.build]
+description = "Build in debug mode"
+run = "cargo build"
+
+[tasks.release]
+description = "Build the optimized binary"
+sources = ["Cargo.toml", "Cargo.lock", "src/**/*", "static/**/*", "site/**/*"]
+outputs = ["target/release/neoleaf"]
+run = "cargo build --release"
+
+[tasks.carbon]
+description = "Refresh site/carbon.json, the Website Carbon snapshot shown in the landing page footer (then run deploy:site)"
+run = "python3 scripts/fetch_carbon.py"
+
+[tasks.fonts]
+description = "Build the light package with the maps and the per-family font packages (Times, Libertine, newtx, Inconsolata, Montserrat, Noto Sans...) from TeX Live 2023"
+sources = ["scripts/build_font_packs.py", "static/texlive/texmf-core-pdflatex.tar.gz"]
+outputs = ["static/texlive/texmf-core-neoleaf.tar.gz", "static/texlive/fonts/manifest.json"]
+run = "python3 scripts/build_font_packs.py"
+
+[tasks.bibtex]
+description = "Download BibTeX in WebAssembly (bibtexu) and the Unicode data (ICU), verified with SHA-256"
+outputs = ["static/texlive/bibtexu/emscripten/bibtexu.wasm", "static/texlive/icudt78l.dat"]
+run = "python3 scripts/fetch_bibtex_assets.py"
+
+[tasks.biber]
+description = "Download Biber in WebAssembly (biblatex in the browser), verified with SHA-256"
+outputs = ["static/texlive/biber/emscripten/biber.wasm", "static/texlive/biber/emscripten/biber-vfs.tar.gz"]
+run = "python3 scripts/fetch_biber_assets.py"
+
+[tasks.xelatex]
+description = "Download XeLaTeX and xdvipdfmx in WebAssembly and the texmf-core-xelatex package"
+outputs = ["static/texlive/xelatex/emscripten/xelatex.wasm", "static/texlive/xdvipdfmx/emscripten/xdvipdfmx.wasm", "static/texlive/texmf-core-xelatex.tar.gz"]
+run = "python3 scripts/fetch_xelatex_assets.py"
+
+[tasks.lualatex]
+description = "Download LuaLaTeX in WebAssembly and the texmf-core-lualatex package"
+outputs = ["static/texlive/lualatex/emscripten/lualatex.wasm", "static/texlive/texmf-core-lualatex.tar.gz"]
+run = "python3 scripts/fetch_lualatex_assets.py"
+
+[tasks.clean]
+description = "Remove build artifacts"
+run = "cargo clean"
+
+[tasks.size]
+description = "Show the size of the release binary"
+depends = ["release"]
+run = "ls -lh target/release/neoleaf"
+
+# ---------------------------------------------------------------- Utilities
+
+[tasks.loc]
+description = "Count lines of the project own code"
+run = "wc -l src/**/*.rs src/*.rs static/js/*.js static/css/editor.css | tail -1"
+
+[tasks.todo]
+description = "List TODO/FIXME in the project own code"
+run = "grep -rn -E 'TODO|FIXME' src static/js static/css || echo 'none'"

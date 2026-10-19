@@ -132,7 +132,7 @@ It runs as a user daemon (`./neoleaf-agent install`), listening on `127.0.0.1:47
 ```text
 neoleaf/
 ├── Cargo.toml             # Rust project manifest and dependencies
-├── mise.toml              # Development, test and quality tasks (deploy lives in the operations layer, one folder up)
+├── mise.toml              # Development, test and quality tasks
 ├── .env.example           # Example environment variable configuration
 ├── agent/                 # Local companion daemon in Rust (neoleaf-agent)
 │   ├── src/

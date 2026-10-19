@@ -240,17 +240,14 @@ Existing example to follow: `/api/git/{owner}/{repo}/info/refs`, `git-upload-pac
 ## 6. How to work in this repository
 
 ### Repository layout
-- The application is this folder (`neoleaf/`). The folder above it is the **operations layer** (private): the production `Caddyfile` and systemd unit in `deploy/`, a `mise.toml` with `deploy*`, `agent` and `build:linux`, and the owner's secrets. The two `mise.toml` files are separate: this one has development, test and quality tasks; the parent one forwards to it (`mise -C neoleaf run <task>`) and adds the deploy tasks. Run development commands from this folder, deploy commands from the parent.
+- The application is this folder. Run development commands from here.
 
 ### Commands (`mise`)
 - `cargo run` / `mise run dev`: local server at `http://localhost:3000` (needs the GitHub OAuth keys in `.env`).
 - `mise run dev:fake`: local server **without a GitHub account**, with the fake GitHub (sign in with the GitHub button: you become `demo`).
 - `mise run test:e2e`: browser tests (Playwright with `bun`), test server on port 3001, temporary workspace.
-- `cd agent && cargo test`: agent tests. `mise run test` runs the server's Rust tests
-  (there is a **pre-existing** failure in `session::tests::sessions_expire_and_renew`; it is not caused by new changes).
+- `cd agent && cargo test`: agent tests. `mise run test` runs the server's Rust tests.
 - `tools/windows-vm/`: a Windows 10 LTSC inside a container (dockur/windows, QEMU with KVM) to test the agent on Windows; see the folder's `README.md`.
-- `mise run agent` (parent folder): builds the agent binaries (Linux in a container, universal macOS and Windows with `cargo-zigbuild`) and `version.json`.
-- `mise run deploy` (parent folder): builds, uploads and restarts the service (`deploy:logs`, `deploy:status`, `deploy:ssh` help).
 
 ### Code conventions
 - Rust: Topcoat routes must be registered in `main()` with `.route(my_function)`; otherwise they return 404. Handlers live in `src/routes/*.rs`; `src/main.rs` only builds the router.

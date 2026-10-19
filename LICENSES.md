@@ -40,7 +40,7 @@ GNU AGPL 3 with a font exception that allows embedding them in PDF or PostScript
 
 ## Templates
 
-The catalog repository [`tassiovirginio/neoleaf-modelos`](https://github.com/tassiovirginio/neoleaf-modelos) keeps third-party
+The catalog repository [`neoleaf-science/neoleaf-modelos`](https://github.com/neoleaf-science/neoleaf-modelos) keeps third-party
 templates with their authors' notices and declared licenses:
 
 | Template | Origin | License |

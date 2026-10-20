@@ -1,4 +1,4 @@
-// Editor toolbar (LaTeX and Markdown), Overleaf style: undo and redo, text style, bold and italic, math,
+// Editor toolbar (LaTeX and Markdown): undo and redo, text style, bold and italic, math,
 // symbols, link, comment, label and reference, citation, image, table and list. Every change goes through the editor itself (executeEdits and
 // Monaco snippets), so undo (Ctrl+Z) and live editing keep working. Only shown for LaTeX and Markdown files.
 (function () {

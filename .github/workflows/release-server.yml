@@ -1,0 +1,71 @@
+name: Release server
+
+# Builds the NeoLeaf server for Linux x86_64 and attaches a tar.gz (executable, landing page, base TeX engine, .env.example, licenses), a SHA256SUMS
+# file and a build provenance attestation to the GitHub release of the tag.
+#   git tag v1.23.2 && git push origin v1.23.2        (the tag must match the version in Cargo.toml)
+# Run by hand (workflow_dispatch) with a `tag` that already exists, it builds that tag and uploads the files to its release.
+
+on:
+  push:
+    tags: ["v[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and publish (for example v1.23.1)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04     # older glibc than Ubuntu 24.04 and Debian bookworm, so the binary runs on current distributions
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+      - id: v
+        run: |
+          VER=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          [ "$TAG" = "v$VER" ] || { echo "The tag $TAG does not match Cargo.toml version $VER" >&2; exit 1; }
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: sudo apt-get update && sudo apt-get install -y cmake
+      - run: cargo build --release --locked
+      - name: Package
+        run: |
+          NAME="neoleaf-server-${{ steps.v.outputs.version }}-linux-x86_64"
+          mkdir -p "dist/$NAME"
+          cp target/release/neoleaf .env.example LICENSE-MIT LICENSE-APACHE LICENSE-ART NOTICE LICENSES.md ART.md "dist/$NAME/"
+          [ -f docs/self-hosting.md ] && cp docs/self-hosting.md "dist/$NAME/SELF-HOSTING.md" || true
+          cp -r site "dist/$NAME/site"
+          git ls-files -z static/texlive | xargs -0 -I{} cp --parents {} "dist/$NAME/"
+          tar -C dist -czf "dist/$NAME.tar.gz" "$NAME"
+          (cd dist && sha256sum "$NAME.tar.gz" > SHA256SUMS && cat SHA256SUMS)
+          echo "ARCHIVE=dist/$NAME.tar.gz" >> "$GITHUB_ENV"
+      - name: Smoke run
+        run: |
+          mkdir smoke && tar -C smoke -xzf "$ARCHIVE" --strip-components=1
+          cd smoke
+          PORT=3999 HOST=127.0.0.1 ./neoleaf > ../smoke.log 2>&1 &
+          for i in $(seq 1 30); do curl -fs http://127.0.0.1:3999/licenses > /dev/null && break; sleep 1; done
+          curl -fs http://127.0.0.1:3999/licenses | grep -q "Open-source licenses"
+          curl -fs -o /dev/null http://127.0.0.1:3999/static/texlive/pdflatex.wasm
+          kill %1 || true
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ env.ARCHIVE }}
+      - name: Upload to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1 || gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --title "NeoLeaf ${{ steps.v.outputs.version }}" \
+            --notes "NeoLeaf ${{ steps.v.outputs.version }}. Server build for Linux x86_64 built by GitHub Actions; see docs/self-hosting.md."
+          gh release upload "$TAG" "$ARCHIVE" dist/SHA256SUMS --repo "$GITHUB_REPOSITORY" --clobber

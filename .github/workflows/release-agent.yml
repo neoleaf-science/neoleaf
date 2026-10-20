@@ -1,0 +1,116 @@
+name: Release agent
+
+# Builds the local agent natively on Linux, macOS and Windows and attaches the binaries, a SHA256SUMS file and a build
+# provenance attestation to a GitHub release.
+#   git tag agent-v0.4.14 && git push origin agent-v0.4.14      (the tag must match the version in agent/Cargo.toml)
+# Run by hand (workflow_dispatch) it only builds and uploads the artifacts: nothing is published unless "publish" is true.
+
+on:
+  push:
+    tags: ["agent-v*"]
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Create the GitHub release (needs a tag agent-vX.Y.Z on the selected commit)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          VER=$(grep -m1 '^version' agent/Cargo.toml | cut -d'"' -f2)
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_REF_TYPE}" = "tag" ] && [ "${GITHUB_REF_NAME}" != "agent-v$VER" ]; then
+            echo "The tag ${GITHUB_REF_NAME} does not match agent/Cargo.toml version $VER" >&2
+            exit 1
+          fi
+
+  build:
+    needs: check
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - os: ubuntu-22.04        # older glibc than Debian bookworm, so the binary runs on current distributions
+            name: neoleaf-agent-linux-x86_64
+          - os: macos-latest
+            name: neoleaf-agent-macos-universal
+          - os: windows-latest
+            name: neoleaf-agent-windows-x86_64.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ startsWith(matrix.os, 'macos') && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: agent
+      - name: Test
+        working-directory: agent
+        run: cargo test --locked
+      - name: Build (Linux, Windows)
+        if: ${{ !startsWith(matrix.os, 'macos') }}
+        working-directory: agent
+        shell: bash
+        run: |
+          cargo build --release --locked
+          mkdir -p ../dist
+          SRC=target/release/neoleaf-agent
+          [ -f "$SRC.exe" ] && SRC="$SRC.exe"
+          cp "$SRC" "../dist/${{ matrix.name }}"
+      - name: Build (macOS universal)
+        if: ${{ startsWith(matrix.os, 'macos') }}
+        working-directory: agent
+        run: |
+          cargo build --release --locked --target aarch64-apple-darwin
+          cargo build --release --locked --target x86_64-apple-darwin
+          mkdir -p ../dist
+          lipo -create -output "../dist/${{ matrix.name }}" \
+            target/aarch64-apple-darwin/release/neoleaf-agent target/x86_64-apple-darwin/release/neoleaf-agent
+      - name: Smoke run
+        shell: bash
+        run: |
+          chmod +x "dist/${{ matrix.name }}"
+          "dist/${{ matrix.name }}" --version
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.name }}
+          path: dist/${{ matrix.name }}
+          if-no-files-found: error
+
+  publish:
+    needs: [check, build]
+    if: ${{ github.ref_type == 'tag' && (github.event_name == 'push' || inputs.publish) }}
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum neoleaf-agent-* > SHA256SUMS && cat SHA256SUMS
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/neoleaf-agent-*
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* --repo "${GITHUB_REPOSITORY}" \
+            --title "NeoLeaf agent ${{ needs.check.outputs.version }}" \
+            --notes "Binaries of the NeoLeaf local agent ${{ needs.check.outputs.version }}, built by GitHub Actions from this tag. Verify a download with \`sha256sum -c SHA256SUMS\` or \`gh attestation verify <file> --repo ${GITHUB_REPOSITORY}\`. The recommended install is \`curl -fsSL https://neoleaf.science/install.sh | sh\`, which checks the SHA-256 published by neoleaf.science; the binaries served there are built separately and are not byte-identical to these."

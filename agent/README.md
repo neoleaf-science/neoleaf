@@ -113,3 +113,19 @@ a QEMU/KVM container, see `tools/windows-vm/`: installation through `install.ps1
 TinyTeX, pairing and compilation through the API, and startup at login, which **failed** in 0.4.7 because of the mixed slashes of the path in the Run
 key and was fixed in 0.4.8. Not tested yet: pairing through the browser on Windows, the red dot during compilation and the
 update flow to a new version.)
+
+## Releases and verification
+
+Each agent version is also published as a GitHub release with the tag `agent-vX.Y.Z` (the tag must match `version` in `Cargo.toml`). The workflow
+`.github/workflows/release-agent.yml` builds the agent natively on Linux, macOS (universal) and Windows, runs the tests and a smoke run on each,
+and attaches the three binaries, a `SHA256SUMS` file and a build provenance attestation. To verify a download:
+
+```bash
+sha256sum -c SHA256SUMS
+gh attestation verify neoleaf-agent-linux-x86_64 --repo neoleaf-science/neoleaf
+```
+
+The recommended install is still `install.sh`, which checks the SHA-256 published by neoleaf.science. Those binaries are built separately (in a
+Debian container and with `cargo-zigbuild`), so they are not byte-identical to the ones in the GitHub release.
+
+To publish: update the version in `agent/Cargo.toml`, commit, then `git tag agent-vX.Y.Z && git push origin agent-vX.Y.Z`.

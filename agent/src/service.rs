@@ -627,14 +627,22 @@ mod tests {
     fn verify_outcome_explains_a_port_conflict() {
         assert!(verify_outcome("0.2.2", Some("0.2.2"), 47474).is_ok());
         let e = verify_outcome("0.2.2", Some("0.2.1"), 47474).unwrap_err();
+        // the advice depends on the service manager of each system
+        let (restart_hint, log_hint) = if cfg!(windows) {
+            ("neoleaf-agent install", "neoleaf-agent.exe background")
+        } else if cfg!(target_os = "macos") {
+            ("neoleaf-agent install", "neoleaf-agent.log")
+        } else {
+            ("reset-failed", "journalctl")
+        };
         assert!(
-            e.contains("0.2.1") && e.contains("another copy") && e.contains("reset-failed"),
+            e.contains("0.2.1") && e.contains("another copy") && e.contains(restart_hint),
             "{e}"
         );
         assert!(
             verify_outcome("0.2.2", None, 47474)
                 .unwrap_err()
-                .contains("journalctl")
+                .contains(log_hint)
         );
     }
 

@@ -559,6 +559,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(unix)] // the separator is ":" on Unix and ";" on Windows (covered by search_path_separator)
     fn adds_main_dir_and_keeps_defaults() {
         assert_eq!(search_path(Path::new("/p/samples"), None), ".:/p/samples:");
         assert_eq!(

@@ -424,11 +424,17 @@ mod tests {
     fn platform_names() {
         assert_eq!(asset_ext("windows"), ".exe");
         assert_eq!(asset_ext("linux-x86_64"), ".tar.xz");
-        assert_eq!(platform_tag("x86_64", false), Some("linux-x86_64"));
-        assert_eq!(platform_tag("x86_64", true), Some("linuxmusl-x86_64"));
-        assert_eq!(platform_tag("aarch64", false), Some("linux-arm64"));
-        assert_eq!(platform_tag("aarch64", true), None);
-        assert_eq!(platform_tag("riscv64", false), None);
+        if cfg!(target_os = "macos") {
+            assert_eq!(platform_tag("aarch64", false), Some("darwin"));
+        } else if cfg!(windows) {
+            assert_eq!(platform_tag("x86_64", false), Some("windows"));
+        } else {
+            assert_eq!(platform_tag("x86_64", false), Some("linux-x86_64"));
+            assert_eq!(platform_tag("x86_64", true), Some("linuxmusl-x86_64"));
+            assert_eq!(platform_tag("aarch64", false), Some("linux-arm64"));
+            assert_eq!(platform_tag("aarch64", true), None);
+            assert_eq!(platform_tag("riscv64", false), None);
+        }
     }
 
     #[test]

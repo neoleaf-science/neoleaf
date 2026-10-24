@@ -58,7 +58,7 @@ describe('GitHub and Codeberg buttons', () => {
       const page = await ctx.newPage();
       await page.goto(BASE_URL + '/');
       const r = await page.evaluate(() => {
-        const items = [...document.querySelectorAll('.nl-nav-brand .nl-nav-badge, .nl-nav-item a, .nl-pill-free')].filter(e => (e as HTMLElement).offsetParent !== null);
+        const items = [...document.querySelectorAll('.nl-nav-item a, .nl-pill-free')].filter(e => (e as HTMLElement).offsetParent !== null);
         const cont = document.querySelector('.nl-nav-container') as HTMLElement;
         return {
           maxHeight: Math.max(0, ...items.map(e => Math.round(e.getBoundingClientRect().height))),

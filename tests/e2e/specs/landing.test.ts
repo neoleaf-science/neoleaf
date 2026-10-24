@@ -132,6 +132,8 @@ describe('landing page', () => {
     const html = await page.content();
     expect(html).not.toContain('tassio.png');
     expect(html).not.toContain('Who is behind');
+    expect(html).not.toMatch(/beta/i);   // the system is no longer in beta: no badge by the logo, no "Public Beta Version" in the footer
+    expect(await page.locator('.nl-nav-brand').first().innerText()).toBe('NeoLeaf');
     expect(await page.locator('.nl-footer-bottom').innerText()).toContain('© 2026 Tássio Virgínio');
     expect(await page.locator('.nl-footer-bottom a[href="/licenses"]').count()).toBe(1);
     expect(await page.locator('#about .nl-about-point').count()).toBe(3);

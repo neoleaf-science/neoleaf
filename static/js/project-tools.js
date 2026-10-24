@@ -68,6 +68,8 @@
       $('cfg-engine').value = d.config.engine;
       $('cfg-auto').checked = d.config.autoInstall !== false;
       $('cfg-global').checked = false;
+      if ($('cfg-spell-check')) $('cfg-spell-check').checked = d.config.spellCheck !== false;
+      if ($('cfg-spell-lang')) $('cfg-spell-lang').value = d.config.spellLanguage || 'auto';
       if ($('cfg-auto-sync')) $('cfg-auto-sync').checked = !!d.config.autoSync;
       if ($('cfg-auto-sync-interval')) $('cfg-auto-sync-interval').value = d.config.autoSyncInterval || 5;
       window.toggleAutoSyncIntervalVisibility();
@@ -81,20 +83,23 @@
     const mainFile = $('cfg-main').value;
     const engine = $('cfg-engine').value;
     const autoInstall = $('cfg-auto').checked;
+    const spellCheck = $('cfg-spell-check') ? $('cfg-spell-check').checked : true;
+    const spellLanguage = $('cfg-spell-lang') ? $('cfg-spell-lang').value : 'auto';
     const autoSync = $('cfg-auto-sync') ? $('cfg-auto-sync').checked : false;
     const autoSyncInterval = $('cfg-auto-sync-interval') ? parseInt($('cfg-auto-sync-interval').value, 10) || 5 : 5;
     try {
-      await Project.config.save({ mainFile, engine, autoInstall, autoSync, autoSyncInterval, scope: 'project' });
+      await Project.config.save({ mainFile, engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage, scope: 'project' });
       if ($('cfg-global').checked) {
-        await Project.config.save({ mainFile: 'main.tex', engine, autoInstall, autoSync, autoSyncInterval, scope: 'global' });
+        await Project.config.save({ mainFile: 'main.tex', engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage, scope: 'global' });
       }
-      projectConfig = { mainFile, engine, autoInstall, autoSync, autoSyncInterval };
+      projectConfig = { mainFile, engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage };
       if (window.BrowserGit && await BrowserGit.isCloned()) {
         try {
           await BrowserGit.writeFile('.neoleaf/config.json', JSON.stringify(projectConfig, null, 2));
           if (typeof checkGitStatus === 'function') checkGitStatus();
         } catch (_) {}
       }
+      if (window.SpellCheck && SpellCheck.applyConfig) SpellCheck.applyConfig(projectConfig);
       if (window.initAutoSync) window.initAutoSync();
       const sel = $('engine-select');
       if (sel) sel.value = engine;

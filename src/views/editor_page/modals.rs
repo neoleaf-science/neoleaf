@@ -144,6 +144,23 @@ pub(super) fn project_tab_settings() -> &'static str {
                         First checks whether the remote repository has changes (pull), and if there are local changes in the browser, pushes them with date and time.
                     </div>
                 </div>
+                <div class="form-group" style="margin-top: 12px; margin-bottom: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border-color);">
+                    <label class="check" style="font-weight: 500; margin-bottom: 6px;">
+                        <input type="checkbox" id="cfg-spell-check" checked>
+                        Spell check
+                    </label>
+                    <div style="margin-left: 24px; display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 6px;">
+                        <span>Language:</span>
+                        <select id="cfg-spell-lang" class="form-control" style="width: auto; padding: 2px 8px; font-size: 13px;">
+                            <option value="auto" selected>Automatic (from document)</option>
+                            <option value="pt-BR">Português (Brasil)</option>
+                            <option value="en-US">English (United States)</option>
+                        </select>
+                    </div>
+                    <div class="modal-hint" style="margin-left: 24px; margin-top: 6px; font-size: 11px;" data-i18n-html>
+                        Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.
+                    </div>
+                </div>
                 <p class="modal-hint" data-i18n-html>The settings are stored in the project's <code>.neoleaf/config.json</code> file (and in <code>NeoLeaf/.neoleaf</code> for the global default). Anyone who edits the project can change them.</p>
                 <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
             </div>

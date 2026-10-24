@@ -18,12 +18,19 @@ Rust dependency lists, is served at `/licenses`.
 | `mermaid.min.js` | Mermaid 11.17.2 (its bundle embeds other permissive libraries with their own notices) | MIT |
 | `papaparse.min.js` | PapaParse 5.7.0 | MIT |
 | `katex/` | KaTeX 0.18.10 and its fonts | MIT |
+| `hunspell-asm.min.js` | hunspell-asm 4.0.2 (with Hunspell, emscripten-wasm-loader, nanoid, tslib) | MIT; Hunspell under the MPL 1.1 option of its MPL/GPL/LGPL license; tslib 0BSD |
 | `neoleaf-mascot.mjs` | clippyjs (fork) | MIT |
 
 Copyright lines and the MIT text are in [`static/vendor/NOTICES.md`](static/vendor/NOTICES.md). Monaco Editor 0.45.0 (MIT) and pdf.js 3.11.174
 (Apache-2.0) are loaded from a CDN and not redistributed. Pyodide 314.0.7 (MPL-2.0) and its Python packages are downloaded by
 `scripts/fetch_pyodide.py` and not included in the repository. The toolbar icons use paths from Material Icons (Google, Apache-2.0).
 The Codeberg mark comes from Simple Icons (CC0); it belongs to Codeberg e.V.
+
+## Spell check dictionaries (`static/dict/`)
+
+Hunspell dictionaries served unchanged: `en-US` from the npm package `dictionary-en` 4.0.0 (SCOWL 2020.12.07, Kevin Atkinson and others, MIT and
+BSD) and `pt-BR` from the LibreOffice dictionaries repository (VERO 3.3.0, Raimundo Santos Moura and the VERO contributors, LGPL-3.0 and MPL).
+The complete license texts and the exact sources are in `static/dict/`.
 
 ## TeX engines in WebAssembly (not in the repository)
 

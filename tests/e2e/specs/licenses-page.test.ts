@@ -13,7 +13,7 @@ describe('licenses page', () => {
     const res = await s.page.goto(BASE_URL + '/licenses');
     expect(res!.status()).toBe(200);
     const t = (await s.page.locator('.legal-container').innerText()).replace(/\s+/g, ' ');
-    for (const w of ['MIT License', 'Apache License 2.0', 'CC BY-NC-ND 4.0', 'pdfTeX', 'LuaTeX', 'xdvipdfmx', 'GPL', 'texlive-source', 'v0.2.4-alpha', 'URW base 35', 'DOMPurify', 'Pyodide']) expect(t).toContain(w);
+    for (const w of ['MIT License', 'Apache License 2.0', 'CC BY-NC-ND 4.0', 'pdfTeX', 'LuaTeX', 'xdvipdfmx', 'GPL', 'texlive-source', 'v0.2.4-alpha', 'URW base 35', 'DOMPurify', 'Pyodide', 'Hunspell', 'VERO']) expect(t).toContain(w);
     expect(external).toEqual([]);
   });
 
@@ -24,6 +24,14 @@ describe('licenses page', () => {
       const lines = (await r.text()).split('\n').filter(l => / \| /.test(l) && !l.startsWith('Format:'));
       expect(lines.length).toBeGreaterThan(min);
       expect(lines.filter(l => l.split(' | ')[1].trim() === '').length).toBe(0);
+    }
+  });
+
+  test('the license texts of the spell check dictionaries are served', async () => {
+    for (const [file, needle] of [['LICENSE-en-US.txt', 'Kevin Atkinson'], ['LICENSE-pt-BR.txt', 'Raimundo']] as const) {
+      const r = await s.page.request.get(`${BASE_URL}/static/dict/${file}`);
+      expect(r.status()).toBe(200);
+      expect(await r.text()).toContain(needle);
     }
   });
 

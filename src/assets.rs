@@ -245,6 +245,14 @@ pub static FILES: &[(&str, &[u8])] = &[
         include_bytes!("../static/js/session-guard.js"),
     ),
     (
+        "js/spellcheck.js",
+        include_bytes!("../static/js/spellcheck.js"),
+    ),
+    (
+        "js/spellcheck-worker.js",
+        include_bytes!("../static/js/spellcheck-worker.js"),
+    ),
+    (
         "js/splitters.js",
         include_bytes!("../static/js/splitters.js"),
     ),
@@ -256,6 +264,10 @@ pub static FILES: &[(&str, &[u8])] = &[
     ("js/tabs.js", include_bytes!("../static/js/tabs.js")),
     ("js/theme.js", include_bytes!("../static/js/theme.js")),
     ("js/zip.js", include_bytes!("../static/js/zip.js")),
+    (
+        "vendor/hunspell-asm.min.js",
+        include_bytes!("../static/vendor/hunspell-asm.min.js"),
+    ),
     (
         "vendor/isomorphic-git-http.js",
         include_bytes!("../static/vendor/isomorphic-git-http.js"),

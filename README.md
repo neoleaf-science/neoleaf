@@ -6,7 +6,6 @@ A modern, collaborative web platform for **LaTeX**, built in **Rust** with the *
 [![Topcoat](https://img.shields.io/badge/Framework-Topcoat-blue)](https://github.com/rust-lang)
 [![WebAssembly](https://img.shields.io/badge/Compilation-WebAssembly-purple?logo=webassembly)](https://webassembly.org/)
 [![GitHub](https://img.shields.io/badge/Sync-GitHub_API-black?logo=github)](https://github.com)
-[![Status](https://img.shields.io/badge/Status-Beta-success)](https://neoleaf.science)
 
 🌐 **Try the production version:** [neoleaf.science](https://neoleaf.science)
 

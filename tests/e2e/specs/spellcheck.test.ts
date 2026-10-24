@@ -37,6 +37,22 @@ async function fresh(lang = 'en'): Promise<Session> {
   return s;
 }
 
+describe('spell check: the worker is requested with the version of the page', () => {
+  test('so a worker kept in the browser cache is never mixed with a newer page', async () => {
+    const s = await newSession();
+    const urls: string[] = [];
+    s.page.on('worker', w => urls.push(w.url()));
+    const requests: string[] = [];
+    s.page.on('request', r => { if (/spellcheck-worker|hunspell-asm/.test(r.url())) requests.push(r.url()); });
+    await openProject(s.page);
+    await setDoc(s, doc(EN));
+    await waitMarked(s, m => m.includes('wrold'));
+    expect(urls.some(u => /\/static\/js\/spellcheck-worker\.js\?v=\d+/.test(u))).toBe(true);
+    expect(requests.some(u => /hunspell-asm\.min\.js\?v=\d+/.test(u))).toBe(true);
+    await s.context.close();
+  }, 120000);
+});
+
 describe('spell check: English', () => {
   let s: Session;
   afterAll(async () => { await s?.context.close(); });

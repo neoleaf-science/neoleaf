@@ -1,6 +1,6 @@
 [package]
 name = "neoleaf"
-version = "1.24.2"
+version = "1.24.3"
 edition = "2024"
 authors = ["Tássio Virgínio"]
 license = "MIT OR Apache-2.0"

@@ -3,6 +3,17 @@
 (function () {
   'use strict';
 
+  // The page asks for this script as spellcheck.js?v=<build>. The worker and its library get the same version, so a worker left in the
+  // browser cache (the CDN keeps static files for hours) is never mixed with a newer page.
+  const ASSET_QUERY = (function () {
+    try {
+      const m = document.currentScript && /[?&]v=([^&#]+)/.exec(document.currentScript.src);
+      return m ? '?v=' + m[1] : '';
+    } catch (_) {
+      return '';
+    }
+  })();
+
   let worker = null;
   let state = 'idle'; // 'idle' | 'loading' | 'ready' | 'backoff' | 'error'
   let loadedLang = null; // language of the dictionary that is ready
@@ -437,7 +448,7 @@
   }
 
   function createWorker() {
-    worker = new Worker('/static/js/spellcheck-worker.js');
+    worker = new Worker('/static/js/spellcheck-worker.js' + ASSET_QUERY);
     worker.onmessage = function (e) {
       const msg = e.data || {};
       if (msg.type === 'ready') {

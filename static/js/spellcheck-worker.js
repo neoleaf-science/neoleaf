@@ -1,7 +1,7 @@
 // Web Worker for Hunspell spell checking (hunspell-asm, Hunspell compiled to WebAssembly). Runs off the main UI thread.
 // Messages are handled one at a time, in order, so a language change never overlaps another one.
 /* global importScripts, HunspellAsm */
-importScripts('/static/vendor/hunspell-asm.min.js');
+importScripts('/static/vendor/hunspell-asm.min.js' + self.location.search); // same ?v= as the page, see spellcheck.js
 
 // Bump when a file in /static/dict changes: the server sends the dictionaries with "immutable", so the URL has to change.
 const DICT_VERSION = '2';

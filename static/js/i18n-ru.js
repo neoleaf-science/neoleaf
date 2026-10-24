@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "Автоматически (из документа)",
   "Português (Brasil)": "Португальский (Бразилия)",
   "English (United States)": "Английский (США)",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "Подчеркивает слова с ошибками в редакторе. Игнорирует команды LaTeX, формулы и ссылки. Словарь проекта сохраняется в <code>.neoleaf/dictionary.txt</code>. Словари: португальский (Бразилия) и английский (США); документы на других языках не проверяются.",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "Подчеркивает слова с ошибками в редакторе. Игнорирует команды LaTeX, формулы и ссылки. Словарь проекта сохраняется в <code>.neoleaf/dictionary.txt</code>. Браузер скачивает каждый словарь, когда он нужен, из словарей LibreOffice на GitHub и сохраняет его на этом устройстве: португальский (Бразилия и Португалия), английский (США и Великобритания), испанский, французский, итальянский и немецкий. Документы на других языках не проверяются.",
   "Possible spelling mistake: \"{0}\"": "Возможная орфографическая ошибка: «{0}»",
   "Change to \"{0}\"": "Заменить на «{0}»",
   "Add \"{0}\" to project dictionary": "Добавить «{0}» в словарь проекта",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "Игнорировать «{0}» в этой сессии",
   "Ignore in this session": "Игнорировать в этой сессии",
   "The spell check dictionary could not be loaded.": "Не удалось загрузить словарь проверки орфографии.",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Проверке орфографии нужен словарь {0} ({1}). Браузер скачает его с GitHub и сохранит на этом устройстве; сервер NeoLeaf его не хранит.",
+  "Not now": "Не сейчас",
+  "Downloading the {0} dictionary...": "Скачивание словаря {0}...",
 };

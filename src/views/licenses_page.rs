@@ -61,7 +61,7 @@ fn body() -> &'static str {
             <ul>
                 <li><strong>isomorphic-git</strong> (Copyright 2017-2023 the isomorphic-git authors), <strong>lightning-fs</strong> (Copyright (c) 2018 wmhilton), <strong>Yjs</strong> and <strong>lib0</strong> (Kevin Jahns), <strong>clippyjs</strong> (Fireplace, Inc and Pooya Parsa), <strong>marked</strong>, <strong>PapaParse</strong>, <strong>Mermaid</strong>, <strong>KaTeX</strong>: MIT License.</li>
                 <li><strong>DOMPurify</strong> (Cure53): Apache-2.0 or MPL-2.0.</li>
-                <li><strong>Spell check:</strong> <strong>hunspell-asm</strong> (OJ Kwon, MIT) with <strong>Hunspell</strong> compiled to WebAssembly (László Németh and contributors; used under the MPL 1.1 option of its MPL, GPL and LGPL license; source at <a href="https://github.com/hunspell/hunspell" style="color: var(--green); text-decoration: underline;">github.com/hunspell/hunspell</a>), plus emscripten-wasm-loader and nanoid (MIT) and tslib (0BSD). Dictionaries: English (US) from SCOWL (Kevin Atkinson and others, MIT and BSD) and Portuguese (Brazil) VERO (Raimundo Santos Moura and the VERO contributors, LGPL-3.0 and MPL), served unchanged. Full texts: <a href="/static/dict/LICENSE-en-US.txt" style="color: var(--green); text-decoration: underline;">English (US)</a> and <a href="/static/dict/LICENSE-pt-BR.txt" style="color: var(--green); text-decoration: underline;">Portuguese (Brazil)</a>.</li>
+                <li><strong>Spell check engine:</strong> <strong>hunspell-asm</strong> (OJ Kwon, MIT) with <strong>Hunspell</strong> compiled to WebAssembly (László Németh and contributors; used under the MPL 1.1 option of its MPL, GPL and LGPL license; source at <a href="https://github.com/hunspell/hunspell" style="color: var(--green); text-decoration: underline;">github.com/hunspell/hunspell</a>), plus emscripten-wasm-loader and nanoid (MIT) and tslib (0BSD). The dictionaries are listed below.</li>
                 <li><strong>Pyodide</strong> (Python in the browser, optional): MPL-2.0, with its Python packages under their own licenses.</li>
                 <li>Loaded from a CDN (not redistributed by NeoLeaf): <strong>Monaco Editor</strong> (MIT) and <strong>pdf.js</strong> (Apache-2.0).</li>
             </ul>
@@ -69,7 +69,23 @@ fn body() -> &'static str {
         </div>
 
         <div class="legal-section">
-            <h2>5. Rust dependencies</h2>
+            <h2>5. Spell check dictionaries</h2>
+            <p>NeoLeaf does <strong>not</strong> host or redistribute any dictionary. When a document needs one and you agree, your browser downloads it from the LibreOffice dictionaries on GitHub (<code>raw.githubusercontent.com</code>, with the jsDelivr mirror as a backup) at a fixed commit, <code>67032ee</code>, checks the SHA-256 of each file and keeps it on your device, not on the NeoLeaf server and not in your project. Each dictionary keeps its own license, shown here as its README declares it:</p>
+            <ul>
+                <li><strong>Português (Brasil)</strong>: LGPL-3.0 and MPL (the README does not give the MPL version); <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/pt_BR/README_pt_BR.txt" style="color: var(--green); text-decoration: underline;">README</a> (Raimundo Santos Moura and the VERO contributors).</li>
+                <li><strong>Português (Portugal)</strong>: GPL 2, LGPL 2.1 or MPL 1.1 (in that order of preference); <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/pt_PT/README_pt_PT.txt" style="color: var(--green); text-decoration: underline;">README</a> (José João Almeida and the contributors named in the README).</li>
+                <li><strong>English (US)</strong>: SCOWL license (MIT-like, with BSD and other notices); <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/en/README_en_US.txt" style="color: var(--green); text-decoration: underline;">README</a> (Kevin Atkinson and the other holders named in the README).</li>
+                <li><strong>English (UK)</strong>: LGPL; <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/en/README_en_GB.txt" style="color: var(--green); text-decoration: underline;">README</a> (the authors named in the README).</li>
+                <li><strong>Español</strong>: GPL 3 or later, LGPL 3 or later or MPL 1.1 or later; <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/es/README_hunspell_es.txt" style="color: var(--green); text-decoration: underline;">README</a> (the authors named in the README).</li>
+                <li><strong>Français</strong>: MPL 2.0; <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/fr_FR/dictionaries/README_dict_fr.txt" style="color: var(--green); text-decoration: underline;">README</a> (the authors named in the README).</li>
+                <li><strong>Italiano</strong>: GPL 3; <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/it_IT/README_it_IT.txt" style="color: var(--green); text-decoration: underline;">README</a> (LibreItalia (Marina Latini) and other authors).</li>
+                <li><strong>Deutsch</strong>: GPL 2 or 3; <a href="https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/de/README_de_DE_frami.txt" style="color: var(--green); text-decoration: underline;">README</a> (the igerman98 and frami authors).</li>
+            </ul>
+            <p>Repository: <a href="https://github.com/LibreOffice/dictionaries/tree/67032ee957631908098a72edf48dc81cac27e369" style="color: var(--green); text-decoration: underline;">github.com/LibreOffice/dictionaries</a> at commit <code>67032ee957631908098a72edf48dc81cac27e369</code>. The German files are converted from ISO-8859-1 to UTF-8 in your browser after the check.</p>
+        </div>
+
+        <div class="legal-section">
+            <h2>6. Rust dependencies</h2>
             <p>NeoLeaf's server and the local agent are written in Rust. The lists below give each dependency, its version, its license and its source. All licenses are permissive (MIT, Apache-2.0, BSD, ISC, Zlib, Unicode-3.0 and similar); no strong copyleft license is among them.</p>
             <ul>
                 <li><a href="/static/licenses/rust-agent.txt" style="color: var(--green); text-decoration: underline;">Local agent</a>: the binary users download and run (list generated on Linux; the Windows and macOS builds add platform crates under the same kinds of licenses).</li>
@@ -78,12 +94,12 @@ fn body() -> &'static str {
         </div>
 
         <div class="legal-section">
-            <h2>6. Templates</h2>
+            <h2>7. Templates</h2>
             <p>The template catalog redistributes or points to third-party templates (ACM acmart, IEEEtran, elsarticle, llncs, abnTeX2 and others). Each keeps its authors' license and notices (mostly LPPL); the origin and license of each one are listed in <code>LICENSES.md</code>.</p>
         </div>
 
         <div class="legal-section">
-            <h2>7. Corrections</h2>
+            <h2>8. Corrections</h2>
             <p>If you believe a notice is missing or wrong, write to <a href="mailto:contact@neoleaf.science" style="color: var(--green); text-decoration: underline;">contact@neoleaf.science</a>.</p>
         </div>
 

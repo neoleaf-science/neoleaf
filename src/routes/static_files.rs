@@ -304,7 +304,6 @@ pub(crate) async fn serve_public_file(dir: &str, name: &str) -> Response {
         "zip" | "whl" => "application/zip",
         "css" => "text/css; charset=utf-8",
         "woff2" => "font/woff2",
-        "aff" | "dic" | "txt" => "text/plain; charset=utf-8",
         _ => return plain(404, "not found"),
     };
     let Ok(file) = tokio::fs::File::open(format!("{dir}/{name}")).await else {
@@ -421,17 +420,6 @@ pub(crate) async fn serve_katex(cx: &Cx) -> Result<Response> {
         return Ok(plain(400, "invalid name"));
     };
     Ok(serve_public_file("static/vendor/katex", name).await)
-}
-
-path_param!(pub dict_file: String);
-
-// Spell check dictionaries (Hunspell format, .aff and .dic)
-#[route(GET "/static/dict/{dict_file}")]
-pub(crate) async fn serve_dict(cx: &Cx) -> Result<Response> {
-    let Ok(name) = topcoat::router::path_param::<DictFile>(cx) else {
-        return Ok(plain(400, "invalid name"));
-    };
-    Ok(serve_public_file("static/dict", name).await)
 }
 
 #[route(GET "/static/texlive/texmf-core-pdflatex.tar.gz")]

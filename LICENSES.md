@@ -18,7 +18,7 @@ Rust dependency lists, is served at `/licenses`.
 | `mermaid.min.js` | Mermaid 11.17.2 (its bundle embeds other permissive libraries with their own notices) | MIT |
 | `papaparse.min.js` | PapaParse 5.7.0 | MIT |
 | `katex/` | KaTeX 0.18.10 and its fonts | MIT |
-| `hunspell-asm.min.js` | hunspell-asm 4.0.2 (with Hunspell, emscripten-wasm-loader, nanoid, tslib) | MIT; Hunspell under the MPL 1.1 option of its MPL/GPL/LGPL license; tslib 0BSD |
+| `hunspell-asm.min.js` | hunspell-asm 4.0.2 (with Hunspell, emscripten-wasm-loader, nanoid, tslib; the dictionaries are not in the repository) | MIT; Hunspell under the MPL 1.1 option of its MPL/GPL/LGPL license; tslib 0BSD |
 | `neoleaf-mascot.mjs` | clippyjs (fork) | MIT |
 
 Copyright lines and the MIT text are in [`static/vendor/NOTICES.md`](static/vendor/NOTICES.md). Monaco Editor 0.45.0 (MIT) and pdf.js 3.11.174
@@ -26,11 +26,13 @@ Copyright lines and the MIT text are in [`static/vendor/NOTICES.md`](static/vend
 `scripts/fetch_pyodide.py` and not included in the repository. The toolbar icons use paths from Material Icons (Google, Apache-2.0).
 The Codeberg mark comes from Simple Icons (CC0); it belongs to Codeberg e.V.
 
-## Spell check dictionaries (`static/dict/`)
+## Spell check dictionaries
 
-Hunspell dictionaries served unchanged: `en-US` from the npm package `dictionary-en` 4.0.0 (SCOWL 2020.12.07, Kevin Atkinson and others, MIT and
-BSD) and `pt-BR` from the LibreOffice dictionaries repository (VERO 3.3.0, Raimundo Santos Moura and the VERO contributors, LGPL-3.0 and MPL).
-The complete license texts and the exact sources are in `static/dict/`.
+NeoLeaf hosts and distributes no dictionary. When a document needs one and the person agrees, the browser downloads it from the LibreOffice
+dictionaries ([`LibreOffice/dictionaries`](https://github.com/LibreOffice/dictionaries/tree/67032ee957631908098a72edf48dc81cac27e369), commit `67032ee957631908098a72edf48dc81cac27e369`; jsDelivr as a mirror), checks the
+SHA-256 pinned in `static/js/spellcheck-dicts.js` and keeps it in its own storage. Each keeps the license its README declares: Portuguese (Brazil)
+LGPL-3.0 and MPL, Portuguese (Portugal) GPL/LGPL/MPL, English (US) SCOWL, English (UK) LGPL, Spanish GPL 3+/LGPL 3+/MPL 1.1+, French MPL 2.0,
+Italian GPL 3, German GPL 2 or 3.
 
 ## TeX engines in WebAssembly (not in the repository)
 

@@ -15,10 +15,11 @@
   })();
 
   let worker = null;
-  let state = 'idle'; // 'idle' | 'loading' | 'ready' | 'backoff' | 'error'
+  let state = 'idle'; // 'idle' | 'loading' | 'needs' (waiting for the person to allow the download) | 'ready' | 'backoff' | 'error'
   let loadedLang = null; // language of the dictionary that is ready
   let wantedLang = null; // language being loaded (or last requested)
   let errorLang = null; // language whose dictionary failed to load
+  let needLang = null; // language whose dictionary has to be downloaded
   let warned = false;
   let retryAt = 0; // while state is 'backoff', no new request before this time
   const failures = {}; // dictionary -> failures in a row
@@ -306,23 +307,33 @@
 
   // ------------------------------------------------------------------ language
 
-  // Dictionaries that exist (static/dict). Any other language is not checked: using the wrong dictionary would underline every word.
-  const SUPPORTED = ['pt-BR', 'en-US'];
+  // The dictionaries NeoLeaf can use (spellcheck-dicts.js, pinned to a commit). The browser downloads one only when a document needs it.
+  // A document in any other language is not checked: using the wrong dictionary would underline every word.
+  const DICTS = (window.NEOLEAF_DICTS && NEOLEAF_DICTS.list) || [];
+  const SUPPORTED = DICTS.map(d => d.id);
+  const dictOf = id => DICTS.find(d => d.id === id);
 
-  // Names that babel and polyglossia accept, by dictionary. 'other' marks a language we have no dictionary for.
+  // Names that babel and polyglossia accept, by dictionary.
   const LANG_NAMES = {
-    'pt-BR': ['brazil', 'brazilian', 'brasil', 'portuges', 'portugues', 'portuguese', 'pt', 'pt-br', 'ptbr'],
-    'en-US': ['english', 'american', 'usenglish', 'british', 'ukenglish', 'australian', 'canadian', 'newzealand', 'en', 'en-us', 'en-gb', 'usa', 'uk']
+    'pt-BR': ['brazil', 'brazilian', 'brasil', 'ptbr', 'pt-br', 'pt', 'portuguese-brazil'],
+    'pt-PT': ['portuges', 'portugues', 'portuguese', 'portugal', 'pt-pt'],
+    'en-US': ['english', 'american', 'usenglish', 'canadian', 'en', 'en-us', 'usa'],
+    'en-GB': ['british', 'ukenglish', 'australian', 'newzealand', 'en-gb', 'uk'],
+    'es-ES': ['spanish', 'es', 'espanol', 'español'],
+    'fr-FR': ['french', 'francais', 'frenchb', 'acadian', 'canadien', 'fr'],
+    'it-IT': ['italian', 'it'],
+    'de-DE': ['german', 'ngerman', 'austrian', 'naustrian', 'swissgerman', 'nswissgerman', 'germanb', 'de']
   };
-  const OTHER_NAMES = ['french', 'francais', 'german', 'ngerman', 'austrian', 'naustrian', 'swissgerman', 'nswissgerman', 'spanish', 'catalan', 'galician',
-    'italian', 'dutch', 'russian', 'polish', 'swedish', 'norwegian', 'norsk', 'nynorsk', 'danish', 'finnish', 'czech', 'slovak', 'turkish', 'greek',
-    'latin', 'hungarian', 'romanian', 'croatian', 'serbian', 'bulgarian', 'ukrainian', 'esperanto', 'icelandic', 'estonian', 'lithuanian', 'latvian'];
+  // Languages we have no dictionary for ('other': nothing is underlined).
+  const OTHER_NAMES = ['catalan', 'galician', 'dutch', 'russian', 'polish', 'swedish', 'norwegian', 'norsk', 'nynorsk', 'danish', 'finnish', 'czech',
+    'slovak', 'turkish', 'greek', 'latin', 'hungarian', 'romanian', 'croatian', 'serbian', 'bulgarian', 'ukrainian', 'esperanto', 'icelandic',
+    'estonian', 'lithuanian', 'latvian'];
 
   function classifyName(name) {
     const n = String(name || '').trim().toLowerCase();
     if (!n) return undefined;
-    for (const lang of SUPPORTED) {
-      if (LANG_NAMES[lang].indexOf(n) !== -1) return lang;
+    for (const lang of Object.keys(LANG_NAMES)) {
+      if (LANG_NAMES[lang].indexOf(n) !== -1) return SUPPORTED.indexOf(lang) !== -1 ? lang : null;
     }
     if (OTHER_NAMES.indexOf(n) !== -1) return null;
     return undefined; // not a language name (draft, utf8...)
@@ -358,14 +369,23 @@
     return undefined;
   }
 
-  // Frequent words of each language, used when the document does not say which language it is in.
+  // Frequent words of each language, used when the document does not say which language it is in. The keys that are not a dictionary ('other:...')
+  // are languages we recognise only to leave them alone.
   const STOPWORDS = {
     'pt-BR': 'que não uma para com os as em um por dos das mais mas são também seu sua ele ela pelo pela foi ou ao aos nos nas na no do da você isso este esta como'.split(' '),
     'en-US': 'the and of to in is that for with are was this on as by an be from or which we it not have has their these'.split(' '),
-    es: 'el los las del una por con para es en se no como más pero su al también está sus entre este'.split(' '),
-    fr: 'le les des une est que pour dans qui pas sur avec ce ses sont au aux par ne nous vous'.split(' '),
-    de: 'der die das und ist nicht ein eine mit für auf den dem zu von sich auch wir sind des'.split(' '),
-    it: 'il di che per un una con non sono della gli nel anche più come delle alla degli'.split(' ')
+    'es-ES': 'el los las del una por con para es en se no como más pero su al también está sus entre este'.split(' '),
+    'fr-FR': 'le les des une est que pour dans qui pas sur avec ce ses sont au aux par ne nous vous'.split(' '),
+    'de-DE': 'der die das und ist nicht ein eine mit für auf den dem zu von sich auch wir sind des'.split(' '),
+    'it-IT': 'il di che per un una con non sono della gli nel anche più come delle alla degli'.split(' '),
+    'other:sv': 'och det att en jag som han på är av för med till den har de inte om ett från vi'.split(' '),
+    'other:da': 'og det at en den til er som på de med han af for ikke der var mig sig have'.split(' '),
+    'other:nb': 'og det som er på en til av med for ikke jeg var den har de om fra'.split(' '),
+    'other:nl': 'de het een van en in is dat op te voor met niet zijn er maar ook'.split(' '),
+    'other:cs': 'a se na je že to s v o jako pro ale ve by který tak'.split(' '),
+    'other:pl': 'nie się w na i z do to że jest jak ale po czy'.split(' '),
+    'other:ru': 'и в не на я что он с как это по но они мы'.split(' '),
+    'other:tr': 'bir ve bu için ile de da çok daha gibi olarak ama'.split(' ')
   };
   const STOPSETS = {};
   Object.keys(STOPWORDS).forEach(k => { STOPSETS[k] = new Set(STOPWORDS[k]); });
@@ -425,7 +445,67 @@
     for (const w of projectWords) worker.postMessage({ type: 'addPersonal', word: w });
   }
 
-  // A dictionary that fails to load is retried twice (a dropped connection while 5 MB come down is common) before the notice.
+  // ---- consent: a dictionary is downloaded by the browser (from GitHub) only after the person agrees, once per language
+
+  const consentKey = lang => 'neoleaf.spell.consent.' + lang;
+  function hasConsent(lang) {
+    try { return localStorage.getItem(consentKey(lang)) === '1'; } catch (_) { return false; }
+  }
+  function giveConsent(lang) {
+    try { localStorage.setItem(consentKey(lang), '1'); } catch (_) {}
+  }
+  const declined = new Set(); // languages the person answered "Not now" to, in this session
+
+  let banner = null;
+  function hideBanner() {
+    if (banner) banner.remove();
+    banner = null;
+  }
+
+  function sizeText(bytes) {
+    return (bytes / 1e6).toFixed(1) + ' MB';
+  }
+
+  function showBanner(lang, text, buttons) {
+    if (typeof editor === 'undefined' || !editor) return;
+    hideBanner();
+    const host = editor.getContainerDomNode();
+    if (!host) return;
+    banner = document.createElement('div');
+    banner.className = 'spell-banner';
+    banner.setAttribute('role', 'status');
+    banner.dataset.lang = lang;
+    const span = document.createElement('span');
+    span.textContent = text;
+    banner.appendChild(span);
+    (buttons || []).forEach(b => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = b.primary ? 'btn btn-primary' : 'btn';
+      btn.textContent = b.label;
+      btn.addEventListener('click', b.run);
+      banner.appendChild(btn);
+    });
+    host.appendChild(banner);
+  }
+
+  function askToDownload(lang, bytes) {
+    const d = dictOf(lang);
+    if (!d || declined.has(lang)) return;
+    showBanner(lang,
+      tr('Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf\'s server does not store it.', d.label, sizeText(bytes)),
+      [
+        { label: tr('Download'), primary: true, run: function () { giveConsent(lang); state = 'loading'; showDownloading(lang); worker.postMessage({ type: 'init', lang: lang, allowDownload: true }); } },
+        { label: tr('Not now'), run: function () { declined.add(lang); hideBanner(); clearMarkers(); } }
+      ]);
+  }
+
+  function showDownloading(lang) {
+    const d = dictOf(lang);
+    if (d) showBanner(lang, tr('Downloading the {0} dictionary...', d.label), []);
+  }
+
+  // A dictionary that fails to load is retried twice (a dropped connection while a few MB come down is common) before the notice.
   function failed(lang, message) {
     console.warn('Spell check dictionary for ' + lang + ' could not be loaded: ' + message);
     failures[lang] = (failures[lang] || 0) + 1;
@@ -439,6 +519,7 @@
     }
     state = 'error';
     errorLang = lang;
+    hideBanner();
     if (!warned) {
       warned = true;
       if (typeof window.neoToast === 'function') {
@@ -456,9 +537,18 @@
         state = 'ready';
         loadedLang = msg.lang;
         errorLang = null;
+        needLang = null;
         failures[msg.lang] = 0;
+        hideBanner();
         postPersonal();
         checkNow();
+      } else if (msg.type === 'need') {
+        if (msg.lang !== wantedLang) return;
+        state = 'needs';
+        needLang = msg.lang;
+        askToDownload(msg.lang, msg.bytes || 0);
+      } else if (msg.type === 'downloading') {
+        if (msg.lang === wantedLang) showDownloading(msg.lang);
       } else if (msg.type === 'error') {
         if (msg.lang && msg.lang !== wantedLang) return;
         failed(wantedLang, msg.message || 'unknown error');
@@ -481,14 +571,16 @@
   // Asks the worker for the dictionary of `lang` (once: a request already in progress is not repeated).
   function ensureLanguage(lang) {
     if (state === 'loading' && wantedLang === lang) return;
+    if (state === 'needs' && needLang === lang) return;
     if (state === 'ready' && loadedLang === lang) return;
     clearMarkers();
+    hideBanner();
     suggestionsCache.clear();
     pendingChecks.clear();
     state = 'loading';
     wantedLang = lang;
     if (!worker) createWorker();
-    worker.postMessage({ type: 'init', lang: lang });
+    worker.postMessage({ type: 'init', lang: lang, allowDownload: hasConsent(lang) });
   }
 
   function getSuggestions(word) {
@@ -613,6 +705,10 @@
       return;
     }
     if (state === 'backoff' && Date.now() < retryAt) return; // waiting to try the dictionary again
+    if (state === 'needs' && needLang === target) { // the person has to allow the download (or has said not now)
+      monaco.editor.setModelMarkers(model, 'spellcheck', []);
+      return;
+    }
     if (state === 'error' && errorLang === target) {
       monaco.editor.setModelMarkers(model, 'spellcheck', []);
       return;
@@ -744,7 +840,9 @@
     errorLang = null; // a new choice is a new chance for a dictionary that failed
     Object.keys(failures).forEach(k => { failures[k] = 0; });
     warned = false;
-    if (state === 'error' || state === 'backoff') state = 'idle';
+    declined.clear();
+    hideBanner();
+    if (state === 'error' || state === 'backoff' || state === 'needs') state = 'idle';
     if (!enabled) clearMarkers();
     else checkNow();
   }
@@ -755,7 +853,10 @@
     registerCodeActions();
 
     if (typeof editor !== 'undefined' && editor) {
-      editor.onDidChangeModelContent(scheduleCheck);
+      editor.onDidChangeModelContent(function (e) {
+        if (e && e.isFlush) clearMarkers(); // the whole text was replaced: old underlines would sit on the wrong words
+        scheduleCheck();
+      });
       editor.onDidChangeModel(function () {
         clearMarkers();
         scheduleCheck();
@@ -778,6 +879,7 @@
     getLanguage: function () { return configuredLang; },
     getActiveLanguage: function () { return lastLang; },
     getState: function () { return state; },
-    suggest: getSuggestions
+    suggest: getSuggestions,
+    languages: function () { return SUPPORTED.slice(); }
   };
 })();

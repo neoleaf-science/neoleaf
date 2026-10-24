@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "自動（ドキュメントから判定）",
   "Português (Brasil)": "ポルトガル語（ブラジル）",
   "English (United States)": "英語（米国）",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "エディタ内のスペルミスに下線を引きます。LaTeX コマンド、数式、参照は無視されます。プロジェクト用語は <code>.neoleaf/dictionary.txt</code> に保存されます。 辞書：ポルトガル語（ブラジル）と英語（米国）。その他の言語の文書はチェックされません。",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "エディタ内のスペルミスに下線を引きます。LaTeX コマンド、数式、参照は無視されます。プロジェクト用語は <code>.neoleaf/dictionary.txt</code> に保存されます。 ブラウザは必要なときに GitHub の LibreOffice 辞書から各辞書をダウンロードし、このデバイスに保存します：ポルトガル語（ブラジルとポルトガル）、英語（米国と英国）、スペイン語、フランス語、イタリア語、ドイツ語。その他の言語の文書はチェックされません。",
   "Possible spelling mistake: \"{0}\"": "スペルミスの可能性: 「{0}」",
   "Change to \"{0}\"": "「{0}」に変更",
   "Add \"{0}\" to project dictionary": "「{0}」をプロジェクト辞書に追加",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "このセッションで「{0}」を無視",
   "Ignore in this session": "このセッションで無視",
   "The spell check dictionary could not be loaded.": "スペルチェックの辞書を読み込めませんでした。",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "スペルチェックには {0} 辞書（{1}）が必要です。ブラウザが GitHub からダウンロードしてこのデバイスに保存します。NeoLeaf のサーバーには保存されません。",
+  "Not now": "今はしない",
+  "Downloading the {0} dictionary...": "{0} 辞書をダウンロードしています...",
 };

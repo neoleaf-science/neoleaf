@@ -27,12 +27,16 @@ describe('licenses page', () => {
     }
   });
 
-  test('the license texts of the spell check dictionaries are served', async () => {
-    for (const [file, needle] of [['LICENSE-en-US.txt', 'Kevin Atkinson'], ['LICENSE-pt-BR.txt', 'Raimundo']] as const) {
-      const r = await s.page.request.get(`${BASE_URL}/static/dict/${file}`);
-      expect(r.status()).toBe(200);
-      expect(await r.text()).toContain(needle);
-    }
+  test('the spell check dictionaries are listed with their licenses at the pinned commit, and the server hosts none', async () => {
+    const fs = await import('node:fs');
+    const path = await import('node:path');
+    const man = JSON.parse(fs.readFileSync(path.resolve(import.meta.dir, '../../../static/js/spellcheck-dicts.js'), 'utf8').replace(/^[\s\S]*?self\.NEOLEAF_DICTS = /, '').replace(/;\s*$/, ''));
+    await s.page.goto(BASE_URL + '/licenses');
+    const t = (await s.page.locator('.legal-container').innerText()).replace(/\s+/g, ' ');
+    expect(t).toContain(man.commit);
+    for (const d of man.list) { expect(t).toContain(d.label); expect(t).toContain(d.license); }
+    expect(t).toContain('does not host or redistribute any dictionary');
+    expect((await s.page.request.get(`${BASE_URL}/static/dict/en-US.aff`)).status()).toBe(404);
   });
 
   test('it is linked from the project list menu and from the landing page', async () => {

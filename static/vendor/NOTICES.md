@@ -27,7 +27,7 @@ marked: MarkedJS and Christopher Jeffrey. PapaParse: Matthew Holt and contributo
 ## DOMPurify (`purify.min.js`)
 Copyright Cure53 and other contributors. Apache-2.0 OR MPL-2.0 (the `@license` header in the file).
 
-## Spell check (`hunspell-asm.min.js`, `static/dict/`)
+## Spell check (`hunspell-asm.min.js`)
 `hunspell-asm.min.js` is a bundle (built by `scripts/build_spell_vendor.sh`) of:
 - **hunspell-asm** 4.0.2: Copyright (c) 2017 OJ Kwon. MIT License. It embeds **Hunspell** compiled to WebAssembly/asm.js with Emscripten.
 - **Hunspell**: Copyright (C) László Németh and contributors. Tri-licensed MPL 1.1, GPL 2.0 or later and LGPL 2.1 or later; NeoLeaf uses it under the
@@ -37,13 +37,17 @@ Copyright Cure53 and other contributors. Apache-2.0 OR MPL-2.0 (the `@license` h
 - **tslib** 1.14.1: Copyright (c) Microsoft Corporation. 0BSD.
 - The Emscripten runtime that Hunspell is compiled with: MIT License / University of Illinois-NCSA, Copyright the Emscripten authors.
 
-The dictionaries are data files served as they came from their sources (unmodified); their complete license texts are next to them:
-- `en-US.aff`, `en-US.dic`: npm package `dictionary-en` 4.0.0, built from SCOWL 2020.12.07. Copyright 2000-2018 Kevin Atkinson and the other
-  holders named in the text; npm declares `(MIT AND BSD)`. Complete text: `static/dict/LICENSE-en-US.txt`.
-- `pt-BR.aff`, `pt-BR.dic`: VERO 3.3.0 (Verificador Ortográfico Livre), from the LibreOffice dictionaries repository
-  (<https://github.com/LibreOffice/dictionaries>, folder `pt_BR`, commit `5cf23af`). Copyright (C) 2006-2013 Raimundo Santos Moura and the VERO
-  contributors, under the terms of the GNU LGPL version 3 and the Mozilla Public License (the README does not give the MPL version).
-  Complete text: `static/dict/LICENSE-pt-BR.txt`.
+**NeoLeaf hosts and distributes no dictionary.** The browser downloads each one, after the person agrees, from the LibreOffice dictionaries repository
+(<https://github.com/LibreOffice/dictionaries>) at the fixed commit `67032ee957631908098a72edf48dc81cac27e369` (raw.githubusercontent.com, with jsDelivr as a mirror), checks the SHA-256
+listed in `static/js/spellcheck-dicts.js` and keeps the file in its own storage. Each dictionary keeps its license, as its README declares it:
+- Português (Brasil) (`pt-BR`): LGPL-3.0 and MPL (the README does not give the MPL version). Authors: Raimundo Santos Moura and the VERO contributors. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/pt_BR/README_pt_BR.txt>
+- Português (Portugal) (`pt-PT`): GPL 2, LGPL 2.1 or MPL 1.1 (in that order of preference). Authors: José João Almeida and the contributors named in the README. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/pt_PT/README_pt_PT.txt>
+- English (US) (`en-US`): SCOWL license (MIT-like, with BSD and other notices). Authors: Kevin Atkinson and the other holders named in the README. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/en/README_en_US.txt>
+- English (UK) (`en-GB`): LGPL. Authors: the authors named in the README. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/en/README_en_GB.txt>
+- Español (`es-ES`): GPL 3 or later, LGPL 3 or later or MPL 1.1 or later. Authors: the authors named in the README. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/es/README_hunspell_es.txt>
+- Français (`fr-FR`): MPL 2.0. Authors: the authors named in the README. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/fr_FR/dictionaries/README_dict_fr.txt>
+- Italiano (`it-IT`): GPL 3. Authors: LibreItalia (Marina Latini) and other authors. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/it_IT/README_it_IT.txt>
+- Deutsch (`de-DE`): GPL 2 or 3. Authors: the igerman98 and frami authors. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/de/README_de_DE_frami.txt>
 
 ## The MIT License (applies to every project above marked MIT)
 

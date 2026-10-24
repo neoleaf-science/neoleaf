@@ -245,6 +245,10 @@ pub static FILES: &[(&str, &[u8])] = &[
         include_bytes!("../static/js/session-guard.js"),
     ),
     (
+        "js/spellcheck-dicts.js",
+        include_bytes!("../static/js/spellcheck-dicts.js"),
+    ),
+    (
         "js/spellcheck.js",
         include_bytes!("../static/js/spellcheck.js"),
     ),

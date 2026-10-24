@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "Automatique (d'après le document)",
   "Português (Brasil)": "Portugais (Brésil)",
   "English (United States)": "Anglais (États-Unis)",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "Souligne les mots mal orthographiés dans l'éditeur. Ignore les commandes LaTeX, les maths et les références. Le vocabulaire du projet est conservé dans <code>.neoleaf/dictionary.txt</code>. Dictionnaires : portugais (Brésil) et anglais (États-Unis) ; les documents dans d'autres langues ne sont pas vérifiés.",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "Souligne les mots mal orthographiés dans l'éditeur. Ignore les commandes LaTeX, les maths et les références. Le vocabulaire du projet est conservé dans <code>.neoleaf/dictionary.txt</code>. Votre navigateur télécharge chaque dictionnaire quand il est nécessaire, depuis les dictionnaires de LibreOffice sur GitHub, et le conserve sur cet appareil : portugais (Brésil et Portugal), anglais (États-Unis et Royaume-Uni), espagnol, français, italien et allemand. Les documents dans d'autres langues ne sont pas vérifiés.",
   "Possible spelling mistake: \"{0}\"": "Faute d'orthographe possible : « {0} »",
   "Change to \"{0}\"": "Remplacer par « {0} »",
   "Add \"{0}\" to project dictionary": "Ajouter « {0} » au dictionnaire du projet",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "Ignorer « {0} » pour cette session",
   "Ignore in this session": "Ignorer pour cette session",
   "The spell check dictionary could not be loaded.": "Le dictionnaire du correcteur orthographique n'a pas pu être chargé.",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Le correcteur a besoin du dictionnaire {0} ({1}). Votre navigateur le télécharge depuis GitHub et le conserve sur cet appareil ; le serveur de NeoLeaf ne le stocke pas.",
+  "Not now": "Pas maintenant",
+  "Downloading the {0} dictionary...": "Téléchargement du dictionnaire {0}...",
 };

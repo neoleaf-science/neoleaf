@@ -154,11 +154,17 @@ pub(super) fn project_tab_settings() -> &'static str {
                         <select id="cfg-spell-lang" class="form-control" style="width: auto; padding: 2px 8px; font-size: 13px;">
                             <option value="auto" selected>Automatic (from document)</option>
                             <option value="pt-BR">Português (Brasil)</option>
-                            <option value="en-US">English (United States)</option>
+                            <option value="pt-PT">Português (Portugal)</option>
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                            <option value="es-ES">Español</option>
+                            <option value="fr-FR">Français</option>
+                            <option value="it-IT">Italiano</option>
+                            <option value="de-DE">Deutsch</option>
                         </select>
                     </div>
                     <div class="modal-hint" style="margin-left: 24px; margin-top: 6px; font-size: 11px;" data-i18n-html>
-                        Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.
+                        Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.
                     </div>
                 </div>
                 <p class="modal-hint" data-i18n-html>The settings are stored in the project's <code>.neoleaf/config.json</code> file (and in <code>NeoLeaf/.neoleaf</code> for the global default). Anyone who edits the project can change them.</p>

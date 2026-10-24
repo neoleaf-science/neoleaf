@@ -101,6 +101,8 @@
     return typeof n === 'string' && n.length > 0 && n.length <= 200 && /\.(tex|mkiv|mkxl)$/.test(n) && !n.includes('\\') && !n.startsWith('/')
       && n.split('/').every(s => s && s !== '..' && !s.startsWith('.'));
   }
+  // the dictionaries of the spell check (spellcheck-dicts.js has the same list)
+  const SPELL_LANGUAGES = ['auto', 'pt-BR', 'pt-PT', 'en-US', 'en-GB', 'es-ES', 'fr-FR', 'it-IT', 'de-DE'];
   const DEFAULT_CONFIG = { mainFile: 'main.tex', engine: 'wasm-texlive', autoInstall: true, autoSync: false, autoSyncInterval: 5, spellCheck: true, spellLanguage: 'auto' };
 
   async function loadConfig() {
@@ -108,7 +110,7 @@
     if (!validEngine(cfg.engine)) cfg.engine = DEFAULT_CONFIG.engine;
     if (!validMainFile(cfg.mainFile)) cfg.mainFile = DEFAULT_CONFIG.mainFile;
     if (typeof cfg.spellCheck !== 'boolean') cfg.spellCheck = DEFAULT_CONFIG.spellCheck;
-    if (!['auto', 'pt-BR', 'en-US'].includes(cfg.spellLanguage)) cfg.spellLanguage = DEFAULT_CONFIG.spellLanguage;
+    if (!SPELL_LANGUAGES.includes(cfg.spellLanguage)) cfg.spellLanguage = DEFAULT_CONFIG.spellLanguage;
     return cfg;
   }
 
@@ -119,7 +121,7 @@
       version: 1, mainFile: p.mainFile, engine: p.engine, autoInstall: p.autoInstall !== false,
       autoSync: !!p.autoSync, autoSyncInterval: Math.max(1, Math.min(1440, parseInt(p.autoSyncInterval, 10) || 5)),
       spellCheck: p.spellCheck !== false,
-      spellLanguage: ['auto', 'pt-BR', 'en-US'].includes(p.spellLanguage) ? p.spellLanguage : 'auto',
+      spellLanguage: SPELL_LANGUAGES.includes(p.spellLanguage) ? p.spellLanguage : 'auto',
     };
     if (p.scope === 'global') lsSet('neoleaf.globalConfig', { engine: cfg.engine, autoInstall: cfg.autoInstall, autoSync: cfg.autoSync, autoSyncInterval: cfg.autoSyncInterval, spellCheck: cfg.spellCheck, spellLanguage: cfg.spellLanguage });
     else await writeJson('.neoleaf/config.json', cfg);

@@ -606,11 +606,16 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `fetchBytes` | function | (only itself) |
+| `dictInfo` | function | (only itself) |
+| `sha256Hex` | function | (only itself) |
+| `verified` | function | (only itself) |
+| `fromCache` | function | (only itself) |
+| `download` | function | agent.js, file-tree-ops.js, mermaid-preview.js |
+| `toUtf8` | function | (only itself) |
 | `release` | function | (only itself) |
 | `load` | function | comments.js, csv-preview.js, i18n.js, mindmap.js, package-install.js, project-store.js, splitters.js |
 | `handle` | function | splitters.js |
-| `DICT_VERSION` | variable | (only itself) |
+| `CACHE_NAME` | variable | (only itself) |
 | `factory` | variable | (only itself) |
 | `hunspell` | variable | (only itself) |
 | `mounted` | variable | (only itself) |

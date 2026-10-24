@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "Otomatik (belgeden)",
   "Português (Brasil)": "Portekizce (Brezilya)",
   "English (United States)": "İngilizce (Amerika Birleşik Devletleri)",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "Düzenleyicide yanlış yazılan kelimelerin altını çizer. LaTeX komutlarını, matematik formüllerini ve referansları yoksayar. Proje kelime dağarcığı <code>.neoleaf/dictionary.txt</code> dosyasında saklanır. Sözlükler: Portekizce (Brezilya) ve İngilizce (ABD); diğer dillerdeki belgeler denetlenmez.",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "Düzenleyicide yanlış yazılan kelimelerin altını çizer. LaTeX komutlarını, matematik formüllerini ve referansları yoksayar. Proje kelime dağarcığı <code>.neoleaf/dictionary.txt</code> dosyasında saklanır. Tarayıcınız her sözlüğü gerektiğinde GitHub'daki LibreOffice sözlüklerinden indirir ve bu cihazda saklar: Portekizce (Brezilya ve Portekiz), İngilizce (ABD ve Birleşik Krallık), İspanyolca, Fransızca, İtalyanca ve Almanca. Diğer dillerdeki belgeler denetlenmez.",
   "Possible spelling mistake: \"{0}\"": "Olası yazım hatası: \"{0}\"",
   "Change to \"{0}\"": "\"{0}\" ile değiştir",
   "Add \"{0}\" to project dictionary": "\"{0}\" ifadesini proje sözlüğüne ekle",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "Bu oturumda \"{0}\" ifadesini yoksay",
   "Ignore in this session": "Bu oturumda yoksay",
   "The spell check dictionary could not be loaded.": "Yazım denetimi sözlüğü yüklenemedi.",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Yazım denetimi {0} sözlüğüne ({1}) ihtiyaç duyuyor. Tarayıcınız onu GitHub'dan indirir ve bu cihazda saklar; NeoLeaf sunucusu onu saklamaz.",
+  "Not now": "Şimdi değil",
+  "Downloading the {0} dictionary...": "{0} sözlüğü indiriliyor...",
 };

@@ -1,6 +1,6 @@
 name: Release server
 
-# Builds the NeoLeaf server for Linux x86_64 and attaches a tar.gz (executable, landing page, base TeX engine, spell check dictionaries, .env.example, licenses), a SHA256SUMS
+# Builds the NeoLeaf server for Linux x86_64 and attaches a tar.gz (executable, landing page, base TeX engine, .env.example, licenses), a SHA256SUMS
 # file and a build provenance attestation to the GitHub release of the tag.
 #   git tag v1.23.2 && git push origin v1.23.2        (the tag must match the version in Cargo.toml)
 # Run by hand (workflow_dispatch) with a `tag` that already exists, it builds that tag and uploads the files to its release.
@@ -46,7 +46,7 @@ jobs:
           cp target/release/neoleaf .env.example LICENSE-MIT LICENSE-APACHE LICENSE-ART NOTICE LICENSES.md ART.md "dist/$NAME/"
           [ -f docs/self-hosting.md ] && cp docs/self-hosting.md "dist/$NAME/SELF-HOSTING.md" || true
           cp -r site "dist/$NAME/site"
-          git ls-files -z static/texlive static/dict | xargs -0 -I{} cp --parents {} "dist/$NAME/"
+          git ls-files -z static/texlive | xargs -0 -I{} cp --parents {} "dist/$NAME/"
           tar -C dist -czf "dist/$NAME.tar.gz" "$NAME"
           (cd dist && sha256sum "$NAME.tar.gz" > SHA256SUMS && cat SHA256SUMS)
           echo "ARCHIVE=dist/$NAME.tar.gz" >> "$GITHUB_ENV"
@@ -58,7 +58,6 @@ jobs:
           for i in $(seq 1 30); do curl -fs http://127.0.0.1:3999/licenses > /dev/null && break; sleep 1; done
           curl -fs http://127.0.0.1:3999/licenses | grep -q "Open-source licenses"
           curl -fs -o /dev/null http://127.0.0.1:3999/static/texlive/pdflatex.wasm
-          curl -fs -o /dev/null "http://127.0.0.1:3999/static/dict/pt-BR.dic"
           kill %1 || true
       - uses: actions/attest-build-provenance@v2
         with:

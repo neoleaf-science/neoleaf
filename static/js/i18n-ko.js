@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "자동 (문서에서 감지)",
   "Português (Brasil)": "포르투갈어 (브라질)",
   "English (United States)": "영어 (미국)",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "편집기에서 철자가 틀린 단어에 밑줄을 표시합니다. LaTeX 명령어, 수식 및 참조는 무시됩니다. 프로젝트 맞춤 단어는 <code>.neoleaf/dictionary.txt</code>에 보관됩니다. 사전: 포르투갈어(브라질)와 영어(미국). 다른 언어의 문서는 검사하지 않습니다.",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "편집기에서 철자가 틀린 단어에 밑줄을 표시합니다. LaTeX 명령어, 수식 및 참조는 무시됩니다. 프로젝트 맞춤 단어는 <code>.neoleaf/dictionary.txt</code>에 보관됩니다. 브라우저는 필요할 때 GitHub의 LibreOffice 사전에서 각 사전을 내려받아 이 기기에 보관합니다: 포르투갈어(브라질 및 포르투갈), 영어(미국 및 영국), 스페인어, 프랑스어, 이탈리아어, 독일어. 다른 언어의 문서는 검사하지 않습니다.",
   "Possible spelling mistake: \"{0}\"": "철자 오류 가능성: \"{0}\"",
   "Change to \"{0}\"": "\"{0}\"(으)로 변경",
   "Add \"{0}\" to project dictionary": "\"{0}\"을(를) 프로젝트 사전에 추가",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "이 세션에서 \"{0}\" 무시",
   "Ignore in this session": "이 세션에서 무시",
   "The spell check dictionary could not be loaded.": "맞춤법 검사 사전을 불러오지 못했습니다.",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "맞춤법 검사에 {0} 사전({1})이 필요합니다. 브라우저가 GitHub에서 내려받아 이 기기에 보관하며, NeoLeaf 서버는 저장하지 않습니다.",
+  "Not now": "나중에",
+  "Downloading the {0} dictionary...": "{0} 사전을 내려받는 중...",
 };

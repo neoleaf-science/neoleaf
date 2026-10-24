@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "Automatisch (aus Dokument)",
   "Português (Brasil)": "Portugiesisch (Brasilien)",
   "English (United States)": "Englisch (Vereinigte Staaten)",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "Unterstreicht falsch geschriebene Wörter im Editor. Ignoriert LaTeX-Befehle, Mathematik und Verweise. Das Projektvokabular wird in <code>.neoleaf/dictionary.txt</code> gespeichert. Wörterbücher: Portugiesisch (Brasilien) und Englisch (USA); Dokumente in anderen Sprachen werden nicht geprüft.",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "Unterstreicht falsch geschriebene Wörter im Editor. Ignoriert LaTeX-Befehle, Mathematik und Verweise. Das Projektvokabular wird in <code>.neoleaf/dictionary.txt</code> gespeichert. Ihr Browser lädt jedes Wörterbuch bei Bedarf aus den LibreOffice-Wörterbüchern auf GitHub herunter und speichert es auf diesem Gerät: Portugiesisch (Brasilien und Portugal), Englisch (USA und Vereinigtes Königreich), Spanisch, Französisch, Italienisch und Deutsch. Dokumente in anderen Sprachen werden nicht geprüft.",
   "Possible spelling mistake: \"{0}\"": "Möglicher Rechtschreibfehler: „{0}“",
   "Change to \"{0}\"": "Ändern in „{0}“",
   "Add \"{0}\" to project dictionary": "„{0}“ zum Projektwörterbuch hinzufügen",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "„{0}“ in dieser Sitzung ignorieren",
   "Ignore in this session": "In dieser Sitzung ignorieren",
   "The spell check dictionary could not be loaded.": "Das Wörterbuch der Rechtschreibprüfung konnte nicht geladen werden.",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Die Rechtschreibprüfung braucht das Wörterbuch {0} ({1}). Ihr Browser lädt es von GitHub herunter und speichert es auf diesem Gerät; der NeoLeaf-Server speichert es nicht.",
+  "Not now": "Jetzt nicht",
+  "Downloading the {0} dictionary...": "Wörterbuch {0} wird heruntergeladen...",
 };

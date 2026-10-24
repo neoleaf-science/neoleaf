@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "Automaticky (z dokumentu)",
   "Português (Brasil)": "Portugalština (Brazílie)",
   "English (United States)": "Angličtina (Spojené státy)",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "Podtrhává pravopisné chyby v editoru. Ignoruje příkazy LaTeXu, matematiku a reference. Slovník projektu je uložen v <code>.neoleaf/dictionary.txt</code>. Slovníky: portugalština (Brazílie) a angličtina (USA); dokumenty v jiných jazycích se nekontrolují.",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "Podtrhává pravopisné chyby v editoru. Ignoruje příkazy LaTeXu, matematiku a reference. Slovník projektu je uložen v <code>.neoleaf/dictionary.txt</code>. Váš prohlížeč stáhne každý slovník, když je potřeba, ze slovníků LibreOffice na GitHubu a uloží jej na tomto zařízení: portugalština (Brazílie a Portugalsko), angličtina (USA a Spojené království), španělština, francouzština, italština a němčina. Dokumenty v jiných jazycích se nekontrolují.",
   "Possible spelling mistake: \"{0}\"": "Možná pravopisná chyba: „{0}“",
   "Change to \"{0}\"": "Změnit na „{0}“",
   "Add \"{0}\" to project dictionary": "Přidat „{0}“ do slovníku projektu",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "Ignorovat „{0}“ v této relaci",
   "Ignore in this session": "Ignorovat v této relaci",
   "The spell check dictionary could not be loaded.": "Slovník pro kontrolu pravopisu se nepodařilo načíst.",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Kontrola pravopisu potřebuje slovník {0} ({1}). Váš prohlížeč jej stáhne z GitHubu a uloží na tomto zařízení; server NeoLeaf jej neukládá.",
+  "Not now": "Teď ne",
+  "Downloading the {0} dictionary...": "Stahování slovníku {0}...",
 };

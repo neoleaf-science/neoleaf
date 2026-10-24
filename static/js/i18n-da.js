@@ -1717,7 +1717,7 @@
   "Automatic (from document)": "Automatisk (fra dokument)",
   "Português (Brasil)": "Portugisisk (Brasilien)",
   "English (United States)": "Engelsk (USA)",
-  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Dictionaries: Portuguese (Brazil) and English (US); documents in other languages are not checked.": "Understreger forkert stavede ord i editoren. Ignorerer LaTeX-kommandoer, matematik og referencer. Projektets ordforråd gemmes i <code>.neoleaf/dictionary.txt</code>. Ordbøger: portugisisk (Brasilien) og engelsk (USA); dokumenter på andre sprog kontrolleres ikke.",
+  "Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.": "Understreger forkert stavede ord i editoren. Ignorerer LaTeX-kommandoer, matematik og referencer. Projektets ordforråd gemmes i <code>.neoleaf/dictionary.txt</code>. Din browser henter hver ordbog, når den er nødvendig, fra LibreOffice-ordbøgerne på GitHub, og gemmer den på denne enhed: portugisisk (Brasilien og Portugal), engelsk (USA og Storbritannien), spansk, fransk, italiensk og tysk. Dokumenter på andre sprog kontrolleres ikke.",
   "Possible spelling mistake: \"{0}\"": "Mulig stavefejl: \"{0}\"",
   "Change to \"{0}\"": "Skift til \"{0}\"",
   "Add \"{0}\" to project dictionary": "Tilføj \"{0}\" til projektordbog",
@@ -1725,4 +1725,7 @@
   "Ignore \"{0}\" in this session": "Ignorer \"{0}\" i denne session",
   "Ignore in this session": "Ignorer i denne session",
   "The spell check dictionary could not be loaded.": "Ordbogen til stavekontrollen kunne ikke indlæses.",
+  "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Stavekontrollen har brug for ordbogen {0} ({1}). Din browser henter den fra GitHub og gemmer den på denne enhed; NeoLeafs server gemmer den ikke.",
+  "Not now": "Ikke nu",
+  "Downloading the {0} dictionary...": "Henter ordbogen {0}...",
 };

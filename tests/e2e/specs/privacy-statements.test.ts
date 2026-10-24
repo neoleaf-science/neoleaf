@@ -17,7 +17,7 @@ describe('privacy policy: local copy, direct requests, sign out, encrypted sessi
     expect(t).toContain('use a separate browser profile or a private window');
     expect(t).toContain('Storage tab');
     expect(t).toContain('Services your browser contacts directly');
-    for (const name of ['Monaco', 'PDF.js', 'Green Web Foundation', 'Crossref', 'OpenAlex', 'PubMed', 'Europe PMC', 'DOAJ', 'HAL', 'Zenodo', 'OpenAIRE', 'Unpaywall', 'arXiv', 'DBLP']) expect(t).toContain(name);
+    for (const name of ['Monaco', 'PDF.js', 'Green Web Foundation', 'Crossref', 'OpenAlex', 'PubMed', 'Europe PMC', 'DOAJ', 'HAL', 'Zenodo', 'OpenAIRE', 'Unpaywall', 'arXiv', 'DBLP', 'raw.githubusercontent.com', 'jsDelivr']) expect(t).toContain(name);
     expect(t).toContain('NeoLeaf does not send them your project files.');
     expect(t).toContain('deletes all NeoLeaf data stored in the browser');
     expect(t).toContain('the NeoLeaf data stored in your browser is deleted');
@@ -36,6 +36,8 @@ describe('privacy policy: local copy, direct requests, sign out, encrypted sessi
       const t = await text();
       for (const part of [a, b, c, d]) expect(t, `${lang}: ${part}`).toContain(part);
       expect(t).not.toContain('NeoLeaf does not encrypt this copy');   // no English left of the new text
+      expect(t, `${lang}: the spell check dictionaries are in the list of direct contacts`).toContain('jsDelivr');
+      expect(t).not.toContain('the spell check dictionaries are downloaded');   // and that sentence is translated
       expect(await s.page.locator('#legal-lang-note').isVisible()).toBe(false);
       await s.page.evaluate(() => (window as any).LDI18n.setLang('en'));
     });

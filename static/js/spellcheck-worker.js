@@ -31,7 +31,8 @@ function release() {
 }
 
 async function load(lang) {
-  if (!factory) factory = await HunspellAsm.loadModule();
+  // the default wait for the runtime is 3 s, too short for a slow machine
+  if (!factory) factory = await HunspellAsm.loadModule({ timeout: 60000 });
   const base = '/static/dict/' + encodeURIComponent(lang);
   const [aff, dic] = await Promise.all([
     fetchBytes(base + '.aff?v=' + DICT_VERSION),

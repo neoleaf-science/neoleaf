@@ -188,7 +188,7 @@ describe('spell check: a dictionary that fails to load', () => {
     await waitMarked(s, m => m.includes('wrold'));
     await s.context.route('**/static/dict/pt-BR.*', r => r.abort());
     await setDoc(s, doc(PT, '\\usepackage[brazil]{babel}\n'));
-    await s.page.waitForFunction(() => (window as any).SpellCheck.getState() === 'error', null, { timeout: 30000 });
+    await s.page.waitForFunction(() => (window as any).SpellCheck.getState() === 'error', null, { timeout: 60000 });   // after two retries
     expect(await marked(s)).toEqual([]);
     await setDoc(s, doc(PT + ' Mais um erroo.', '\\usepackage[brazil]{babel}\n'));
     expect(await quiet(s, 2000)).toEqual([]);
@@ -197,5 +197,19 @@ describe('spell check: a dictionary that fails to load', () => {
     await s.page.evaluate(() => (window as any).SpellCheck.applyConfig({ spellCheck: true, spellLanguage: 'auto' }));
     const m = await waitMarked(s, m => m.includes('erroo'), 60000);
     expect(m.sort()).toEqual(['errda', 'erroo']);
-  }, 180000);
+  }, 240000);
+
+  test('a dictionary that fails once is tried again by itself and then works', async () => {
+    const s2 = await newSession();
+    await openProject(s2.page);
+    await s2.page.waitForFunction(() => !!(window as any).SpellCheck, null, { timeout: 15000 });
+    let hits = 0;
+    await s2.context.route('**/static/dict/pt-BR.aff*', r => (hits++ === 0 ? r.abort() : r.continue()));
+    await setDoc(s2, doc(PT, '\\usepackage[brazil]{babel}\n'));
+    const m = await waitMarked(s2, m => m.includes('errda'), 90000);
+    expect(m).toEqual(['errda']);
+    expect(hits).toBeGreaterThanOrEqual(2);
+    expect(await spellState(s2)).toBe('ready');
+    await s2.context.close();
+  }, 150000);
 });

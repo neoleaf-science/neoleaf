@@ -4,11 +4,13 @@
   'use strict';
 
   let worker = null;
-  let state = 'idle'; // 'idle' | 'loading' | 'ready' | 'error'
+  let state = 'idle'; // 'idle' | 'loading' | 'ready' | 'backoff' | 'error'
   let loadedLang = null; // language of the dictionary that is ready
   let wantedLang = null; // language being loaded (or last requested)
   let errorLang = null; // language whose dictionary failed to load
   let warned = false;
+  let retryAt = 0; // while state is 'backoff', no new request before this time
+  const failures = {}; // dictionary -> failures in a row
   let enabled = true;
   let configuredLang = 'auto'; // 'auto' | 'pt-BR' | 'en-US'
   let lastLang = null; // language used by the last check (null: the document has no dictionary)
@@ -412,14 +414,25 @@
     for (const w of projectWords) worker.postMessage({ type: 'addPersonal', word: w });
   }
 
+  // A dictionary that fails to load is retried twice (a dropped connection while 5 MB come down is common) before the notice.
   function failed(lang, message) {
+    console.warn('Spell check dictionary for ' + lang + ' could not be loaded: ' + message);
+    failures[lang] = (failures[lang] || 0) + 1;
+    clearMarkers();
+    if (failures[lang] < 3) {
+      state = 'backoff';
+      wantedLang = null;
+      retryAt = Date.now() + failures[lang] * 4000;
+      setTimeout(checkNow, failures[lang] * 4000 + 50);
+      return;
+    }
     state = 'error';
     errorLang = lang;
-    console.warn('Spell check dictionary for ' + lang + ' could not be loaded: ' + message);
-    clearMarkers();
     if (!warned) {
       warned = true;
-      if (typeof window.neoToast === 'function') window.neoToast(tr('The spell check dictionary could not be loaded.'));
+      if (typeof window.neoToast === 'function') {
+        window.neoToast(tr('The spell check dictionary could not be loaded.') + ' (' + String(message).slice(0, 140) + ')');
+      }
     }
   }
 
@@ -432,6 +445,7 @@
         state = 'ready';
         loadedLang = msg.lang;
         errorLang = null;
+        failures[msg.lang] = 0;
         postPersonal();
         checkNow();
       } else if (msg.type === 'error') {
@@ -587,6 +601,7 @@
       monaco.editor.setModelMarkers(model, 'spellcheck', []);
       return;
     }
+    if (state === 'backoff' && Date.now() < retryAt) return; // waiting to try the dictionary again
     if (state === 'error' && errorLang === target) {
       monaco.editor.setModelMarkers(model, 'spellcheck', []);
       return;
@@ -716,7 +731,9 @@
     enabled = cfg.spellCheck !== false;
     configuredLang = cfg.spellLanguage || 'auto';
     errorLang = null; // a new choice is a new chance for a dictionary that failed
-    if (state === 'error') state = 'idle';
+    Object.keys(failures).forEach(k => { failures[k] = 0; });
+    warned = false;
+    if (state === 'error' || state === 'backoff') state = 'idle';
     if (!enabled) clearMarkers();
     else checkNow();
   }

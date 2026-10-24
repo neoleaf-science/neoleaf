@@ -7,7 +7,7 @@ Only the Linux x86_64 build is published, and it has been tested on Ubuntu 24.04
 ## 1. Get the files
 Download `neoleaf-server-<version>-linux-x86_64.tar.gz` and `SHA256SUMS` from the [releases](https://github.com/neoleaf-science/neoleaf/releases)
 and check them (`sha256sum -c SHA256SUMS`, or `gh attestation verify <file> --repo neoleaf-science/neoleaf`). The archive holds the executable
-(`neoleaf`), `.env.example`, `site/` (the landing page), `static/texlive/` (the pdfTeX engine and its base package) and the license files.
+(`neoleaf`), `.env.example`, `site/` (the landing page), `static/texlive/` (the pdfTeX engine and its base package), `static/dict/` (the spell check dictionaries) and the license files.
 
 ## 2. Create a GitHub OAuth App
 GitHub, Settings, Developer settings, OAuth Apps, New OAuth App. Homepage: your address. Callback: `https://your.domain/auth/callback`.

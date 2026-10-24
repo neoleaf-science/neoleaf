@@ -1728,4 +1728,11 @@
   "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Kontrola pravopisu potřebuje slovník {0} ({1}). Váš prohlížeč jej stáhne z GitHubu a uloží na tomto zařízení; server NeoLeaf jej neukládá.",
   "Not now": "Teď ne",
   "Downloading the {0} dictionary...": "Stahování slovníku {0}...",
+  "⚡ Browser (Typst / WebAssembly)": "⚡ Prohlížeč (Typst / WebAssembly)",
+  "Compiled successfully (Typst WebAssembly)": "Úspěšně zkompilováno (Typst WebAssembly)",
+  "Error running the Typst WebAssembly compiler: {0}": "Chyba při spuštění kompilátoru Typst WebAssembly: {0}",
+  "Typst Article": "Článek v Typstu",
+  "This project has no Typst file (.typ).": "Tento projekt nemá žádný soubor Typst (.typ).",
+  "Compiling with Typst (WebAssembly)...": "Kompilace pomocí Typst (WebAssembly)...",
+  "The Typst compiler could not be loaded: {0}": "Kompilátor Typst se nepodařilo načíst: {0}",
 };

@@ -317,7 +317,7 @@ pub(super) fn model_form() -> &'static str {
                     <label class="mf">Main file<input id="mf-main" class="form-control" maxlength="200" placeholder="empty = detect"></label>
                     <label class="mf">Recommended engine
                         <select id="mf-engine" class="form-control">
-                            <option value="">NeoLeaf default</option><option value="wasm-texlive">pdfLaTeX</option><option value="wasm-xelatex">XeLaTeX</option><option value="wasm-lualatex">LuaLaTeX</option>
+                            <option value="">NeoLeaf default</option><option value="wasm-texlive">pdfLaTeX</option><option value="wasm-xelatex">XeLaTeX</option><option value="wasm-lualatex">LuaLaTeX</option><option value="wasm-typst">Typst</option>
                         </select>
                     </label>
                     <label class="mf" style="grid-column:1/-1;">Preview image (https:// or /static/...)<input id="mf-preview" class="form-control" maxlength="300" placeholder="optional"></label>

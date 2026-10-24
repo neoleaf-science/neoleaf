@@ -60,6 +60,10 @@ pub static FILES: &[(&str, &[u8])] = &[
     ("js/collab.js", include_bytes!("../static/js/collab.js")),
     ("js/comments.js", include_bytes!("../static/js/comments.js")),
     (
+        "js/compile-typst.js",
+        include_bytes!("../static/js/compile-typst.js"),
+    ),
+    (
         "js/context-index.js",
         include_bytes!("../static/js/context-index.js"),
     ),
@@ -267,6 +271,14 @@ pub static FILES: &[(&str, &[u8])] = &[
     ("js/synctex.js", include_bytes!("../static/js/synctex.js")),
     ("js/tabs.js", include_bytes!("../static/js/tabs.js")),
     ("js/theme.js", include_bytes!("../static/js/theme.js")),
+    (
+        "js/typst-language.js",
+        include_bytes!("../static/js/typst-language.js"),
+    ),
+    (
+        "js/typst-worker.js",
+        include_bytes!("../static/js/typst-worker.js"),
+    ),
     ("js/zip.js", include_bytes!("../static/js/zip.js")),
     (
         "vendor/hunspell-asm.min.js",
@@ -307,6 +319,10 @@ pub static FILES: &[(&str, &[u8])] = &[
     (
         "vendor/neoleaf-mascot-agent.mjs",
         include_bytes!("../static/vendor/neoleaf-mascot-agent.mjs"),
+    ),
+    (
+        "vendor/typst-engine.min.js",
+        include_bytes!("../static/vendor/typst-engine.min.js"),
     ),
     ("vendor/yjs.mjs", include_bytes!("../static/vendor/yjs.mjs")),
 ];

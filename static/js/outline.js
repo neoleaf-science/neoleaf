@@ -9,6 +9,19 @@
   const CMD_CTX = /\\(startpart|startchapter|starttitle|startsection|startsubject|startsubsection|startsubsubject|startsubsubsection|startsubsubsubsection|startsubsubsubject|part|chapter|title|section|subject|subsection|subsubject|subsubsection|subsubsubsection|subsubsubject|component|product|project|environment|input|externalfigure)(?![A-Za-z@!?])/g;
   const isContextFile = (path, text) => /\.(mkiv|mkxl|mkvi)$/i.test(path) || /\\(?:starttext|startcomponent|startproduct|startproject|startenvironment)(?![A-Za-z])/.test(text || '');
 
+  // ---- Typst (.typ)
+  const isTypstPath = path => /\.typ$/i.test(String(path || ''));
+  // a path written in a Typst file: relative to that file, or to the project root when it starts with "/"
+  function resolveTypst(name, fromPath, files) {
+    const parts = name.startsWith('/') ? [] : fromPath.split('/').slice(0, -1);
+    for (const seg of name.replace(/^\/+/, '').split('/')) {
+      if (seg === '..') parts.pop();
+      else if (seg && seg !== '.') parts.push(seg);
+    }
+    const p = parts.join('/');
+    return Object.prototype.hasOwnProperty.call(files, p) ? p : null;
+  }
+
   // value of a key inside [key=value, ...]: title={Text, with comma} or title=Text
   function optValue(opts, key) {
     const m = new RegExp('(?:^|,)\\s*' + key + '\\s*=\\s*').exec(opts);
@@ -77,6 +90,44 @@
       const src = sections(path);
       const out = [];
       const lineAt = idx => { let n = 1; for (let k = src.indexOf('\n'); k !== -1 && k < idx; k = src.indexOf('\n', k + 1)) n++; return n; };
+      if (isTypstPath(path)) {
+        // Typst: headings are "= Title", "== Subtitle"...; #include "file.typ" brings in another file; #image("file") is an image
+        const lines = String(files[path] || '').split('\n');
+        let raw = false;
+        let block = 0;
+        for (let i = 0; i < lines.length; i++) {
+          let l = lines[i];
+          if (/^\s*`{3,}/.test(l)) { raw = !raw; continue; }
+          if (raw) continue;
+          // block comments /* ... */ (may nest) and // comments
+          let kept = '';
+          for (let k = 0; k < l.length; k++) {
+            if (l.startsWith('/*', k)) { block++; k++; continue; }
+            if (block && l.startsWith('*/', k)) { block--; k++; continue; }
+            if (block) continue;
+            if (l.startsWith('//', k) && l[k - 1] !== ':') break;
+            kept += l[k];
+          }
+          l = kept;
+          const h = /^\s*(=+)\s+(.*?)\s*$/.exec(l);
+          if (h) {
+            const title = h[2].replace(/\s*<[^>]+>\s*$/, '').replace(/[*_`]/g, '').trim();
+            if (title) out.push({ level: h[1].length, title, path, line: i + 1 });
+          }
+          const inc = /#include\s*\(?\s*"([^"]+)"/.exec(l);
+          if (inc) {
+            const target = resolveTypst(inc[1], path, files);
+            if (target && target !== path) out.push({ include: target, at: i });
+          }
+          const img = withImages && /#image\s*\(\s*"([^"]+)"/.exec(l);
+          if (img) out.push({ kind: 'image', level: 99, title: img[1], path, line: i + 1 });
+        }
+        for (const it of out) {
+          if (it.include) walk(it.include, [...stack, path]);
+          else items.push(it);
+        }
+        return;
+      }
       const ctxFile = inheritCtx || isContextFile(path, src);   // what a ConTeXt file includes is also ConTeXt
       if (ctxFile) {
         CMD_CTX.lastIndex = 0;
@@ -159,7 +210,7 @@
     if (mainPath && files[mainPath] !== undefined) walk(mainPath, []);
     const orphans = [];
     for (const path of Object.keys(files).sort()) {
-      if (!withOrphans || visited.has(path) || !/\.(tex|mkiv|mkxl|mkvi)$/i.test(path) || path.startsWith('.neoleaf/')) continue;
+      if (!withOrphans || visited.has(path) || !/\.(tex|mkiv|mkxl|mkvi|typ)$/i.test(path) || path.startsWith('.neoleaf/')) continue;
       const sub = parse(files, path, false, withImages).items.filter(i => i.path === path);
       if (sub.length) orphans.push({ path, items: sub });
     }

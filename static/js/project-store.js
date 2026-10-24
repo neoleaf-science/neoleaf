@@ -20,8 +20,8 @@
   const enc = new TextEncoder();
   const dec = new TextDecoder();
 
-  const TEXT_EXT = ['tex', 'bib', 'sty', 'cls', 'clo', 'bst', 'txt', 'cfg', 'def', 'ldf', 'fd', 'bbx', 'cbx', 'lbx', 'md', 'markdown', 'mmd', 'mermaid', 'dbx', 'ins', 'dtx', 'ist', 'bbl', 'csv', 'tsv', 'py', 'json', 'sto', 'ltx', 'rtx', 'mkiv', 'mkxl', 'mkvi'];
-  const ASSET_EXT = ['png', 'jpg', 'jpeg', 'pdf', 'eps', 'otf', 'ttf', 'ttc', 'pfb', 'pfa', 'afm', 'tfm', 'vf', 'woff', 'woff2'];
+  const TEXT_EXT = ['tex', 'bib', 'sty', 'cls', 'clo', 'bst', 'txt', 'cfg', 'def', 'ldf', 'fd', 'bbx', 'cbx', 'lbx', 'md', 'markdown', 'mmd', 'mermaid', 'dbx', 'ins', 'dtx', 'ist', 'bbl', 'csv', 'tsv', 'py', 'json', 'sto', 'ltx', 'rtx', 'mkiv', 'mkxl', 'mkvi', 'typ', 'yaml', 'yml', 'toml', 'xml'];
+  const ASSET_EXT = ['png', 'jpg', 'jpeg', 'svg', 'gif', 'webp', 'pdf', 'eps', 'otf', 'ttf', 'ttc', 'pfb', 'pfa', 'afm', 'tfm', 'vf', 'woff', 'woff2'];
   const MAX_FILES = 300, MAX_TEXT = 1024 * 1024, MAX_ASSET = 15 * 1024 * 1024;
   const MAX_MILESTONE = 3 * 1024 * 1024, MAX_HISTORY = 2000, MAX_PDF = 9 * 1024 * 1024;
   const MAX_THREADS = 500, MAX_COMMENT_TEXT = 4000;
@@ -96,9 +96,9 @@
   const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (_) { return d; } };
   const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
 
-  const validEngine = e => /^wasm-(texlive|xelatex|lualatex)$/.test(e) || /^agent-[a-z]{1,24}$/.test(e);
+  const validEngine = e => /^wasm-(texlive|xelatex|lualatex|typst)$/.test(e) || /^agent-[a-z]{1,24}$/.test(e);
   function validMainFile(n) {
-    return typeof n === 'string' && n.length > 0 && n.length <= 200 && /\.(tex|mkiv|mkxl)$/.test(n) && !n.includes('\\') && !n.startsWith('/')
+    return typeof n === 'string' && n.length > 0 && n.length <= 200 && /\.(tex|mkiv|mkxl|typ)$/.test(n) && !n.includes('\\') && !n.startsWith('/')
       && n.split('/').every(s => s && s !== '..' && !s.startsWith('.'));
   }
   // the dictionaries of the spell check (spellcheck-dicts.js has the same list)
@@ -116,7 +116,7 @@
 
   async function saveConfig(p) {
     if (!validEngine(p.engine)) throw new Error('Invalid compilation engine');
-    if (!validMainFile(p.mainFile)) throw new Error('Invalid main file (use a .tex, .mkiv or .mkxl file)');
+    if (!validMainFile(p.mainFile)) throw new Error('Invalid main file (use a .tex, .mkiv, .mkxl or .typ file)');
     const cfg = {
       version: 1, mainFile: p.mainFile, engine: p.engine, autoInstall: p.autoInstall !== false,
       autoSync: !!p.autoSync, autoSyncInterval: Math.max(1, Math.min(1440, parseInt(p.autoSyncInterval, 10) || 5)),
@@ -322,7 +322,7 @@
 
     config: {
       /** { config, texFiles } */
-      async get() { await git(); return { config: await loadConfig(), texFiles: (await projectFiles()).map(f => f.path).filter(p => /\.(tex|mkiv|mkxl)$/.test(p)) }; },
+      async get() { await git(); return { config: await loadConfig(), texFiles: (await projectFiles()).map(f => f.path).filter(p => /\.(tex|mkiv|mkxl|typ)$/.test(p)) }; },
       async save(p) { await git(); return saveConfig(p); },
     },
 

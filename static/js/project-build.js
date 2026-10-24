@@ -25,12 +25,14 @@ async function assetBytes(a) {
   return assetCache.get(key);
 }
 
-// Picks the main .tex: the configured one, if it exists; otherwise the open one (if .tex) or the first root .tex.
+// Picks the main file: the configured one, if it exists; otherwise the open one or the first root file of the kind the engine compiles
+// (.typ for Typst, .tex for the others).
 function pickMainFile(files, activeName) {
   let main = projectConfig.mainFile;
   if (!files.has(main)) {
-    const tex = [...files.keys()].filter(k => k.endsWith('.tex') && !k.includes('/'));
-    main = (activeName && activeName.endsWith('.tex') && activeName) || tex[0] || main;
+    const ext = projectConfig.engine === 'wasm-typst' ? '.typ' : '.tex';
+    const roots = [...files.keys()].filter(k => k.endsWith(ext) && !k.includes('/'));
+    main = (activeName && activeName.endsWith(ext) && activeName) || roots[0] || main;
   }
   return main;
 }

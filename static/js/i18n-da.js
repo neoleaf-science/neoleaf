@@ -1728,4 +1728,11 @@
   "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Stavekontrollen har brug for ordbogen {0} ({1}). Din browser henter den fra GitHub og gemmer den på denne enhed; NeoLeafs server gemmer den ikke.",
   "Not now": "Ikke nu",
   "Downloading the {0} dictionary...": "Henter ordbogen {0}...",
+  "⚡ Browser (Typst / WebAssembly)": "⚡ Browser (Typst / WebAssembly)",
+  "Compiled successfully (Typst WebAssembly)": "Kompileret uden fejl (Typst WebAssembly)",
+  "Error running the Typst WebAssembly compiler: {0}": "Fejl ved kørsel af Typst WebAssembly-compileren: {0}",
+  "Typst Article": "Typst-artikel",
+  "This project has no Typst file (.typ).": "Dette projekt har ingen Typst-fil (.typ).",
+  "Compiling with Typst (WebAssembly)...": "Kompilerer med Typst (WebAssembly)...",
+  "The Typst compiler could not be loaded: {0}": "Typst-kompilatoren kunne ikke indlæses: {0}",
 };

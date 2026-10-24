@@ -25,6 +25,9 @@ static/texlive/texmf-core-xelatex.tar.gz
 static/texlive/lualatex/
 static/texlive/texmf-core-lualatex.tar.gz
 
+# gerados por scripts/fetch_typst_assets.py (mise run typst)
+static/typst/
+
 __pycache__/
 *.pyc
 blocked.json

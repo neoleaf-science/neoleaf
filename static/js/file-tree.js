@@ -160,7 +160,7 @@
         const isText = !f.is_folder && (
           f.name.endsWith('.tex') || f.name.endsWith('.mkiv') || f.name.endsWith('.mkxl') || f.name.endsWith('.bib') || f.name.endsWith('.cls') ||
           f.name.endsWith('.sty') || f.name.endsWith('.txt') || f.name.endsWith('.md') || f.name.endsWith('.markdown') || f.name.endsWith('.mmd') || f.name.endsWith('.mermaid') || f.name.endsWith('.csv') || f.name.endsWith('.tsv') || f.name.endsWith('.py') ||
-          f.name.endsWith('.json') || f.name.endsWith('.bst')
+          f.name.endsWith('.json') || f.name.endsWith('.bst') || /\.(typ|yaml|yml|toml|xml)$/i.test(f.name)
         );
         return {
           id: f.path,

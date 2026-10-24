@@ -2,6 +2,7 @@
 pub(super) fn script_tags() -> &'static str {
     r##"    <!-- Frontend Script -->
     <script src="/static/js/context-language.js"></script>
+    <script src="/static/js/typst-language.js"></script>
     <script src="/static/js/latex-language.js"></script>
     <script src="/static/js/autocomplete.js"></script>
     <script src="/static/js/synctex.js"></script>
@@ -24,6 +25,7 @@ pub(super) fn script_tags() -> &'static str {
     <script src="/static/js/package-install.js"></script>
     <script src="/static/js/compile-xelatex.js"></script>
     <script src="/static/js/compile-lualatex.js"></script>
+    <script src="/static/js/compile-typst.js"></script>
     <script src="/static/js/pdf-panel.js"></script>
     <script src="/static/js/editor-ui.js"></script>
     <script src="/static/js/share.js"></script>

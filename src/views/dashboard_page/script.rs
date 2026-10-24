@@ -333,7 +333,7 @@ pub(super) fn actions_script() -> &'static str {
             const box = document.getElementById('tpl-gallery');
             if (!box || galleryLoaded) return;
             box.innerHTML = '';
-            [['article', 'Scientific Article (Default)'], ['report', 'Technical Report'], ['beamer', 'Slide Presentation (Beamer)']].forEach(([k, n]) => box.appendChild(tplCard(k, tr(n), '', '', '', '')));
+            [['article', 'Scientific Article (Default)'], ['report', 'Technical Report'], ['beamer', 'Slide Presentation (Beamer)'], ['typst', 'Typst Article']].forEach(([k, n]) => box.appendChild(tplCard(k, tr(n), '', '', '', '')));
             pickTemplate(document.getElementById('proj-template').value || 'article');
             // catalog templates come from GitHub repositories: with a Codeberg session they are not offered
             if ((document.getElementById('new-project-modal').dataset.provider || '') === 'codeberg') {

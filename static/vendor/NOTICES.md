@@ -49,6 +49,21 @@ listed in `static/js/spellcheck-dicts.js` and keeps the file in its own storage.
 - Italiano (`it-IT`): GPL 3. Authors: LibreItalia (Marina Latini) and other authors. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/it_IT/README_it_IT.txt>
 - Deutsch (`de-DE`): GPL 2 or 3. Authors: the igerman98 and frami authors. README: <https://github.com/LibreOffice/dictionaries/blob/67032ee957631908098a72edf48dc81cac27e369/de/README_de_DE_frami.txt>
 
+## Typst (`typst-engine.min.js`, `static/typst/`)
+`typst-engine.min.js` is a bundle (built by `scripts/build_typst_vendor.sh`) of **typst.ts** 0.7.0 (`@myriaddreamin/typst.ts`): Copyright the typst.ts authors (Myriad-Dreamin and
+contributors), Apache License 2.0. Source: <https://github.com/Myriad-Dreamin/typst.ts>. The compiler itself, `typst_ts_web_compiler_bg.wasm` (npm package
+`@myriaddreamin/typst-ts-web-compiler` 0.7.0), is the **Typst** compiler (Copyright the Typst contributors, Apache License 2.0, <https://github.com/typst/typst>)
+compiled to WebAssembly; it is not in the repository: `scripts/fetch_typst_assets.py` downloads it (and checks the npm integrity hash) into `static/typst/`.
+
+The fonts Typst ships with come from **typst-assets** v0.15.1 (<https://github.com/typst/typst-assets>, Apache License 2.0 for the crate; each font keeps its own license,
+see its `NOTICE`). They are downloaded by the same script into `static/typst/fonts/` (all but `NewCM10-Regular`, see below), not committed:
+- **Libertinus Serif**: Copyright 2012-2024 The Libertinus Project Authors, SIL Open Font License 1.1, with Reserved Font Names ("Linux Libertine", "Biolinum", "STIX Fonts").
+- **New Computer Modern**: `NewCM10-Regular` under the GNU GPL 3 or later with the Font Exception and the Distribution Exception (Section 7 of the GPL 3; these let documents that embed the font be distributed under any license); the other NewCM10 and NewCMMath files under the GUST Font License 1.0 (LPPL 1.3c or later). Source: <https://ctan.org/pkg/newcomputermodern>. **NeoLeaf does not serve `NewCM10-Regular`**: the browser downloads it from typst-assets v0.15.1 (raw.githubusercontent.com, jsDelivr as a mirror), checks the SHA-256 pinned in `static/js/typst-worker.js` and keeps it in its own storage.
+- **DejaVu Sans Mono**: fonts (c) Bitstream, Inc. (Bitstream Vera) and Tavmjong Bah (Arev), changes in the public domain; the Bitstream Vera license.
+The full texts are in <https://github.com/typst/typst-assets/blob/v0.15.1/NOTICE>.
+
+The Typst packages a document imports (`@preview/...`) are downloaded by the browser from packages.typst.org, each with the license its author chose.
+
 ## The MIT License (applies to every project above marked MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation

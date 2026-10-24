@@ -19,6 +19,7 @@ Rust dependency lists, is served at `/licenses`.
 | `papaparse.min.js` | PapaParse 5.7.0 | MIT |
 | `katex/` | KaTeX 0.18.10 and its fonts | MIT |
 | `hunspell-asm.min.js` | hunspell-asm 4.0.2 (with Hunspell, emscripten-wasm-loader, nanoid, tslib; the dictionaries are not in the repository) | MIT; Hunspell under the MPL 1.1 option of its MPL/GPL/LGPL license; tslib 0BSD |
+| `typst-engine.min.js` | typst.ts 0.7.0 (the Typst compiler in WebAssembly and its fonts are downloaded by `scripts/fetch_typst_assets.py` and are not in the repository) | Apache-2.0; fonts: OFL-1.1 (Libertinus Serif), GUST Font License (New Computer Modern; NewCM10-Regular, GPL 3+ with Font Exception, is downloaded by the browser from upstream and not served by NeoLeaf), Bitstream Vera (DejaVu Sans Mono) |
 | `neoleaf-mascot.mjs` | clippyjs (fork) | MIT |
 
 Copyright lines and the MIT text are in [`static/vendor/NOTICES.md`](static/vendor/NOTICES.md). Monaco Editor 0.45.0 (MIT) and pdf.js 3.11.174

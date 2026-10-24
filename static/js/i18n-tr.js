@@ -1728,4 +1728,11 @@
   "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Yazım denetimi {0} sözlüğüne ({1}) ihtiyaç duyuyor. Tarayıcınız onu GitHub'dan indirir ve bu cihazda saklar; NeoLeaf sunucusu onu saklamaz.",
   "Not now": "Şimdi değil",
   "Downloading the {0} dictionary...": "{0} sözlüğü indiriliyor...",
+  "⚡ Browser (Typst / WebAssembly)": "⚡ Tarayıcı (Typst / WebAssembly)",
+  "Compiled successfully (Typst WebAssembly)": "Başarıyla derlendi (Typst WebAssembly)",
+  "Error running the Typst WebAssembly compiler: {0}": "Typst WebAssembly derleyicisi çalıştırılırken hata: {0}",
+  "Typst Article": "Typst Makalesi",
+  "This project has no Typst file (.typ).": "Bu projede Typst dosyası (.typ) yok.",
+  "Compiling with Typst (WebAssembly)...": "Typst (WebAssembly) ile derleniyor...",
+  "The Typst compiler could not be loaded: {0}": "Typst derleyicisi yüklenemedi: {0}",
 };

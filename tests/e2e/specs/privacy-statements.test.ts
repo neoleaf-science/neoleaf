@@ -17,7 +17,7 @@ describe('privacy policy: local copy, direct requests, sign out, encrypted sessi
     expect(t).toContain('use a separate browser profile or a private window');
     expect(t).toContain('Storage tab');
     expect(t).toContain('Services your browser contacts directly');
-    for (const name of ['Monaco', 'PDF.js', 'Green Web Foundation', 'Crossref', 'OpenAlex', 'PubMed', 'Europe PMC', 'DOAJ', 'HAL', 'Zenodo', 'OpenAIRE', 'Unpaywall', 'arXiv', 'DBLP', 'raw.githubusercontent.com', 'jsDelivr']) expect(t).toContain(name);
+    for (const name of ['Monaco', 'PDF.js', 'Green Web Foundation', 'Crossref', 'OpenAlex', 'PubMed', 'Europe PMC', 'DOAJ', 'HAL', 'Zenodo', 'OpenAIRE', 'Unpaywall', 'arXiv', 'DBLP', 'raw.githubusercontent.com', 'jsDelivr', 'packages.typst.org']) expect(t).toContain(name);
     expect(t).toContain('NeoLeaf does not send them your project files.');
     expect(t).toContain('deletes all NeoLeaf data stored in the browser');
     expect(t).toContain('the NeoLeaf data stored in your browser is deleted');

@@ -26,11 +26,12 @@ Run the executable **from the unpacked folder** (it reads `.env`, `site/` and `s
 
 Put it behind an HTTPS reverse proxy (Caddy or nginx). The pdfTeX engine works as soon as it starts. For the other engines and fonts, fetch the
 generated files from a clone of the repository at the same tag (they are large and not in the archive), then copy `static/texlive/` and
-`static/pyodide/` next to the executable:
+`static/pyodide/` and `static/typst/` next to the executable:
 
 ```bash
 mise run fonts bibtex biber xelatex lualatex     # TeX Live fonts, BibTeX, Biber, XeLaTeX, LuaLaTeX (needs Python 3)
 python3 scripts/fetch_pyodide.py                 # optional: Python notebooks
+mise run typst                                   # optional: Typst projects (compiler and fonts into static/typst/, needs Python 3)
 mise run agent                                   # optional: the local agent binaries served at /download/agent (needs Docker and cargo-zigbuild)
 ```
 

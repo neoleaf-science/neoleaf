@@ -305,6 +305,163 @@
     return tokens;
   }
 
+  // Tokenize Typst text: prose only. Code after #, math, raw text, comments, labels and references are skipped. The [content] blocks that hang from a
+  // function call or sit inside its arguments (a caption, a figure body) are prose and are read too.
+  function tokenizeTypst(text) {
+    const tokens = [];
+    const len = text.length;
+    const starts = [0];
+    for (let i = 0; i < len; i++) if (text[i] === '\n') starts.push(i + 1);
+    const where = i => {
+      let lo = 0;
+      let hi = starts.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (starts[mid] <= i) lo = mid; else hi = mid - 1;
+      }
+      return { line: lo + 1, col: i - starts[lo] + 1 };
+    };
+
+    // index just after the string that starts at `from`
+    function stringEnd(from) {
+      let i = from + 1;
+      while (i < len && text[i] !== '"') { if (text[i] === '\\') i++; i++; }
+      return Math.min(len, i + 1);
+    }
+
+    // index just after the group that opens at `from` ( ( [ { ), skipping strings; len when it never closes
+    function groupEnd(from) {
+      const open = text[from];
+      const close = open === '(' ? ')' : open === '[' ? ']' : '}';
+      let depth = 0;
+      for (let i = from; i < len; i++) {
+        const c = text[i];
+        if (c === '"') i = stringEnd(i) - 1;
+        else if (c === open) depth++;
+        else if (c === close && --depth === 0) return i + 1;
+      }
+      return len;
+    }
+
+    // the [content] blocks inside the code group [from, end): [start, end) of their text
+    function contentBlocks(from, end) {
+      const blocks = [];
+      for (let i = from + 1; i < end - 1; i++) {
+        const c = text[i];
+        if (c === '"') i = stringEnd(i) - 1;
+        else if (c === '[') {
+          const close = groupEnd(i);
+          blocks.push([i + 1, close - 1]);
+          i = close - 1;
+        }
+      }
+      return blocks;
+    }
+
+    function scan(from, to) {
+      let pos = from;
+      // skips a code group, reading the prose blocks inside it
+      const skipGroup = () => {
+        const end = groupEnd(pos);
+        for (const blk of contentBlocks(pos, end)) scan(blk[0], blk[1]);
+        pos = end;
+      };
+      while (pos < to) {
+        const c = text[pos];
+
+        if (c === '\\') { pos += 2; continue; }
+
+        // comments
+        if (text.startsWith('//', pos)) {
+          while (pos < to && text[pos] !== '\n') pos++;
+          continue;
+        }
+        if (text.startsWith('/*', pos)) {
+          let depth = 0;
+          do {
+            if (text.startsWith('/*', pos)) { depth++; pos += 2; }
+            else if (text.startsWith('*/', pos)) { depth--; pos += 2; }
+            else pos++;
+          } while (pos < to && depth > 0);
+          continue;
+        }
+
+        // raw text
+        if (c === '`') {
+          const fence = /^`+/.exec(text.slice(pos, pos + 10))[0];
+          const end = text.indexOf(fence, pos + fence.length);
+          pos = end === -1 ? to : end + fence.length;
+          continue;
+        }
+
+        // math
+        if (c === '$') {
+          pos++;
+          while (pos < to && text[pos] !== '$') { if (text[pos] === '\\') pos++; pos++; }
+          pos++;
+          continue;
+        }
+
+        // labels and references
+        if (c === '<' && /^<[A-Za-z_][\w.:-]*>/.test(text.slice(pos, pos + 80))) { pos = text.indexOf('>', pos) + 1; continue; }
+        if (c === '@' && /[A-Za-z_]/.test(text[pos + 1] || '')) {
+          pos++;
+          while (pos < to && /[\w.:-]/.test(text[pos])) pos++;
+          continue;
+        }
+
+        // code mode
+        if (c === '#') {
+          pos++;
+          if (text[pos] === '(' || text[pos] === '{') { skipGroup(); continue; }
+          const word = /^[A-Za-z_][\w-]*/.exec(text.slice(pos, pos + 80));
+          if (!word) continue;
+          pos += word[0].length;
+          if (/^(?:let|set|show|import|include|if|else|for|while|break|continue|return|context)$/.test(word[0])) {
+            // a statement: up to the end of the line, or of the brackets it opens
+            while (pos < to && text[pos] !== '\n') {
+              if (text[pos] === '(' || text[pos] === '{' || text[pos] === '[') skipGroup();
+              else if (text[pos] === '"') pos = stringEnd(pos);
+              else pos++;
+            }
+            continue;
+          }
+          // a call or a field: .name(...) and (...) are code; a [content] argument is prose and is read as such
+          while (pos < to) {
+            if (text[pos] === '(') skipGroup();
+            else if (text[pos] === '.' && /[A-Za-z_]/.test(text[pos + 1] || '')) { pos++; while (pos < to && /[\w-]/.test(text[pos])) pos++; }
+            else break;
+          }
+          continue;
+        }
+
+        // URLs
+        if (text.startsWith('http://', pos) || text.startsWith('https://', pos)) {
+          while (pos < to && !/\s/.test(text[pos])) pos++;
+          continue;
+        }
+
+        if (/\p{L}/u.test(c)) {
+          const start = pos;
+          let word = '';
+          while (pos < to && /[\p{L}\-']/u.test(text[pos])) { word += text[pos]; pos++; }
+          while (word.endsWith('-') || word.endsWith("'")) word = word.slice(0, -1);
+          if (word.length > 1 && !/^[A-Z]{2,5}$/.test(word)) {
+            const at = where(start);
+            tokens.push({ word: word, line: at.line, startCol: at.col, endCol: at.col + word.length });
+          }
+          continue;
+        }
+
+        pos++;
+      }
+    }
+
+    scan(0, len);
+    tokens.sort((x, y) => x.line - y.line || x.startCol - y.startCol);
+    return tokens;
+  }
+
   // ------------------------------------------------------------------ language
 
   // The dictionaries NeoLeaf can use (spellcheck-dicts.js, pinned to a commit). The browser downloads one only when a document needs it.
@@ -369,6 +526,24 @@
     return undefined;
   }
 
+  // Language named by `#set text(lang: "pt", region: "PT")` in a Typst document. undefined: not stated.
+  function languageFromTypst(content) {
+    const head = String(content || '').slice(0, 6000);
+    const set = /#set\s+text\s*\(([^)]*)\)/.exec(head);
+    const lang = set && /\blang\s*:\s*"([A-Za-z]{2,3})"/.exec(set[1]);
+    if (!lang) return undefined;
+    const region = set && /\bregion\s*:\s*"([A-Za-z]{2})"/.exec(set[1]);
+    const l = lang[1].toLowerCase();
+    const r = region ? region[1].toUpperCase() : '';
+    const pick = id => (SUPPORTED.indexOf(id) !== -1 ? id : null);
+    if (l === 'pt') return pick(r === 'PT' ? 'pt-PT' : 'pt-BR');
+    if (l === 'en') return pick(['GB', 'AU', 'NZ', 'IE', 'ZA', 'IN'].indexOf(r) !== -1 ? 'en-GB' : 'en-US');
+    const direct = { es: 'es-ES', fr: 'fr-FR', it: 'it-IT', de: 'de-DE' }[l];
+    if (direct) return pick(direct);
+    if (['sv', 'da', 'nb', 'nn', 'no', 'nl', 'cs', 'sk', 'pl', 'ru', 'tr', 'fi', 'el', 'la', 'hu', 'ro', 'hr', 'sr', 'bg', 'uk', 'eo', 'is', 'et', 'lt', 'lv', 'ca', 'gl'].indexOf(l) !== -1) return null;
+    return undefined;
+  }
+
   // Frequent words of each language, used when the document does not say which language it is in. The keys that are not a dictionary ('other:...')
   // are languages we recognise only to leave them alone.
   const STOPWORDS = {
@@ -428,6 +603,8 @@
     if (SUPPORTED.indexOf(configured) !== -1) return configured;
     const fromPreamble = languageFromPreamble(content);
     if (fromPreamble !== undefined) return fromPreamble;
+    const fromTypst = languageFromTypst(content);
+    if (fromTypst !== undefined) return fromTypst;
     const fromWords = languageFromWords(tokens);
     if (fromWords !== undefined) return fromWords;
     return ui;
@@ -691,13 +868,13 @@
     const model = editor.getModel();
     if (!model) return;
     const langId = model.getLanguageId();
-    if ((langId !== 'latex' && langId !== 'markdown') || !enabled) {
+    if ((langId !== 'latex' && langId !== 'markdown' && langId !== 'typst') || !enabled) {
       monaco.editor.setModelMarkers(model, 'spellcheck', []);
       return;
     }
 
     const text = editor.getValue();
-    const tokens = (langId === 'markdown') ? tokenizeMarkdown(text) : tokenizeLatex(text);
+    const tokens = langId === 'markdown' ? tokenizeMarkdown(text) : langId === 'typst' ? tokenizeTypst(text) : tokenizeLatex(text);
     const target = chooseLanguage(text, tokens, configuredLang, uiLanguage());
     lastLang = target;
     if (!target) {
@@ -819,6 +996,7 @@
 
     monaco.languages.registerCodeActionProvider('latex', provider);
     monaco.languages.registerCodeActionProvider('markdown', provider);
+    monaco.languages.registerCodeActionProvider('typst', provider);
   }
 
   async function loadConfig() {
@@ -872,7 +1050,7 @@
     ignoreWord: ignoreWord,
     // Dictionary chosen for a text ('pt-BR', 'en-US' or null when there is none), as the editor would choose it; used by the tests.
     detectLanguage: function (text, kind, configured, uiCode) {
-      const tokens = kind === 'markdown' ? tokenizeMarkdown(text) : tokenizeLatex(text);
+      const tokens = kind === 'markdown' ? tokenizeMarkdown(text) : kind === 'typst' ? tokenizeTypst(text) : tokenizeLatex(text);
       return chooseLanguage(text, tokens, configured || 'auto', dictionaryForUi(uiCode));
     },
     getEnabled: function () { return enabled; },

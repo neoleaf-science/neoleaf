@@ -13,7 +13,7 @@ describe('licenses page', () => {
     const res = await s.page.goto(BASE_URL + '/licenses');
     expect(res!.status()).toBe(200);
     const t = (await s.page.locator('.legal-container').innerText()).replace(/\s+/g, ' ');
-    for (const w of ['MIT License', 'Apache License 2.0', 'CC BY-NC-ND 4.0', 'pdfTeX', 'LuaTeX', 'xdvipdfmx', 'GPL', 'texlive-source', 'v0.2.4-alpha', 'URW base 35', 'DOMPurify', 'Pyodide', 'Hunspell', 'VERO']) expect(t).toContain(w);
+    for (const w of ['MIT License', 'Apache License 2.0', 'CC BY-NC-ND 4.0', 'pdfTeX', 'LuaTeX', 'xdvipdfmx', 'GPL', 'texlive-source', 'v0.2.4-alpha', 'URW base 35', 'DOMPurify', 'Pyodide', 'Hunspell', 'VERO', 'typst.ts', 'Libertinus']) expect(t).toContain(w);
     expect(external).toEqual([]);
   });
 

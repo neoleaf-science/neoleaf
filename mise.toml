@@ -136,6 +136,11 @@ description = "Download XeLaTeX and xdvipdfmx in WebAssembly and the texmf-core-
 outputs = ["static/texlive/xelatex/emscripten/xelatex.wasm", "static/texlive/xdvipdfmx/emscripten/xdvipdfmx.wasm", "static/texlive/texmf-core-xelatex.tar.gz"]
 run = "python3 scripts/fetch_xelatex_assets.py"
 
+[tasks.typst]
+description = "Download the Typst compiler in WebAssembly and the fonts Typst ships with (static/typst/), verified"
+outputs = ["static/typst/typst_ts_web_compiler_bg.wasm", "static/typst/manifest.json"]
+run = "python3 scripts/fetch_typst_assets.py"
+
 [tasks.lualatex]
 description = "Download LuaLaTeX in WebAssembly and the texmf-core-lualatex package"
 outputs = ["static/texlive/lualatex/emscripten/lualatex.wasm", "static/texlive/texmf-core-lualatex.tar.gz"]

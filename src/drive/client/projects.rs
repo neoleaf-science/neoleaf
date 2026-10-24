@@ -164,6 +164,26 @@ impl DriveClient {
 
     /// Initial files of a project created from scratch (the browser writes them, commits and pushes).
     pub fn template_files(name: &str, template: Option<&str>) -> Vec<(String, String)> {
+        if template == Some("typst") {
+            return vec![
+                (
+                    "main.typ".to_string(),
+                    include_str!("../../templates/typst-article.typ").to_string(),
+                ),
+                (
+                    "refs.bib".to_string(),
+                    include_str!("../../templates/typst-refs.bib").to_string(),
+                ),
+                (".gitignore".to_string(), ".neoleaf/last.*\n".to_string()),
+                (
+                    "README.md".to_string(),
+                    format!(
+                        "# {}\n\nTypst project created with [NeoLeaf](https://neoleaf.science).\n",
+                        name
+                    ),
+                ),
+            ];
+        }
         let main = match template {
             Some("beamer") => include_str!("../../templates/beamer.tex"),
             Some("report") => include_str!("../../templates/report.tex"),

@@ -119,7 +119,7 @@ describe('templates with a Codeberg session', () => {
     await page.evaluate(() => (window as any).openNewProjectModal());
     await page.waitForSelector('#tpl-gallery .tpl-meta');
     expect(await page.locator('#tpl-gallery').innerText()).toContain(SENTENCE);
-    expect(await page.locator('#tpl-gallery .tpl-card').count()).toBe(3); // only the built-in ones
+    expect(await page.locator('#tpl-gallery .tpl-card').count()).toBe(4); // only the built-in ones
     await ctx.close();
   });
 

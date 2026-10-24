@@ -153,6 +153,7 @@ const ENGINE_LABELS = {
   'wasm-texlive': '⚡ Browser (pdfLaTeX)',
   'wasm-xelatex': '⚡ Browser (XeLaTeX / WebAssembly)',
   'wasm-lualatex': '⚡ Browser (LuaLaTeX / WebAssembly)',
+  'wasm-typst': '⚡ Browser (Typst / WebAssembly)',
   'server-tectonic': '🖥️ Server (Tectonic)',
   'server-tinytex': '🖥️ Server (TinyTeX / TeX Live)'
 };
@@ -162,7 +163,7 @@ async function loadEngines() {
   const sel = document.getElementById('engine-select');
   if (!sel) return;
   // the browser engines (the local agent adds its own); nothing is compiled on the server
-  const ids = ['wasm-texlive', 'wasm-xelatex', 'wasm-lualatex'];
+  const ids = ['wasm-texlive', 'wasm-xelatex', 'wasm-lualatex', 'wasm-typst'];
   sel.textContent = '';
   ids.forEach(id => { const o = document.createElement('option'); o.value = id; o.textContent = ENGINE_LABELS[id] || id; sel.appendChild(o); });
   sel.style.display = ids.length > 1 ? '' : 'none';
@@ -254,7 +255,13 @@ async function recompileLatex(ev) {
   const content = editor ? editor.getValue() : '';
 
   try {
-    if (selectedEngine.startsWith('agent-')) {
+    // a Typst project (its main file is .typ, or the Typst engine is chosen) compiles in the browser: the local agent has no Typst
+    const mainFile = String((projectConfig && projectConfig.mainFile) || '');
+    if (selectedEngine === 'wasm-typst' || /\.typ$/i.test(mainFile)) {
+      if (engineSelect && engineSelect.value !== 'wasm-typst' && engineSelect.querySelector('option[value="wasm-typst"]')) engineSelect.value = 'wasm-typst';
+      projectConfig.engine = 'wasm-typst';
+      await compileAndShowTypst();
+    } else if (selectedEngine.startsWith('agent-')) {
       await compileOnAgent(selectedEngine);
     } else if (selectedEngine === 'wasm-xelatex') {
       await compileAndShowXe();
@@ -288,12 +295,13 @@ function renderCompileResult(res) {
   // Clear previous editor markers
   if (editor && monaco) {
     const model = editor.getModel();
-    const markers = (res.diagnostics || []).map(diag => ({
+    // a message about another file (Typst reports the file) is not drawn on this one
+    const markers = (res.diagnostics || []).filter(diag => !diag.file || diag.file === currentFileId).map(diag => ({
       severity: diag.is_error ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
       startLineNumber: diag.line || 1,
-      startColumn: 1,
-      endLineNumber: diag.line || 1,
-      endColumn: 100,
+      startColumn: diag.column || 1,
+      endLineNumber: diag.endLine || diag.line || 1,
+      endColumn: diag.endLine ? (diag.endColumn || 100) : 100,
       message: diag.message
     }));
     monaco.editor.setModelMarkers(model, 'tinytex', markers);

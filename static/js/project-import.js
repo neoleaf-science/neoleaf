@@ -87,7 +87,8 @@
   async function startNew(name, template) {
     const data = await createRepo('/api/project/create', { name, template });
     const enc = new TextEncoder();
-    await Handoff.put(data.id, { files: (data.files || []).map(f => ({ path: f.path, bytes: enc.encode(f.text) })), message: 'feat: initialize LaTeX project via NeoLeaf', mainFile: 'main.tex', preinstall: false });
+    const typst = template === 'typst';
+    await Handoff.put(data.id, { files: (data.files || []).map(f => ({ path: f.path, bytes: enc.encode(f.text) })), message: typst ? 'feat: initialize Typst project via NeoLeaf' : 'feat: initialize LaTeX project via NeoLeaf', mainFile: typst ? 'main.typ' : 'main.tex', engine: typst ? 'wasm-typst' : '', preinstall: false });
     return data.id;
   }
 

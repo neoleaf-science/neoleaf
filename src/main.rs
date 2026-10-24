@@ -112,6 +112,8 @@ async fn run() {
         .route(serve_favicon_ico)
         .route(serve_pyodide)
         .route(serve_katex)
+        .route(serve_typst)
+        .route(serve_typst_font)
         .route(scholar_search)
         .route(serve_install_script)
         .route(serve_install_ps1)

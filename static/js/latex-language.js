@@ -12,6 +12,7 @@
     const ext = String(name || '').split('.').pop().toLowerCase();
     if (LATEX_EXT.includes(ext)) return 'latex';
     if (window.LDContext && LDContext.EXT.includes(ext)) return 'context';
+    if (window.LDTypst && LDTypst.EXT.includes(ext)) return 'typst';
     if (ext === 'bib') return 'bibtex';
     if (ext === 'md' || ext === 'markdown') return 'markdown';
     if (ext === 'mmd' || ext === 'mermaid') return 'mermaid';
@@ -375,6 +376,7 @@
     monaco.languages.register({ id: 'csv', extensions: ['.csv', '.tsv'], aliases: ['CSV', 'csv'] });
 
     if (window.LDContext) LDContext.register(monaco);   // ConTeXt: .mkiv, .mkxl, .mkvi
+    if (window.LDTypst) LDTypst.register(monaco);       // Typst: .typ
     monaco.languages.setMonarchTokensProvider('latex', latexMonarch);
     monaco.languages.setMonarchTokensProvider('bibtex', bibtexMonarch);
     monaco.languages.setMonarchTokensProvider('mermaid', mermaidMonarch);

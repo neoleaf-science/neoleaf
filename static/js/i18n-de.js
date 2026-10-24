@@ -1728,4 +1728,11 @@
   "Spell check needs the {0} dictionary ({1}). Your browser downloads it from GitHub and keeps it on this device; NeoLeaf's server does not store it.": "Die Rechtschreibprüfung braucht das Wörterbuch {0} ({1}). Ihr Browser lädt es von GitHub herunter und speichert es auf diesem Gerät; der NeoLeaf-Server speichert es nicht.",
   "Not now": "Jetzt nicht",
   "Downloading the {0} dictionary...": "Wörterbuch {0} wird heruntergeladen...",
+  "⚡ Browser (Typst / WebAssembly)": "⚡ Browser (Typst / WebAssembly)",
+  "Compiled successfully (Typst WebAssembly)": "Erfolgreich kompiliert (Typst WebAssembly)",
+  "Error running the Typst WebAssembly compiler: {0}": "Fehler beim Ausführen des Typst-WebAssembly-Compilers: {0}",
+  "Typst Article": "Typst-Artikel",
+  "This project has no Typst file (.typ).": "Dieses Projekt hat keine Typst-Datei (.typ).",
+  "Compiling with Typst (WebAssembly)...": "Kompilieren mit Typst (WebAssembly)...",
+  "The Typst compiler could not be loaded: {0}": "Der Typst-Compiler konnte nicht geladen werden: {0}",
 };

@@ -119,6 +119,7 @@ pub(super) fn project_tab_settings() -> &'static str {
                         <option value="wasm-texlive">⚡ Browser (pdfLaTeX)</option>
                         <option value="wasm-xelatex">⚡ Browser (XeLaTeX / WebAssembly)</option>
                         <option value="wasm-lualatex">⚡ Browser (LuaLaTeX / WebAssembly)</option>
+                        <option value="wasm-typst">⚡ Browser (Typst / WebAssembly)</option>
                     </select>
                     <div id="agent-hint" class="modal-hint"></div>
                 </div>

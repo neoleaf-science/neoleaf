@@ -22,6 +22,7 @@ pub(super) fn top_bar() -> &'static str {
                 <option value="wasm-texlive" selected>⚡ Browser (pdfLaTeX)</option>
                 <option value="wasm-xelatex">⚡ Browser (XeLaTeX / WebAssembly)</option>
                 <option value="wasm-lualatex">⚡ Browser (LuaLaTeX / WebAssembly)</option>
+                <option value="wasm-typst">⚡ Browser (Typst / WebAssembly)</option>
             </select>
             <button id="fast-btn" class="btn compile-icon" style="display:none" onclick="toggleFastMode()" title="Fast mode" aria-label="Fast mode"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></button>
             <button id="compile-btn" class="btn btn-primary compile-icon" onclick="recompileLatex(event)" title="Recompile document (Ctrl + Enter). Shift+click: clean build" aria-label="Recompile document (Ctrl + Enter)"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg></button>

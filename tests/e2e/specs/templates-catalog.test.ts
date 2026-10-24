@@ -86,7 +86,7 @@ describe('template catalog', () => {
     await admin.page.goto(`${BASE_URL}/`);
     await admin.page.evaluate(() => (window as any).openNewProjectModal());
     await admin.page.waitForSelector('#tpl-gallery .tpl-card[data-value="model:tcc-e2e"]');
-    expect(await admin.page.locator('#tpl-gallery .tpl-card').count()).toBe(4);
+    expect(await admin.page.locator('#tpl-gallery .tpl-card').count()).toBe(5);
     await admin.page.click('#tpl-gallery .tpl-card[data-value="model:tcc-e2e"]');
     expect(await admin.page.inputValue('#proj-template')).toBe('model:tcc-e2e');
     await admin.page.fill('#proj-name', 'e2e-from-template');

@@ -11,7 +11,7 @@ let historyDiffEditor = null;
 const revisionCache = {};
 let historyCurrent = null;
 let historyFile = null;   // file whose history is on screen (may differ from the one open in the editor)
-const HISTORY_TEXT_RE = /\.(tex|bib|sty|cls|clo|bst|txt|md|markdown|mmd|mermaid|cfg|def|json|csv|tsv|py|ltx|bbl|ldf|fd|dbx|ins|dtx|ist|bbx|cbx|lbx|sto|rtx)$/i;
+const HISTORY_TEXT_RE = /\.(tex|bib|sty|cls|clo|bst|txt|md|markdown|mmd|mermaid|cfg|def|json|csv|tsv|py|ltx|bbl|ldf|fd|dbx|ins|dtx|ist|bbx|cbx|lbx|sto|rtx|typ|yaml|yml|toml|xml)$/i;
 
 function fmtDate(iso) {
   return iso ? new Date(iso).toLocaleString(LDI18n.locale()) : '';

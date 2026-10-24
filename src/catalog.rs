@@ -12,7 +12,13 @@ const MAX_MODELS: usize = 200;
 /// ids that already exist as built-in templates
 const RESERVED: [&str; 3] = ["article", "report", "beamer"];
 const CATEGORIES: [&str; 6] = ["article", "thesis", "slides", "report", "poster", "other"];
-const ENGINES: [&str; 4] = ["", "wasm-texlive", "wasm-xelatex", "wasm-lualatex"];
+const ENGINES: [&str; 5] = [
+    "",
+    "wasm-texlive",
+    "wasm-xelatex",
+    "wasm-lualatex",
+    "wasm-typst",
+];
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Model {

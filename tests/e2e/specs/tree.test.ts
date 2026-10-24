@@ -40,6 +40,36 @@ describe('file tree operations', () => {
     expect(await editorValue(s.page)).toBe(before);
   });
 
+  test('the new file window offers the file types and keeps the extension in step with the name', async () => {
+    await s.page.evaluate(() => { (globalThis as any).FT.newFile(); });
+    await s.page.waitForSelector('#name-type', { state: 'visible' });
+    expect(await s.page.inputValue('#name-input')).toBe('new.tex');
+    expect(await s.page.inputValue('#name-type')).toBe('tex');
+    const values = await s.page.$$eval('#name-type option', os => os.map(o => (o as HTMLOptionElement).value));
+    expect(values).toEqual(expect.arrayContaining(['tex', 'bib', 'typ', 'md', 'py', '']));
+    await s.page.selectOption('#name-type', 'typ');
+    expect(await s.page.inputValue('#name-input')).toBe('new.typ');
+    await s.page.fill('#name-input', 'chapter.md');
+    expect(await s.page.inputValue('#name-type')).toBe('md');
+    await s.page.selectOption('#name-type', 'bib');
+    expect(await s.page.inputValue('#name-input')).toBe('chapter.bib');
+    await s.page.fill('#name-input', 'data.xyz');
+    expect(await s.page.inputValue('#name-type')).toBe('');
+    await s.page.selectOption('#name-type', '');
+    expect(await s.page.inputValue('#name-input')).toBe('data.xyz');
+    await s.page.fill('#name-input', 'notes.txt');
+    await s.page.click('#name-ok');
+    await openInTree(s.page, 'notes.txt');
+    expect(await currentFile(s.page)).toBe('notes.txt');
+  });
+
+  test('the type list is only in the new file window', async () => {
+    await menu(s.page, 'main.tex', 'Rename');
+    await s.page.waitForSelector('#name-input', { state: 'visible' });
+    expect(await s.page.isVisible('#name-type')).toBe(false);
+    await s.page.evaluate(() => { (globalThis as any).FT.nameCancel(); });
+  });
+
   test('renaming the open file keeps the text and does not recreate the old name', async () => {
     await menu(s.page, 'main.tex', 'Rename');
     await answerName(s.page, 'paper.tex');

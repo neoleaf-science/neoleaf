@@ -1735,4 +1735,9 @@
   "This project has no Typst file (.typ).": "Bu projede Typst dosyası (.typ) yok.",
   "Compiling with Typst (WebAssembly)...": "Typst (WebAssembly) ile derleniyor...",
   "The Typst compiler could not be loaded: {0}": "Typst derleyicisi yüklenemedi: {0}",
+  "File type": "Dosya türü",
+  "Plain text": "Düz metin",
+  "LaTeX package": "LaTeX paketi",
+  "LaTeX class": "LaTeX sınıfı",
+  "Other (any extension)": "Diğer (herhangi bir uzantı)",
 };

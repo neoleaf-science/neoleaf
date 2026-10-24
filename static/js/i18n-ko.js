@@ -1735,4 +1735,9 @@
   "This project has no Typst file (.typ).": "이 프로젝트에는 Typst 파일(.typ)이 없습니다.",
   "Compiling with Typst (WebAssembly)...": "Typst (WebAssembly)로 컴파일하는 중...",
   "The Typst compiler could not be loaded: {0}": "Typst 컴파일러를 불러오지 못했습니다: {0}",
+  "File type": "파일 형식",
+  "Plain text": "일반 텍스트",
+  "LaTeX package": "LaTeX 패키지",
+  "LaTeX class": "LaTeX 클래스",
+  "Other (any extension)": "기타(모든 확장자)",
 };

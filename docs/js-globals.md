@@ -508,7 +508,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `outputEntries` | function | compile-pdflatex.js |
 | `texmfCache` | variable | (only itself) |
 | `assetCache` | variable | (only itself) |
-| `projectConfig` | variable | agent.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, git-sync.js, package-install.js, pdf-panel.js, project-tools.js |
+| `projectConfig` | variable | agent.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-ops.js, git-sync.js, package-install.js, pdf-panel.js, project-tools.js |
 | `lastBuild` | variable | compile-pdflatex.js |
 | `forceCleanBuild` | variable | compile-pdflatex.js, pdf-panel.js |
 | `knownTexts` | variable | (only itself) |
@@ -623,8 +623,8 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | Name | Kind | Used by |
 |---|---|---|
 | `dictInfo` | function | (only itself) |
-| `sha256Hex` | function | (only itself) |
-| `verified` | function | (only itself) |
+| `sha256Hex` | function | typst-worker.js |
+| `verified` | function | typst-worker.js |
 | `fromCache` | function | (only itself) |
 | `download` | function | agent.js, file-tree-ops.js, mermaid-preview.js |
 | `toUtf8` | function | (only itself) |
@@ -693,6 +693,9 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
+| `sha256Hex` | function | spellcheck-worker.js |
+| `verified` | function | spellcheck-worker.js |
+| `externalFont` | function | (only itself) |
 | `prepare` | function | (only itself) |
 | `position` | function | autocomplete.js, context-language.js, csv-preview.js, git-review.js, latex-language.js, notebook.js, typst-language.js |
 | `compile` | function | py-runner.js |
@@ -700,6 +703,8 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `query` | variable | ref-sources.js |
 | `asset` | variable | (only itself) |
 | `PDF` | variable | (only itself) |
+| `EXTERNAL_FONT` | variable | (only itself) |
+| `FONT_CACHE` | variable | (only itself) |
 | `snippet` | variable | editor-toolbar.js |
 | `setup` | variable | context-language.js |
 | `queue` | variable | notebook-frame.js, project-store-texmf.js, spellcheck-worker.js |

@@ -1735,4 +1735,9 @@
   "This project has no Typst file (.typ).": "このプロジェクトには Typst ファイル (.typ) がありません。",
   "Compiling with Typst (WebAssembly)...": "Typst (WebAssembly) でコンパイルしています...",
   "The Typst compiler could not be loaded: {0}": "Typst コンパイラを読み込めませんでした: {0}",
+  "File type": "ファイルの種類",
+  "Plain text": "プレーンテキスト",
+  "LaTeX package": "LaTeX パッケージ",
+  "LaTeX class": "LaTeX クラス",
+  "Other (any extension)": "その他（任意の拡張子）",
 };

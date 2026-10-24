@@ -1735,4 +1735,9 @@
   "This project has no Typst file (.typ).": "Ce projet n'a aucun fichier Typst (.typ).",
   "Compiling with Typst (WebAssembly)...": "Compilation avec Typst (WebAssembly)...",
   "The Typst compiler could not be loaded: {0}": "Le compilateur Typst n'a pas pu être chargé : {0}",
+  "File type": "Type de fichier",
+  "Plain text": "Texte brut",
+  "LaTeX package": "Extension LaTeX",
+  "LaTeX class": "Classe LaTeX",
+  "Other (any extension)": "Autre (n'importe quelle extension)",
 };

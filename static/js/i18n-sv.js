@@ -1735,4 +1735,9 @@
   "This project has no Typst file (.typ).": "Projektet har ingen Typst-fil (.typ).",
   "Compiling with Typst (WebAssembly)...": "Kompilerar med Typst (WebAssembly)...",
   "The Typst compiler could not be loaded: {0}": "Typst-kompilatorn kunde inte läsas in: {0}",
+  "File type": "Filtyp",
+  "Plain text": "Oformaterad text",
+  "LaTeX package": "LaTeX-paket",
+  "LaTeX class": "LaTeX-klass",
+  "Other (any extension)": "Annat (valfri filändelse)",
 };

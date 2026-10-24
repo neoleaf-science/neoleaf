@@ -5,6 +5,10 @@ pub(super) fn name_modal() -> &'static str {
         <div class="modal-box" style="width: 400px;">
             <h3 id="name-title" style="color: var(--text-bright); margin-bottom: 14px;"></h3>
             <form onsubmit="FT.nameSubmit(event)">
+                <div id="name-type-row" style="display:none; margin-bottom: 10px;">
+                    <label for="name-type" class="modal-hint" style="display:block; margin-bottom: 4px;">File type</label>
+                    <select id="name-type" class="form-control"></select>
+                </div>
                 <input type="text" id="name-input" class="form-control" maxlength="120" autocomplete="off" required>
                 <div id="name-error" class="modal-error" style="display:none; margin-top: 10px;"></div>
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">

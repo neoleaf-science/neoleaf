@@ -33,7 +33,8 @@
   }
 
   async function newFile() {
-    const name = await ask('New file', 'new.tex', 'Create');
+    const typst = typeof projectConfig !== 'undefined' && projectConfig && projectConfig.engine === 'wasm-typst';
+    const name = await ask('New file', typst ? 'new.typ' : 'new.tex', 'Create', true);
     if (!name) return;
     try {
       if (window.BrowserGit && await BrowserGit.isCloned()) {

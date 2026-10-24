@@ -1807,4 +1807,9 @@
   "This project has no Typst file (.typ).": "此项目没有 Typst 文件 (.typ)。",
   "Compiling with Typst (WebAssembly)...": "正在使用 Typst (WebAssembly) 编译...",
   "The Typst compiler could not be loaded: {0}": "无法加载 Typst 编译器：{0}",
+  "File type": "文件类型",
+  "Plain text": "纯文本",
+  "LaTeX package": "LaTeX 宏包",
+  "LaTeX class": "LaTeX 文档类",
+  "Other (any extension)": "其他（任意扩展名）",
 };

@@ -109,13 +109,54 @@
 
   // ------------------------------------------------------------ name window
 
-  function ask(title, initial, okLabel) {
+  // The file types NeoLeaf opens and edits as text, offered when a file is created. Any other name can still be typed in the box.
+  const FILE_TYPES = [
+    ['tex', 'LaTeX'], ['bib', 'BibTeX'], ['typ', 'Typst'], ['md', 'Markdown'], ['py', 'Python'], ['mmd', 'Mermaid'], ['mkiv', 'ConTeXt'],
+    ['sty', 'LaTeX package'], ['cls', 'LaTeX class'], ['csv', 'CSV'], ['tsv', 'TSV'], ['json', 'JSON'], ['yaml', 'YAML'], ['toml', 'TOML'], ['xml', 'XML'], ['txt', 'Plain text']
+  ];
+
+  // Fills the "File type" list and keeps it and the name box in step: choosing a type changes the extension, typing an extension picks the type.
+  function setupTypeSelect(input, initial) {
+    const row = $('name-type-row');
+    const select = $('name-type');
+    row.style.display = 'block';
+    select.textContent = '';
+    for (const [e, label] of FILE_TYPES) {
+      const o = document.createElement('option');
+      o.value = e;
+      o.textContent = T(label) + ' (.' + e + ')';
+      select.appendChild(o);
+    }
+    const other = document.createElement('option');
+    other.value = '';
+    other.textContent = T('Other (any extension)');
+    select.appendChild(other);
+
+    const extOf = v => { const i = v.lastIndexOf('.'); return i > 0 ? v.slice(i + 1).toLowerCase() : ''; };
+    const sync = () => { const e = extOf(input.value); select.value = FILE_TYPES.some(t => t[0] === e) ? e : ''; };
+    sync();
+    select.onchange = function () {
+      if (!select.value) { input.focus(); return; }
+      const v = input.value;
+      const dot = v.lastIndexOf('.');
+      const base = dot > 0 ? v.slice(0, dot) : v;
+      input.value = (base || 'new') + '.' + select.value;
+      input.focus();
+      input.setSelectionRange(0, input.value.lastIndexOf('.'));
+    };
+    input.oninput = sync;
+  }
+
+  function ask(title, initial, okLabel, withTypes) {
     return new Promise(resolve => {
       state.nameResolve = resolve;
+      $('name-type-row').style.display = 'none';
+      $('name-input').oninput = null;
       $('name-title').textContent = title;
       $('name-ok').textContent = okLabel || 'OK';
       const input = $('name-input');
       input.value = initial || '';
+      if (withTypes) setupTypeSelect(input, initial);
       showNameError('');
       $('name-modal').style.display = 'flex';
       input.focus();

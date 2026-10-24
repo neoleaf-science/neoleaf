@@ -1735,4 +1735,9 @@
   "This project has no Typst file (.typ).": "Dette projekt har ingen Typst-fil (.typ).",
   "Compiling with Typst (WebAssembly)...": "Kompilerer med Typst (WebAssembly)...",
   "The Typst compiler could not be loaded: {0}": "Typst-kompilatoren kunne ikke indlæses: {0}",
+  "File type": "Filtype",
+  "Plain text": "Ren tekst",
+  "LaTeX package": "LaTeX-pakke",
+  "LaTeX class": "LaTeX-klasse",
+  "Other (any extension)": "Andet (en vilkårlig filendelse)",
 };

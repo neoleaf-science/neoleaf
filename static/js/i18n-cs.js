@@ -1735,4 +1735,9 @@
   "This project has no Typst file (.typ).": "Tento projekt nemá žádný soubor Typst (.typ).",
   "Compiling with Typst (WebAssembly)...": "Kompilace pomocí Typst (WebAssembly)...",
   "The Typst compiler could not be loaded: {0}": "Kompilátor Typst se nepodařilo načíst: {0}",
+  "File type": "Typ souboru",
+  "Plain text": "Prostý text",
+  "LaTeX package": "Balíček LaTeX",
+  "LaTeX class": "Třída LaTeX",
+  "Other (any extension)": "Jiný (libovolná přípona)",
 };

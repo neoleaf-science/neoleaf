@@ -1776,4 +1776,11 @@
   "Ready": "Готово",
   "Complete this entry from its DOI...": "Дополнить эту запись по DOI...",
   "Complete all entries from their DOIs...": "Дополнить все записи по DOI...",
+  "Line wrapping: next mode": "Перенос строк: следующий режим",
+  "Line wrapping: {0}": "Перенос строк: {0}",
+  "at the formatter width ({0} columns)": "по ширине форматировщика ({0} столбцов)",
+  "at the window edge": "по краю окна",
+  "turned off": "выключен",
+  "Format Document": "Форматировать документ",
+  "Cycle Line Wrapping": "Переключить перенос строк",
 };

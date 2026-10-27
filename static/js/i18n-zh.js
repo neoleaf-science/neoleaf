@@ -1848,4 +1848,11 @@
   "Ready": "就绪",
   "Complete this entry from its DOI...": "根据 DOI 补全此条目…",
   "Complete all entries from their DOIs...": "根据 DOI 补全所有条目…",
+  "Line wrapping: next mode": "自动换行：下一个模式",
+  "Line wrapping: {0}": "自动换行：{0}",
+  "at the formatter width ({0} columns)": "按格式化宽度（{0} 列）",
+  "at the window edge": "在窗口边缘",
+  "turned off": "已关闭",
+  "Format Document": "格式化文档",
+  "Cycle Line Wrapping": "切换自动换行",
 };

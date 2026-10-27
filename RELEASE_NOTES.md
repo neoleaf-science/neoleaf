@@ -1,5 +1,7 @@
 # NeoLeaf: release notes
 
+- **1.30.0**: line wrapping in the editor can be set per person: at the formatter width (default, in LaTeX and BibTeX), at the window edge, or off. Alt+Z or the editor menu switches it; the choice stays in the browser, not in the project.
+- **1.29.1**: compilation errors and warnings were listed twice (once from the log file and once from the console output); each is now listed once.
 - **1.29.0**: complete and normalize `.bib` entries by DOI: Crossref (OpenAlex as a backup) fills the missing fields and the window shows every change before it is made; your own values are never replaced unless you tick them.
 - **1.28.0**: Format Document for LaTeX and BibTeX (Shift+Alt+F), syntax errors and style findings with quick fixes, and "Fix all style issues", with Badness (MIT) running in the browser as WebAssembly. Settings: style checks on or off, wrap mode and width.
 - **1.27.0**: the "New file" window has a file type list (LaTeX, BibTeX, Typst, Markdown, Python and others) that sets the extension; any other name can still be typed.

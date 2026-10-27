@@ -1776,4 +1776,11 @@
   "Ready": "Klar",
   "Complete this entry from its DOI...": "Fullfør denne oppføringen fra DOI-en...",
   "Complete all entries from their DOIs...": "Fullfør alle oppføringer fra DOI-ene...",
+  "Line wrapping: next mode": "Linjebryting: neste modus",
+  "Line wrapping: {0}": "Linjebryting: {0}",
+  "at the formatter width ({0} columns)": "ved formatererens bredde ({0} kolonner)",
+  "at the window edge": "ved vindukanten",
+  "turned off": "slått av",
+  "Format Document": "Formater dokument",
+  "Cycle Line Wrapping": "Bytt linjebryting",
 };

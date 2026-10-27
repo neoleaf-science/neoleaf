@@ -1776,4 +1776,11 @@
   "Ready": "준비됨",
   "Complete this entry from its DOI...": "DOI로 이 항목 완성...",
   "Complete all entries from their DOIs...": "DOI로 모든 항목 완성...",
+  "Line wrapping: next mode": "줄 바꿈: 다음 모드",
+  "Line wrapping: {0}": "줄 바꿈: {0}",
+  "at the formatter width ({0} columns)": "서식 지정 너비({0}열)에서",
+  "at the window edge": "창 가장자리에서",
+  "turned off": "꺼짐",
+  "Format Document": "문서 서식 지정",
+  "Cycle Line Wrapping": "줄 바꿈 전환",
 };

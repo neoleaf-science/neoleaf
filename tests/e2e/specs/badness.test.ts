@@ -81,6 +81,37 @@ describe('Badness', () => {
     await s.page.evaluate(() => (window as any).LDBadness.applyConfig({ formatLineWidth: 80 }));
   }, 60000);
 
+  test('line wrapping can be turned off or set to the window, per person, and Alt+Z cycles the modes', async () => {
+    await openInTree(s.page, 'main.tex');
+    const opt = () => s.page.evaluate(() => {
+      const m = (window as any).monaco; const e = (globalThis as any).eval('editor');
+      return e.getOption(m.editor.EditorOption.wordWrap);
+    });
+    await s.page.evaluate(() => localStorage.removeItem('neoleaf.editor.wrap'));
+    await s.page.evaluate(() => (window as any).LDBadness.setWrapMode('format'));
+    expect(await opt()).toBe('bounded');
+    await s.page.evaluate(() => (window as any).LDBadness.setWrapMode('window'));
+    expect(await opt()).toBe('on');
+    await s.page.evaluate(() => (window as any).LDBadness.setWrapMode('off'));
+    expect(await opt()).toBe('off');
+    // the choice is kept in this browser and nothing about it goes to the project
+    expect(await s.page.evaluate(() => localStorage.getItem('neoleaf.editor.wrap'))).toBe('off');
+    expect(await s.page.evaluate(() => JSON.stringify((globalThis as any).eval('projectConfig')))).not.toContain('wrap"');
+    // it also holds when another file is opened
+    await openInTree(s.page, 'references.bib');
+    expect(await opt()).toBe('off');
+    // Alt+Z goes to the next mode: off -> format -> window -> off
+    await s.page.evaluate(() => (globalThis as any).eval('editor').focus());
+    await s.page.keyboard.press('Alt+KeyZ');
+    expect(await opt()).toBe('bounded');
+    await s.page.keyboard.press('Alt+KeyZ');
+    expect(await opt()).toBe('on');
+    await s.page.keyboard.press('Alt+KeyZ');
+    expect(await opt()).toBe('off');
+    await s.page.evaluate(() => (window as any).LDBadness.setWrapMode('format'));
+    expect(await opt()).toBe('bounded');
+  }, 60000);
+
   test('turning the style checks off clears the underlines', async () => {
     await openInTree(s.page, 'main.tex');
     await setText(s.page, 'Wait... done\n');

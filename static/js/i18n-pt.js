@@ -1848,4 +1848,11 @@
   "Ready": "Pronto",
   "Complete this entry from its DOI...": "Completar esta entrada pelo DOI...",
   "Complete all entries from their DOIs...": "Completar todas as entradas pelos DOIs...",
+  "Line wrapping: next mode": "Quebra de linha: próximo modo",
+  "Line wrapping: {0}": "Quebra de linha: {0}",
+  "at the formatter width ({0} columns)": "na largura do formatador ({0} colunas)",
+  "at the window edge": "na borda da janela",
+  "turned off": "desligada",
+  "Format Document": "Formatar documento",
+  "Cycle Line Wrapping": "Alternar quebra de linha",
 };

@@ -1776,4 +1776,11 @@
   "Ready": "Hazır",
   "Complete this entry from its DOI...": "Bu girdiyi DOI'sinden tamamla...",
   "Complete all entries from their DOIs...": "Tüm girdileri DOI'lerinden tamamla...",
+  "Line wrapping: next mode": "Satır kaydırma: sonraki mod",
+  "Line wrapping: {0}": "Satır kaydırma: {0}",
+  "at the formatter width ({0} columns)": "biçimlendirici genişliğinde ({0} sütun)",
+  "at the window edge": "pencere kenarında",
+  "turned off": "kapalı",
+  "Format Document": "Belgeyi biçimlendir",
+  "Cycle Line Wrapping": "Satır kaydırmayı değiştir",
 };

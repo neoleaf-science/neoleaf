@@ -37,7 +37,14 @@ function parseLogToDiagnostics(log) {
       list.push({ line: lineNum, message: line, is_error: false });
     }
   }
-  return list;
+  // The log file and the console output both carry each message: show it once
+  const seen = new Set();
+  return list.filter(d => {
+    const key = (d.is_error ? 'E' : 'W') + '|' + d.line + '|' + d.message;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 // ---------------------------------------------------------------------

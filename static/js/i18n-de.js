@@ -1776,4 +1776,11 @@
   "Ready": "Bereit",
   "Complete this entry from its DOI...": "Diesen Eintrag anhand seiner DOI ergänzen...",
   "Complete all entries from their DOIs...": "Alle Einträge anhand ihrer DOIs ergänzen...",
+  "Line wrapping: next mode": "Zeilenumbruch: nächster Modus",
+  "Line wrapping: {0}": "Zeilenumbruch: {0}",
+  "at the formatter width ({0} columns)": "an der Breite des Formatierers ({0} Spalten)",
+  "at the window edge": "am Fensterrand",
+  "turned off": "ausgeschaltet",
+  "Format Document": "Dokument formatieren",
+  "Cycle Line Wrapping": "Zeilenumbruch umschalten",
 };

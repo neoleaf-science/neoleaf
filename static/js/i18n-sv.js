@@ -1776,4 +1776,11 @@
   "Ready": "Klar",
   "Complete this entry from its DOI...": "Komplettera den här posten via dess DOI...",
   "Complete all entries from their DOIs...": "Komplettera alla poster via deras DOI...",
+  "Line wrapping: next mode": "Radbrytning: nästa läge",
+  "Line wrapping: {0}": "Radbrytning: {0}",
+  "at the formatter width ({0} columns)": "vid formatterarens bredd ({0} kolumner)",
+  "at the window edge": "vid fönsterkanten",
+  "turned off": "avstängd",
+  "Format Document": "Formatera dokument",
+  "Cycle Line Wrapping": "Växla radbrytning",
 };

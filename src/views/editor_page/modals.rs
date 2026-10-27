@@ -432,6 +432,8 @@ pub(super) fn shortcuts_modal() -> &'static str {
                         <tr style="border-bottom: 1px solid var(--border-color);"><td style="padding: 6px 0;">Indent / Outdent</td><td style="text-align: right; padding: 6px 0;"><kbd>Ctrl</kbd> + <kbd>]</kbd> / <kbd>[</kbd></td></tr>
                         <tr style="border-bottom: 1px solid var(--border-color);"><td style="padding: 6px 0;">Move Line Up / Down</td><td style="text-align: right; padding: 6px 0;"><kbd>Alt</kbd> + <kbd>↑</kbd> / <kbd>↓</kbd></td></tr>
                         <tr style="border-bottom: 1px solid var(--border-color);"><td style="padding: 6px 0;">Uppercase / Lowercase</td><td style="text-align: right; padding: 6px 0;"><kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>U</kbd> / <kbd>L</kbd></td></tr>
+                        <tr style="border-bottom: 1px solid var(--border-color);"><td style="padding: 6px 0;">Format Document</td><td style="text-align: right; padding: 6px 0;"><kbd>Shift</kbd> + <kbd>Alt</kbd> + <kbd>F</kbd></td></tr>
+                        <tr style="border-bottom: 1px solid var(--border-color);"><td style="padding: 6px 0;">Cycle Line Wrapping</td><td style="text-align: right; padding: 6px 0;"><kbd>Alt</kbd> + <kbd>Z</kbd></td></tr>
                     </table>
                 </div>
 

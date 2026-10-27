@@ -1776,4 +1776,11 @@
   "Ready": "Hotovo",
   "Complete this entry from its DOI...": "Doplnit tento záznam podle DOI...",
   "Complete all entries from their DOIs...": "Doplnit všechny záznamy podle DOI...",
+  "Line wrapping: next mode": "Zalamování řádků: další režim",
+  "Line wrapping: {0}": "Zalamování řádků: {0}",
+  "at the formatter width ({0} columns)": "na šířce formátovače ({0} sloupců)",
+  "at the window edge": "na okraji okna",
+  "turned off": "vypnuto",
+  "Format Document": "Formátovat dokument",
+  "Cycle Line Wrapping": "Přepnout zalamování řádků",
 };

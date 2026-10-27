@@ -1776,4 +1776,11 @@
   "Ready": "Pronto",
   "Complete this entry from its DOI...": "Completa questa voce dal suo DOI...",
   "Complete all entries from their DOIs...": "Completa tutte le voci dai loro DOI...",
+  "Line wrapping: next mode": "A capo automatico: modalità successiva",
+  "Line wrapping: {0}": "A capo automatico: {0}",
+  "at the formatter width ({0} columns)": "alla larghezza del formattatore ({0} colonne)",
+  "at the window edge": "al bordo della finestra",
+  "turned off": "disattivato",
+  "Format Document": "Formatta documento",
+  "Cycle Line Wrapping": "Cambia a capo automatico",
 };

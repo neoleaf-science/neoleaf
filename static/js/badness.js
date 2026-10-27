@@ -228,6 +228,14 @@ const BADNESS_QUERY = (function () {
       precondition: null,
       run: fixAll
     });
+    editor.addAction({
+      id: 'ld.wrapMode',
+      label: T('Line wrapping: next mode'),
+      contextMenuGroupId: 'modification',
+      contextMenuOrder: 2.6,
+      keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KeyZ],
+      run: cycleWrap
+    });
   }
 
   // ---------------------------------------------------------------- settings
@@ -241,14 +249,42 @@ const BADNESS_QUERY = (function () {
     };
   }
 
-  // In LaTeX and BibTeX files the lines wrap at the width that Format Document uses (but never wider than the window), so what is seen while typing is
-  // what the formatter will write. Other files keep wrapping at the window.
+  // Line wrapping is a personal choice, kept in this browser (not in the project, which is shared and goes to Git):
+  //   format  LaTeX and BibTeX lines wrap at the width Format Document uses (never wider than the window), so the screen matches what the formatter writes;
+  //           other files wrap at the window                                                                       (the default)
+  //   window  every file wraps at the edge of the window
+  //   off     lines do not wrap: they scroll sideways
+  const WRAP_KEY = 'neoleaf.editor.wrap';
+  const WRAP_MODES = ['format', 'window', 'off'];
+
+  function wrapMode() {
+    try { const v = localStorage.getItem(WRAP_KEY); return WRAP_MODES.includes(v) ? v : 'format'; } catch (_) { return 'format'; }
+  }
+
   function applyLayout() {
     if (typeof editor === 'undefined' || !editor || !window.monaco) return;
+    const mode = wrapMode();
     const model = editor.getModel();
     const id = model && model.getLanguageId();
-    if (id === 'latex' || id === 'bibtex') editor.updateOptions({ wordWrap: 'bounded', wordWrapColumn: options.formatLineWidth });
+    if (mode === 'off') editor.updateOptions({ wordWrap: 'off' });
+    else if (mode === 'format' && (id === 'latex' || id === 'bibtex')) editor.updateOptions({ wordWrap: 'bounded', wordWrapColumn: options.formatLineWidth });
     else editor.updateOptions({ wordWrap: 'on' });
+  }
+
+  function wrapLabel(mode) {
+    return mode === 'off' ? T('turned off') : mode === 'window' ? T('at the window edge') : T('at the formatter width ({0} columns)', options.formatLineWidth);
+  }
+
+  function setWrapMode(mode) {
+    if (!WRAP_MODES.includes(mode)) return;
+    try { localStorage.setItem(WRAP_KEY, mode); } catch (_) {}
+    applyLayout();
+  }
+
+  function cycleWrap() {
+    const next = WRAP_MODES[(WRAP_MODES.indexOf(wrapMode()) + 1) % WRAP_MODES.length];
+    setWrapMode(next);
+    if (typeof updateStatus === 'function') updateStatus('saved', T('Line wrapping: {0}', wrapLabel(next)));
   }
 
   function applyConfig(cfg) {
@@ -286,6 +322,9 @@ const BADNESS_QUERY = (function () {
     format: (text, kind, opts) => request('format', { text: text, kind: kind, options: { ...formatOptions(), ...(opts || {}) } }).then(r => r.text),
     fix: (text, kind, includeUnsafe) => request('fix', { text: text, kind: kind, includeUnsafe: includeUnsafe === true }).then(r => r.text),
     fixAll: fixAll,
+    wrapMode: wrapMode,
+    setWrapMode: setWrapMode,
+    cycleWrap: cycleWrap,
     options: () => ({ ...options })
   };
 })();

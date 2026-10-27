@@ -1776,4 +1776,11 @@
   "Ready": "Klar",
   "Complete this entry from its DOI...": "Fuldfør denne post ud fra dens DOI...",
   "Complete all entries from their DOIs...": "Fuldfør alle poster ud fra deres DOI'er...",
+  "Line wrapping: next mode": "Linjeombrydning: næste tilstand",
+  "Line wrapping: {0}": "Linjeombrydning: {0}",
+  "at the formatter width ({0} columns)": "ved formatererens bredde ({0} kolonner)",
+  "at the window edge": "ved vinduets kant",
+  "turned off": "slået fra",
+  "Format Document": "Formatér dokument",
+  "Cycle Line Wrapping": "Skift linjeombrydning",
 };

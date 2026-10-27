@@ -1776,4 +1776,11 @@
   "Ready": "準備完了",
   "Complete this entry from its DOI...": "DOI からこのエントリーを補完...",
   "Complete all entries from their DOIs...": "DOI からすべてのエントリーを補完...",
+  "Line wrapping: next mode": "折り返し: 次のモード",
+  "Line wrapping: {0}": "折り返し: {0}",
+  "at the formatter width ({0} columns)": "フォーマッターの幅（{0} 桁）で",
+  "at the window edge": "ウィンドウの端で",
+  "turned off": "オフ",
+  "Format Document": "ドキュメントを整形",
+  "Cycle Line Wrapping": "折り返しを切り替え",
 };

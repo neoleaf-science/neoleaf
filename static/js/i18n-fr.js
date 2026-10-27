@@ -1776,4 +1776,11 @@
   "Ready": "Prêt",
   "Complete this entry from its DOI...": "Compléter cette entrée à partir de son DOI...",
   "Complete all entries from their DOIs...": "Compléter toutes les entrées à partir de leurs DOI...",
+  "Line wrapping: next mode": "Retour à la ligne : mode suivant",
+  "Line wrapping: {0}": "Retour à la ligne : {0}",
+  "at the formatter width ({0} columns)": "à la largeur du formateur ({0} colonnes)",
+  "at the window edge": "au bord de la fenêtre",
+  "turned off": "désactivé",
+  "Format Document": "Mettre en forme le document",
+  "Cycle Line Wrapping": "Changer le retour à la ligne",
 };

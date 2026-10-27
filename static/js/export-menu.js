@@ -51,7 +51,7 @@
     const btn = ev.currentTarget, r = btn.getBoundingClientRect();
     const item = (label, fn) => h('button', { class: 'tree-popup-item', onclick: ev2 => { ev2.stopPropagation(); fn(); } }, label);
     const menu = h('div', { id: 'dl-menu', class: 'tree-popup dl-menu', style: `top:${r.bottom + 4}px;right:${Math.max(8, innerWidth - r.right)}px` },
-      item('📦 ' + T('Source code (.zip)'), downloadZip), item('📄 ' + T('Bibliography (.bbl)'), downloadBbl));
+      item('📦 ' + T('Source code (.zip)'), downloadZip), item('📄 ' + T('Bibliography (.bbl)'), downloadBbl), item('🚀 ' + T('Prepare for submission...'), () => { close(); Submission.open(); }));
     document.body.append(menu);
   }
 

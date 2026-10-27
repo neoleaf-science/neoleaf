@@ -61,6 +61,18 @@ pub static FILES: &[(&str, &[u8])] = &[
     ("js/comments.js", include_bytes!("../static/js/comments.js")),
     ("js/badness.js", include_bytes!("../static/js/badness.js")),
     (
+        "js/math-preview.js",
+        include_bytes!("../static/js/math-preview.js"),
+    ),
+    (
+        "js/submission.js",
+        include_bytes!("../static/js/submission.js"),
+    ),
+    (
+        "js/ci-workflow.js",
+        include_bytes!("../static/js/ci-workflow.js"),
+    ),
+    (
         "js/badness-worker.js",
         include_bytes!("../static/js/badness-worker.js"),
     ),

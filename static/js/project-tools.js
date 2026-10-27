@@ -70,6 +70,7 @@
       $('cfg-global').checked = false;
       if ($('cfg-spell-check')) $('cfg-spell-check').checked = d.config.spellCheck !== false;
       if ($('cfg-spell-lang')) $('cfg-spell-lang').value = d.config.spellLanguage || 'auto';
+      if (window.CIWorkflow) refreshCiBox();
       if ($('cfg-style-check')) $('cfg-style-check').checked = d.config.styleCheck !== false;
       if ($('cfg-format-wrap')) $('cfg-format-wrap').value = d.config.formatWrap || 'reflow';
       if ($('cfg-format-width')) $('cfg-format-width').value = d.config.formatLineWidth || 80;
@@ -80,6 +81,24 @@
       showMsg(e.message);
     }
   }
+
+  // "Build the PDF on GitHub": only for projects on GitHub, and not when the workflow is already in the project
+  async function refreshCiBox() {
+    const box = $('cfg-ci');
+    if (!box) return;
+    box.style.display = CIWorkflow.isGitHub() ? '' : 'none';
+    const there = await CIWorkflow.exists();
+    $('cfg-ci-open').disabled = there;
+    $('cfg-ci-msg').textContent = there ? T('The workflow is already in the project ({0}).', CIWorkflow.PATH) : '';
+  }
+  window.openCiWorkflow = async function () {
+    const msg = $('cfg-ci-msg');
+    try { await CIWorkflow.open(); msg.textContent = T('GitHub opened with the file ready: commit it there, then use Pull here.'); } catch (e) { msg.textContent = e.message; }
+  };
+  window.copyCiWorkflow = async function () {
+    const msg = $('cfg-ci-msg');
+    try { await CIWorkflow.copy(); msg.textContent = T('Copied. Save it as {0} in the repository.', CIWorkflow.PATH); } catch (e) { msg.textContent = e.message || T('Could not copy.'); }
+  };
 
   window.saveSettings = async function () {
     showMsg('');

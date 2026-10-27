@@ -20,7 +20,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.LD` | window | comments.js, editor-core.js, file-tree-ops.js, git-conflicts.js, history.js, latex-language.js, pdf-view.js, project-build.js, project-tools.js, references.js |
+| `window.LD` | window | comments.js, editor-core.js, file-tree-ops.js, git-conflicts.js, history.js, latex-language.js, math-preview.js, pdf-view.js, project-build.js, project-tools.js, references.js |
 
 ## `badness-worker.js`
 
@@ -30,7 +30,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `handle` | function | spellcheck-worker.js, splitters.js |
 | `query` | variable | ref-sources.js, typst-worker.js |
 | `ready` | variable | csv-preview.js, md-preview.js, mermaid-preview.js, notebook-frame.js, project-store.js, py-runner.js |
-| `queue` | variable | notebook-frame.js, project-store-texmf.js, spellcheck-worker.js, typst-worker.js |
+| `queue` | variable | notebook-frame.js, project-store-texmf.js, spellcheck-worker.js, submission.js, typst-worker.js |
 
 ## `badness.js`
 
@@ -68,9 +68,17 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.BrowserGit` | window | collab.js, editor-core.js, editor-toolbar.js, file-tree-ops.js, file-tree.js, git-blame.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, git-sync.js, history.js, md-preview.js, mindmap.js, notebook.js, project-build.js, project-store-build.js, project-store-texmf.js, project-store.js, project-tools.js, py-ui.js, references.js, spellcheck.js, storage-manager.js |
+| `window.BrowserGit` | window | ci-workflow.js, collab.js, editor-core.js, editor-toolbar.js, file-tree-ops.js, file-tree.js, git-blame.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, git-sync.js, history.js, md-preview.js, mindmap.js, notebook.js, project-build.js, project-store-build.js, project-store-texmf.js, project-store.js, project-tools.js, py-ui.js, references.js, spellcheck.js, storage-manager.js, submission.js |
 | `window.CloneError` | window | (only itself) |
-| `window.__BG` | window | browser-git-compare.js, browser-git-sync.js |
+| `window.__BG` | window | browser-git-compare.js, browser-git-sync.js, ci-workflow.js |
+
+## `ci-workflow.js`
+
+Wrapped in an IIFE: it only exposes the `window.*` names below.
+
+| Name | Kind | Used by |
+|---|---|---|
+| `window.CIWorkflow` | window | project-tools.js |
 
 ## `collab.js`
 
@@ -189,8 +197,8 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `showImportNote` | function | (only itself) |
 | `initLatexEditor` | function | (only itself) |
 | `saveCurrentFile` | function | file-tree-ops.js, git-review-modals.js, git-status.js, git-sync.js, pdf-panel.js, references.js, search.js |
-| `editor` | variable | autocomplete.js, badness.js, bib-complete.js, collab.js, comments.js, csv-preview.js, editor-toolbar.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review-open.js, git-status.js, history.js, md-preview.js, mermaid-preview.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-store-build.js, project-store.js, project-tools.js, py-ui.js, references.js, search.js, spellcheck.js, tabs.js |
-| `currentFileId` | variable | autocomplete.js, badness.js, comments.js, compile-pdflatex.js, compile-typst.js, editor-toolbar.js, file-tree-ops.js, file-tree.js, git-blame.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, history.js, md-preview.js, mermaid-preview.js, outline.js, pdf-panel.js, pdf-view.js, project-build.js, project-store-build.js, project-store.js, project-tools.js, py-ui.js, references.js, search.js, tabs.js |
+| `editor` | variable | autocomplete.js, badness.js, bib-complete.js, collab.js, comments.js, csv-preview.js, editor-toolbar.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review-open.js, git-status.js, history.js, math-preview.js, md-preview.js, mermaid-preview.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-store-build.js, project-store.js, project-tools.js, py-ui.js, references.js, search.js, spellcheck.js, submission.js, tabs.js |
+| `currentFileId` | variable | autocomplete.js, badness.js, comments.js, compile-pdflatex.js, compile-typst.js, editor-toolbar.js, file-tree-ops.js, file-tree.js, git-blame.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, history.js, md-preview.js, mermaid-preview.js, outline.js, pdf-panel.js, pdf-view.js, project-build.js, project-store-build.js, project-store.js, project-tools.js, py-ui.js, references.js, search.js, submission.js, tabs.js |
 | `isDirty` | variable | collab.js, export-menu.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, git-sync.js, pdf-panel.js |
 | `saveTimeout` | variable | collab.js |
 
@@ -206,7 +214,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `updateStatus` | function | agent.js, badness.js, bib-complete.js, collab.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, file-tree-ops.js, font-packs.js, git-conflicts.js, git-review-open.js, git-status.js, git-sync.js, package-install.js, pdf-panel.js, project-build.js |
+| `updateStatus` | function | agent.js, badness.js, bib-complete.js, collab.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, file-tree-ops.js, font-packs.js, git-conflicts.js, git-review-open.js, git-status.js, git-sync.js, math-preview.js, package-install.js, pdf-panel.js, project-build.js, submission.js |
 | `updateDocumentOutline` | function | editor-core.js |
 | `switchTab` | function | comments.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, md-preview.js, pdf-panel.js, pdf-view.js, project-build.js, py-ui.js, references.js, search.js |
 | `escapeHtml` | function | git-review.js |
@@ -398,8 +406,8 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | Name | Kind | Used by |
 |---|---|---|
 | `window.LDI18n` | window | comments.js, history.js, pdf-panel.js, project-tools.js, spellcheck.js |
-| `window.T` | window | agent.js, autocomplete.js, badness.js, bib-complete.js, browser-git-compare.js, browser-git.js, collab.js, comments.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review.js, git-status.js, history.js, latex-language.js, mascot.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-tools.js, py-ui.js, references.js, search.js, share.js, storage-manager.js, theme.js, typst-language.js |
-| `window.alert` | window | comments.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-status.js, mermaid-preview.js, pdf-panel.js, project-tools.js, storage-manager.js |
+| `window.T` | window | agent.js, autocomplete.js, badness.js, bib-complete.js, browser-git-compare.js, browser-git.js, ci-workflow.js, collab.js, comments.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review.js, git-status.js, history.js, latex-language.js, mascot.js, math-preview.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-import.js, project-tools.js, py-ui.js, references.js, search.js, share.js, storage-manager.js, submission.js, theme.js, typst-language.js |
+| `window.alert` | window | comments.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-status.js, mermaid-preview.js, pdf-panel.js, project-tools.js, storage-manager.js, submission.js |
 | `window.confirm` | window | comments.js, file-tree-ops.js, git-conflicts.js, history.js, notebook.js, project-tools.js, py-ui.js, search.js, share.js |
 | `window.prompt` | window | agent.js, notebook-frame.js, notebook.js |
 
@@ -409,7 +417,15 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.LD` | window | autocomplete.js, comments.js, editor-core.js, file-tree-ops.js, git-conflicts.js, history.js, pdf-view.js, project-build.js, project-tools.js, references.js |
+| `window.LD` | window | autocomplete.js, comments.js, editor-core.js, file-tree-ops.js, git-conflicts.js, history.js, math-preview.js, pdf-view.js, project-build.js, project-tools.js, references.js |
+
+## `math-preview.js`
+
+| Name | Kind | Used by |
+|---|---|---|
+| `window.MathPreview` | window | (only itself) |
+| `window.define` | window | context-language.js |
+| `MATHPREV_QUERY` | variable | (only itself) |
 
 ## `md-preview.js`
 
@@ -472,6 +488,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | Name | Kind | Used by |
 |---|---|---|
 | `window.availableEngines` | window | (only itself) |
+| `window.lastCompileResult` | window | (only itself) |
 | `parseLogToDiagnostics` | function | agent.js, compile-lualatex.js, compile-pdflatex.js, compile-xelatex.js |
 | `updatePdfEmpty` | function | compile-lualatex.js, compile-typst.js, compile-xelatex.js, editor-ui.js, project-build.js |
 | `fmtPdfDate` | function | (only itself) |
@@ -533,7 +550,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `outputEntries` | function | compile-pdflatex.js |
 | `texmfCache` | variable | (only itself) |
 | `assetCache` | variable | (only itself) |
-| `projectConfig` | variable | agent.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-ops.js, git-sync.js, package-install.js, pdf-panel.js, project-tools.js |
+| `projectConfig` | variable | agent.js, ci-workflow.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-ops.js, git-sync.js, package-install.js, pdf-panel.js, project-tools.js, submission.js |
 | `lastBuild` | variable | compile-pdflatex.js |
 | `forceCleanBuild` | variable | compile-pdflatex.js, pdf-panel.js |
 | `knownTexts` | variable | (only itself) |
@@ -560,7 +577,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.Project` | window | autocomplete.js, badness.js, collab.js, comments.js, editor-core.js, editor-toolbar.js, export-menu.js, font-packs.js, git-review-open.js, git-status.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, project-build.js, project-tools.js, references.js, search.js, spellcheck.js |
+| `window.Project` | window | autocomplete.js, badness.js, collab.js, comments.js, editor-core.js, editor-toolbar.js, export-menu.js, font-packs.js, git-review-open.js, git-status.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, project-build.js, project-tools.js, references.js, search.js, spellcheck.js, submission.js |
 | `window.__PS` | window | (only itself) |
 
 ## `project-tools.js`
@@ -570,9 +587,11 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | Name | Kind | Used by |
 |---|---|---|
 | `window.closeProject` | window | (only itself) |
+| `window.copyCiWorkflow` | window | (only itself) |
 | `window.createMilestone` | window | (only itself) |
 | `window.importPackage` | window | (only itself) |
 | `window.loadAuthorship` | window | (only itself) |
+| `window.openCiWorkflow` | window | (only itself) |
 | `window.openProject` | window | (only itself) |
 | `window.saveSettings` | window | (only itself) |
 | `window.switchPTab` | window | (only itself) |
@@ -651,7 +670,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `sha256Hex` | function | typst-worker.js |
 | `verified` | function | typst-worker.js |
 | `fromCache` | function | (only itself) |
-| `download` | function | agent.js, file-tree-ops.js, mermaid-preview.js |
+| `download` | function | agent.js, file-tree-ops.js, mermaid-preview.js, submission.js |
 | `toUtf8` | function | (only itself) |
 | `release` | function | (only itself) |
 | `load` | function | badness-worker.js, comments.js, csv-preview.js, i18n.js, mindmap.js, package-install.js, project-store.js, splitters.js |
@@ -662,7 +681,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `mounted` | variable | (only itself) |
 | `currentLang` | variable | (only itself) |
 | `personal` | variable | (only itself) |
-| `queue` | variable | badness-worker.js, notebook-frame.js, project-store-texmf.js, typst-worker.js |
+| `queue` | variable | badness-worker.js, notebook-frame.js, project-store-texmf.js, submission.js, typst-worker.js |
 
 ## `spellcheck.js`
 
@@ -681,6 +700,14 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `window.StorageManager` | window | (only itself) |
 | `window.__upmFs` | window | (only itself) |
 | `window.upmShowTab` | window | (only itself) |
+
+## `submission.js`
+
+Wrapped in an IIFE: it only exposes the `window.*` names below.
+
+| Name | Kind | Used by |
+|---|---|---|
+| `window.Submission` | window | export-menu.js |
 
 ## `synctex.js`
 
@@ -722,8 +749,8 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `verified` | function | spellcheck-worker.js |
 | `externalFont` | function | (only itself) |
 | `prepare` | function | (only itself) |
-| `position` | function | autocomplete.js, context-language.js, csv-preview.js, git-review.js, latex-language.js, notebook.js, typst-language.js |
-| `compile` | function | py-runner.js |
+| `position` | function | autocomplete.js, context-language.js, csv-preview.js, git-review.js, latex-language.js, math-preview.js, notebook.js, typst-language.js |
+| `compile` | function | ci-workflow.js, py-runner.js |
 | `VERSION` | variable | i18n.js |
 | `query` | variable | badness-worker.js, ref-sources.js |
 | `asset` | variable | (only itself) |
@@ -732,7 +759,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `FONT_CACHE` | variable | (only itself) |
 | `snippet` | variable | editor-toolbar.js |
 | `setup` | variable | context-language.js |
-| `queue` | variable | badness-worker.js, notebook-frame.js, project-store-texmf.js, spellcheck-worker.js |
+| `queue` | variable | badness-worker.js, notebook-frame.js, project-store-texmf.js, spellcheck-worker.js, submission.js |
 
 ## `zip.js`
 
@@ -740,5 +767,5 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.Zip` | window | git-review-open.js, project-import.js, project-store-build.js, project-store-texmf.js |
+| `window.Zip` | window | git-review-open.js, project-import.js, project-store-build.js, project-store-texmf.js, submission.js |
 

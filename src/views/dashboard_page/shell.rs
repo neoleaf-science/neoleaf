@@ -127,7 +127,8 @@ pub(super) fn import_modal() -> &'static str {
                     <label for="imp-name">Repository name</label>
                     <input type="text" id="imp-name" class="form-control" placeholder="e.g. my-latex-paper" maxlength="100" pattern="[A-Za-z0-9._\- ]+" title="Up to 100 characters: unaccented letters, numbers, - _ . (space becomes -)" required>
                 </div>
-                <p style="font-size: 12px; color: var(--muted); line-height: 1.5;">The repository will be created on your GitHub and the extracted files committed locally.</p>
+                <p style="font-size: 12px; color: var(--muted); line-height: 1.5;">Use the ZIP with the source files of the project (the .tex files, figures and .bib), not the PDF. The main file and the compiler are detected from the files.</p>
+                <p style="font-size: 12px; color: var(--muted); line-height: 1.5; margin-top: 8px;">The repository will be created on your GitHub and the extracted files committed locally.</p>
                 <div id="import-error" style="display:none; background:color-mix(in srgb, var(--danger-color) 14%, var(--bg-primary)); border:1px solid color-mix(in srgb, var(--danger-color) 50%, var(--bg-primary)); color:var(--danger-color); padding:8px 12px; border-radius:6px; font-size:13px; margin-top:10px;"></div>
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
                     <button type="button" class="btn" onclick="closeImportModal()" id="imp-cancel">Cancel</button>

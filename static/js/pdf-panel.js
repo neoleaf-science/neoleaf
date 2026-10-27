@@ -293,6 +293,7 @@ async function recompileLatex(ev) {
 
 // Render compilation output (PDF or error logs)
 function renderCompileResult(res) {
+  window.lastCompileResult = { at: Date.now(), success: !!(res && res.success), log: (res && res.log) || '', mainFile: (res && res.mainFile) || (window.projectConfig && projectConfig.mainFile) || '' };
   window.dispatchEvent(new CustomEvent('ld-compile', { detail: { phase: 'done', success: !!(res && res.success) } }));
   const viewer = document.getElementById('pdf-viewer');
   const logsContainer = document.getElementById('logs-container');

@@ -6,6 +6,11 @@
   const __BG = window.__BG;
 
   Object.assign(window.BrowserGit, {
+    /** Name of the branch that is checked out ('main' when it cannot be read). */
+    async branch() {
+      try { return (await git.currentBranch({ fs: initFs().fs, dir: __BG.dir() })) || 'main'; } catch (_) { return 'main'; }
+    },
+
     async status() {
       const { fs, pfs } = initFs();
       if (!(await this.isCloned())) {

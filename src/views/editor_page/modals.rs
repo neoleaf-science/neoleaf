@@ -192,6 +192,17 @@ pub(super) fn project_tab_settings() -> &'static str {
                         Underlines unclosed environments and braces and style slips (straight quotes, <code>$$</code>, <code>...</code>, a missing non-breaking space), with a quick fix. Format Document (Shift+Alt+F) and Fix all style issues are in the editor menu. Runs in your browser with Badness.
                     </div>
                 </div>
+                <div id="cfg-ci" class="form-group" style="margin-top: 12px; margin-bottom: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border-color);">
+                    <div style="font-weight: 500; margin-bottom: 6px;">Build the PDF on GitHub</div>
+                    <div class="modal-hint" style="margin-top: 0; font-size: 11px;">
+                        Adds a GitHub Actions workflow that compiles the project on every push and keeps the PDF with the run. The file is created on GitHub, where you commit it; then Pull here.
+                    </div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn" id="cfg-ci-open" onclick="openCiWorkflow()">Add the workflow on GitHub</button>
+                        <button type="button" class="btn" id="cfg-ci-copy" onclick="copyCiWorkflow()">Copy the file</button>
+                    </div>
+                    <div id="cfg-ci-msg" class="modal-hint" style="margin-top: 6px; font-size: 11px;"></div>
+                </div>
                 <p class="modal-hint" data-i18n-html>The settings are stored in the project's <code>.neoleaf/config.json</code> file (and in <code>NeoLeaf/.neoleaf</code> for the global default). Anyone who edits the project can change them.</p>
                 <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
             </div>

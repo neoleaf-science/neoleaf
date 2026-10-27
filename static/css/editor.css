@@ -1151,3 +1151,26 @@ body.resizing iframe, body.resizing .monaco-editor { pointer-events: none; }
 /* LaTeX and BibTeX are drawn in the editor's monospaced font: the reset `* { font-family }` above would otherwise turn every span Monaco draws proportional (badness.js) */
 #monaco-container.ld-mono .view-line,
 #monaco-container.ld-mono .view-line span { font-family: inherit; }
+
+/* Formula preview (math-preview.js) */
+.ld-mathprev { position: fixed; min-width: 160px; z-index: 3000; max-width: min(680px, 92vw); max-height: 42vh; overflow: auto; padding: 8px 14px; background: var(--bg-secondary); color: var(--text-bright); border: 1px solid var(--border-color); border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.28); font-size: 15px; pointer-events: none; }
+.ld-mathprev .katex-display { margin: .2em 0; }
+
+/* Prepare for submission (submission.js) */
+.sub-box { width: min(780px, 94vw); max-height: 88vh; overflow: auto; display: flex; flex-direction: column; }
+.sub-title { color: var(--text-bright); margin-bottom: 8px; }
+.sub-summary { font-size: 14px; font-weight: 600; padding: 6px 10px; border-radius: 6px; margin-bottom: 8px; }
+.sub-ok { color: var(--green); } .sub-warn { color: var(--warn); } .sub-bad { color: var(--danger-color); }
+.sub-problems { display: flex; flex-direction: column; gap: 4px; margin: 6px 0 10px; }
+.sub-row { display: flex; gap: 8px; font-size: 13px; line-height: 1.4; }
+.sub-mark { min-width: 16px; text-align: center; }
+.sub-error .sub-mark { color: var(--danger-color); } .sub-warning .sub-mark { color: var(--warn); } .sub-info .sub-mark { color: var(--muted); }
+.sub-where { color: var(--green); text-decoration: underline; font-family: monospace; font-size: 12px; }
+.sub-h { margin: 12px 0 4px; font-size: 13px; color: var(--text-bright); }
+.sub-files { display: flex; flex-direction: column; gap: 2px; max-height: 190px; overflow: auto; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; background: var(--bg-primary); }
+.sub-file { display: flex; gap: 8px; align-items: center; font-size: 12.5px; cursor: pointer; }
+.sub-file input { margin: 0; } .sub-file span:nth-child(2) { flex: 1; font-family: monospace; overflow-wrap: anywhere; }
+.sub-size { color: var(--muted); font-size: 11px; }
+.sub-opt { display: flex; gap: 8px; align-items: center; margin: 12px 0 4px; font-size: 13px; cursor: pointer; }
+.sub-foot { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.sub-count { font-size: 12px; color: var(--muted); }

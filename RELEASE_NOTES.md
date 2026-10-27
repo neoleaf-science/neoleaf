@@ -1,5 +1,6 @@
 # NeoLeaf: release notes
 
+- **1.31.0**: prepare for submission (checks the project and builds a clean ZIP with only the files the document uses), a GitHub Actions workflow to build the PDF on every push, a formula preview when the mouse rests on a formula, and a smarter ZIP import that detects the main file and the compiler (pdfLaTeX, XeLaTeX, LuaLaTeX or Typst).
 - **1.30.1**: LaTeX and BibTeX are drawn in a monospaced font (a style rule had turned the editor text proportional), so the wrap column of the editor is exactly the formatter's width; the project setting is now labelled "Line width (characters)".
 - **1.30.0**: line wrapping in the editor can be set per person: at the formatter width (default, in LaTeX and BibTeX), at the window edge, or off. Alt+Z or the editor menu switches it; the choice stays in the browser, not in the project.
 - **1.29.1**: compilation errors and warnings were listed twice (once from the log file and once from the console output); each is now listed once.

@@ -18,10 +18,12 @@
     const entries = await Zip.read(zipBytes, { maxEntries: MAX_FILES * 4, maxTotal: 400 * 1024 * 1024 });
     const raw = [];
     const skipped = [];
+    const hints = {};   // what the project says about how it is built, read before the hidden files are dropped
     let total = 0;
     for (const e of entries) {
       const name = e.name.replace(/\\/g, '/');
       if (name.startsWith('/')) { skipped.push(name); continue; }
+      if (/^(?:[^/]+\/)?\.?latexmkrc$/i.test(name) && e.bytes.length < 20000) hints.latexmkrc = new TextDecoder().decode(e.bytes);
       const segs = name.split('/').filter(Boolean);
       if (segs.some(s => s === '..' || s === '__MACOSX' || s.startsWith('.'))) { if (segs.includes('..')) skipped.push(name); continue; }
       const base = (segs[segs.length - 1] || '').toLowerCase();
@@ -49,19 +51,73 @@
       files.push({ path, bytes: r.bytes });
     }
     files.sort((a, b) => a.path.localeCompare(b.path));
-    return { files, skipped };
+    return { files, skipped, hints };
   }
 
-  /** The main file: the .tex with \documentclass (preferring usual names and the root). */
-  function detectMainFile(files) {
-    const hasClass = bytes => new TextDecoder().decode(bytes).split('\n').some(l => !l.trimStart().startsWith('%') && l.includes('\\documentclass'));
-    let cands = files.filter(f => ext(f.path) === 'tex' && hasClass(f.bytes)).map(f => f.path);
-    if (!cands.length) cands = files.filter(f => ext(f.path) === 'tex').map(f => f.path);
-    const preferred = ['main.tex', 'paper.tex', 'article.tex', 'ms.tex', 'root.tex', 'thesis.tex', 'tese.tex', 'document.tex'];
-    const key = p => { const depth = p.split('/').length - 1; const rank = preferred.indexOf(p.split('/').pop()); return [depth, rank < 0 ? preferred.length : rank, p.length]; };
-    cands.sort((a, b) => { const ka = key(a), kb = key(b); return ka[0] - kb[0] || ka[1] - kb[1] || ka[2] - kb[2]; });
-    return cands[0] || null;
+  // "chapters" + "../main.tex" -> "main.tex"
+  function joinPath(dir, rel) {
+    const out = dir ? dir.split('/') : [];
+    for (const seg of rel.split('/')) { if (seg === '..') out.pop(); else if (seg && seg !== '.') out.push(seg); }
+    return out.join('/');
   }
+  const textOf = f => new TextDecoder().decode(f.bytes);
+  // a line that is not a comment
+  const live = text => text.split('\n').filter(l => !l.trimStart().startsWith('%')).join('\n');
+
+  /** The main file: the one a `% !TeX root = ...` comment points to; else the .tex with \documentclass and \begin{document} (preferring usual names and the
+   *  root of the project); a Typst project without .tex files has main.typ (or the first .typ). */
+  function detectMainFile(files) {
+    const tex = files.filter(f => ext(f.path) === 'tex');
+    const texts = new Map(tex.map(f => [f.path, textOf(f)]));
+    // "% !TeX root = main.tex" in the chapters: the file they all name is the main one
+    const votes = new Map();
+    for (const [p, t] of texts) {
+      const m = /^[ \t]*%\s*!\s*T[eE]X\s+root\s*=\s*(\S+)/m.exec(t.slice(0, 4000));
+      if (!m) continue;
+      const dir = p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '';
+      const target = [joinPath('', m[1]), joinPath(dir, m[1])].find(x => texts.has(x));
+      if (target) votes.set(target, (votes.get(target) || 0) + 1);
+    }
+    if (votes.size) return [...votes.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    let cands = tex.filter(f => live(texts.get(f.path)).includes('\\documentclass')).map(f => f.path);
+    if (!cands.length) cands = tex.map(f => f.path);
+    const preferred = ['main.tex', 'paper.tex', 'article.tex', 'ms.tex', 'root.tex', 'thesis.tex', 'tese.tex', 'document.tex'];
+    const key = p => {
+      const depth = p.split('/').length - 1;
+      const rank = preferred.indexOf(p.split('/').pop());
+      const body = live(texts.get(p) || '').includes('\\begin{document}') ? 0 : 1;
+      return [depth, body, rank < 0 ? preferred.length : rank, p.length];
+    };
+    cands.sort((a, b) => { const ka = key(a), kb = key(b); for (let i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return ka[i] - kb[i]; return 0; });
+    if (cands[0]) return cands[0];
+    const typ = files.filter(f => ext(f.path) === 'typ').map(f => f.path).sort((a, b) => (a.split('/').length - b.split('/').length) || (a === 'main.typ' ? -1 : b === 'main.typ' ? 1 : a.length - b.length));
+    return typ[0] || null;
+  }
+
+  /** The compiler the project was written for: 'wasm-texlive' (pdfLaTeX), 'wasm-xelatex', 'wasm-lualatex' or 'wasm-typst'. Looks at a `% !TeX program` comment,
+   *  the latexmkrc, and the packages and commands that only one engine has. */
+  function detectEngine(files, main, hints) {
+    if (main && ext(main) === 'typ') return 'wasm-typst';
+    const byName = s => (/lua/i.test(s) ? 'wasm-lualatex' : /xe/i.test(s) ? 'wasm-xelatex' : /pdf/i.test(s) ? 'wasm-texlive' : null);
+    const tex = files.filter(f => ['tex', 'sty', 'cls'].includes(ext(f.path)));
+    const mainFile = tex.find(f => f.path === main);
+    if (mainFile) {
+      const m = /^[ \t]*%\s*!\s*T[eE]X\s+(?:TS-)?program\s*=\s*(\w+)/m.exec(textOf(mainFile).slice(0, 4000));
+      const named = m && byName(m[1]);
+      if (named) return named;
+    }
+    const rc = (hints && hints.latexmkrc) || '';
+    if (/\$pdf_mode\s*=\s*5\b|\$pdflatex\s*=\s*['"][^'"]*xelatex/.test(rc)) return 'wasm-xelatex';
+    if (/\$pdf_mode\s*=\s*4\b|\$pdflatex\s*=\s*['"][^'"]*lualatex/.test(rc)) return 'wasm-lualatex';
+    let text = '';
+    for (const f of tex) { if (text.length > 400000) break; text += '\n' + live(textOf(f)); }
+    const uses = names => new RegExp('\\\\(?:usepackage|RequirePackage)\\s*(?:\\[[^\\]]*\\])?\\s*\\{[^}]*\\b(?:' + names + ')\\b[^}]*\\}').test(text);
+    const lua = uses('luacode|luatexja|lualatex-math|luaotfload|luacolor|luatextra|selnolig|lua-ul|lua-visual-debug') || /\\directlua\b|\\RequireLuaTeX\b|\\documentclass(?:\[[^\]]*\])?\{ltj[a-z]+\}/.test(text);
+    if (lua) return 'wasm-lualatex';
+    const xe = uses('fontspec|unicode-math|polyglossia|xeCJK|xltxtra|xunicode|mathspec') || /\\RequireXeTeX\b/.test(text);
+    return xe ? 'wasm-xelatex' : 'wasm-texlive';
+  }
+  const ENGINE_NAMES = { 'wasm-texlive': 'pdfLaTeX', 'wasm-xelatex': 'XeLaTeX', 'wasm-lualatex': 'LuaTeX', 'wasm-typst': 'Typst' };
 
   async function createRepo(url, body) {
     const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -73,13 +129,16 @@
   /** Dashboard: creates the empty repository and leaves the files ready for the editor. Returns the project id. */
   async function start(file, name) {
     if (file.size > MAX_ZIP) throw new Error('Zip too large (maximum 200 MB)');
-    const { files, skipped } = await extract(new Uint8Array(await file.arrayBuffer()));
+    const { files, skipped, hints } = await extract(new Uint8Array(await file.arrayBuffer()));
     const mainFile = detectMainFile(files);
     if (!mainFile) throw new Error('The zip has no .tex file');
+    const engine = detectEngine(files, mainFile, hints);
     const data = await createRepo('/api/project/create-empty', { name });
     const all = files.slice();
     if (!all.some(f => f.path === '.gitignore')) all.push({ path: '.gitignore', bytes: new TextEncoder().encode(DEFAULT_GITIGNORE) });
-    await Handoff.put(data.id, { files: all, message: 'feat: import project from ZIP', mainFile, preinstall: true, note: skipped.length ? `${skipped.length} ${T('file(s) skipped')}` : '' });
+    const note = [T('Main file: {0}', mainFile), T('Engine: {0}', ENGINE_NAMES[engine] || engine)];
+    if (skipped.length) note.push(`${skipped.length} ${T('file(s) skipped')}`);
+    await Handoff.put(data.id, { files: all, message: 'feat: import project from ZIP', mainFile, engine, preinstall: ext(mainFile) !== 'typ', note: note.join(' · ') });
     return data.id;
   }
 
@@ -97,7 +156,7 @@
     const res = await fetch(`/api/templates/${encodeURIComponent(model.id)}/zip`);
     if (res.status === 403) throw new Error('Templates are available only when you sign in with GitHub.');
     if (!res.ok) throw new Error(res.status === 404 ? 'This template is no longer available' : 'Could not download the template right now. Try again in a moment.');
-    let { files, skipped } = await extract(new Uint8Array(await res.arrayBuffer()));
+    let { files, skipped, hints } = await extract(new Uint8Array(await res.arrayBuffer()));
     const sub = (model.subdir || '').replace(/^\/+|\/+$/g, '');
     if (sub) {
       files = files.filter(f => f.path.startsWith(sub + '/')).map(f => ({ path: f.path.slice(sub.length + 1), bytes: f.bytes }));
@@ -108,9 +167,9 @@
     const data = await createRepo('/api/project/create-empty', { name });
     const all = files.slice();
     if (!all.some(f => f.path === '.gitignore')) all.push({ path: '.gitignore', bytes: new TextEncoder().encode(DEFAULT_GITIGNORE) });
-    await Handoff.put(data.id, { files: all, message: `feat: create project from template ${model.name}`, mainFile, preinstall: true, note: '', engine: model.engine || '' });
+    await Handoff.put(data.id, { files: all, message: `feat: create project from template ${model.name}`, mainFile, preinstall: true, note: '', engine: model.engine || detectEngine(files, mainFile, hints) });
     return data.id;
   }
 
-  window.ProjectImport = { extract, detectMainFile, start, startNew, startFromModel, DEFAULT_GITIGNORE };
+  window.ProjectImport = { extract, detectMainFile, detectEngine, start, startNew, startFromModel, DEFAULT_GITIGNORE };
 })();

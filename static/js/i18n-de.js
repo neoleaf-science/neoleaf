@@ -1783,4 +1783,6 @@
   "turned off": "ausgeschaltet",
   "Format Document": "Dokument formatieren",
   "Cycle Line Wrapping": "Zeilenumbruch umschalten",
+  "Line width (characters):": "Zeilenbreite (Zeichen):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Standard 80. Dokument formatieren und der Editor brechen Zeilen bei dieser Breite um.",
 };

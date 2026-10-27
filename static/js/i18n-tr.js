@@ -1783,4 +1783,6 @@
   "turned off": "kapalı",
   "Format Document": "Belgeyi biçimlendir",
   "Cycle Line Wrapping": "Satır kaydırmayı değiştir",
+  "Line width (characters):": "Satır genişliği (karakter):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Varsayılan 80. Belgeyi biçimlendir ve düzenleyici satırları bu genişlikte böler.",
 };

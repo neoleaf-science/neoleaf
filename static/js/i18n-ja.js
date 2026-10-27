@@ -1783,4 +1783,6 @@
   "turned off": "オフ",
   "Format Document": "ドキュメントを整形",
   "Cycle Line Wrapping": "折り返しを切り替え",
+  "Line width (characters):": "行の幅（文字数）:",
+  "Default 80. Format Document and the editor wrap lines at this width.": "既定は 80。ドキュメントの整形とエディターはこの幅で折り返します。",
 };

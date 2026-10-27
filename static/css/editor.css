@@ -1147,3 +1147,7 @@ body.resizing iframe, body.resizing .monaco-editor { pointer-events: none; }
 .bibc-skipped, .bibc-empty { font-size: 12px; color: var(--muted); }
 .bibc-foot { display: flex; align-items: center; gap: 10px; }
 .bibc-count { font-size: 12px; color: var(--muted); }
+
+/* LaTeX and BibTeX are drawn in the editor's monospaced font: the reset `* { font-family }` above would otherwise turn every span Monaco draws proportional (badness.js) */
+#monaco-container.ld-mono .view-line,
+#monaco-container.ld-mono .view-line span { font-family: inherit; }

@@ -1783,4 +1783,6 @@
   "turned off": "disattivato",
   "Format Document": "Formatta documento",
   "Cycle Line Wrapping": "Cambia a capo automatico",
+  "Line width (characters):": "Larghezza della riga (caratteri):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Predefinita 80. Formatta documento e l'editor vanno a capo a questa larghezza.",
 };

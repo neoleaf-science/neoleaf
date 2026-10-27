@@ -1783,4 +1783,6 @@
   "turned off": "avstängd",
   "Format Document": "Formatera dokument",
   "Cycle Line Wrapping": "Växla radbrytning",
+  "Line width (characters):": "Radbredd (tecken):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Standard 80. Formatera dokument och redigeraren bryter rader vid den här bredden.",
 };

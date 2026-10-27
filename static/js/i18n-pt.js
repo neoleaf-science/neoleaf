@@ -1855,4 +1855,6 @@
   "turned off": "desligada",
   "Format Document": "Formatar documento",
   "Cycle Line Wrapping": "Alternar quebra de linha",
+  "Line width (characters):": "Largura da linha (caracteres):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Padrão 80. O Formatar documento e o editor quebram as linhas nesta largura.",
 };

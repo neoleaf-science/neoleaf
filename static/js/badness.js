@@ -261,13 +261,25 @@ const BADNESS_QUERY = (function () {
     try { const v = localStorage.getItem(WRAP_KEY); return WRAP_MODES.includes(v) ? v : 'format'; } catch (_) { return 'format'; }
   }
 
+  // LaTeX and BibTeX are shown in a monospaced font, so that a column of the editor is one character and "80" on the screen is the 80 characters of the
+  // formatter. (The page's reset `* { font-family }` reaches the spans that Monaco draws and made them proportional, which also threw its measures off:
+  // see the `ld-mono` rule in editor.css.)
+  const MONO_FONT = 'Consolas, "SFMono-Regular", Menlo, "DejaVu Sans Mono", "Liberation Mono", "Courier New", monospace';
+  let baseFont = null;
+
   function applyLayout() {
     if (typeof editor === 'undefined' || !editor || !window.monaco) return;
     const mode = wrapMode();
     const model = editor.getModel();
     const id = model && model.getLanguageId();
+    const mono = id === 'latex' || id === 'bibtex';
+    if (baseFont === null) baseFont = editor.getOption(monaco.editor.EditorOption.fontFamily);
+    const box = document.getElementById('monaco-container');
+    if (box) box.classList.toggle('ld-mono', mono);
+    const font = mono ? MONO_FONT : baseFont;
+    if (editor.getOption(monaco.editor.EditorOption.fontFamily) !== font) editor.updateOptions({ fontFamily: font });
     if (mode === 'off') editor.updateOptions({ wordWrap: 'off' });
-    else if (mode === 'format' && (id === 'latex' || id === 'bibtex')) editor.updateOptions({ wordWrap: 'bounded', wordWrapColumn: options.formatLineWidth });
+    else if (mode === 'format' && mono) editor.updateOptions({ wordWrap: 'bounded', wordWrapColumn: options.formatLineWidth });
     else editor.updateOptions({ wordWrap: 'on' });
   }
 

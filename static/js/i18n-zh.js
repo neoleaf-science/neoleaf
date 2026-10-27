@@ -1855,4 +1855,6 @@
   "turned off": "已关闭",
   "Format Document": "格式化文档",
   "Cycle Line Wrapping": "切换自动换行",
+  "Line width (characters):": "行宽（字符数）：",
+  "Default 80. Format Document and the editor wrap lines at this width.": "默认 80。格式化文档和编辑器都按此宽度换行。",
 };

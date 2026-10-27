@@ -1783,4 +1783,6 @@
   "turned off": "꺼짐",
   "Format Document": "문서 서식 지정",
   "Cycle Line Wrapping": "줄 바꿈 전환",
+  "Line width (characters):": "줄 너비(문자 수):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "기본값 80. 문서 서식 지정과 편집기가 이 너비에서 줄을 바꿉니다.",
 };

@@ -1855,4 +1855,6 @@
   "turned off": "desactivado",
   "Format Document": "Dar formato al documento",
   "Cycle Line Wrapping": "Alternar ajuste de línea",
+  "Line width (characters):": "Ancho de línea (caracteres):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Por defecto 80. Dar formato al documento y el editor ajustan las líneas a este ancho.",
 };

@@ -1783,4 +1783,6 @@
   "turned off": "vypnuto",
   "Format Document": "Formátovat dokument",
   "Cycle Line Wrapping": "Přepnout zalamování řádků",
+  "Line width (characters):": "Šířka řádku (znaky):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Výchozí 80. Formátování dokumentu i editor zalamují řádky na této šířce.",
 };

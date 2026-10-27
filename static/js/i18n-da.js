@@ -1783,4 +1783,6 @@
   "turned off": "slået fra",
   "Format Document": "Formatér dokument",
   "Cycle Line Wrapping": "Skift linjeombrydning",
+  "Line width (characters):": "Linjebredde (tegn):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "Standard 80. Formatér dokument og editoren ombryder linjer ved denne bredde.",
 };

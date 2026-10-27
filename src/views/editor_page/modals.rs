@@ -185,8 +185,8 @@ pub(super) fn project_tab_settings() -> &'static str {
                             <option value="semantic">Break at clauses</option>
                             <option value="preserve">Keep my line breaks</option>
                         </select>
-                        <span>Width:</span>
-                        <input type="number" id="cfg-format-width" class="form-control" min="40" max="200" value="80" style="width: 76px; padding: 2px 8px; font-size: 13px;">
+                        <span>Line width (characters):</span>
+                        <input type="number" id="cfg-format-width" class="form-control" min="40" max="200" value="80" title="Default 80. Format Document and the editor wrap lines at this width." style="width: 76px; padding: 2px 8px; font-size: 13px;">
                     </div>
                     <div class="modal-hint" style="margin-left: 24px; margin-top: 6px; font-size: 11px;" data-i18n-html>
                         Underlines unclosed environments and braces and style slips (straight quotes, <code>$$</code>, <code>...</code>, a missing non-breaking space), with a quick fix. Format Document (Shift+Alt+F) and Fix all style issues are in the editor menu. Runs in your browser with Badness.

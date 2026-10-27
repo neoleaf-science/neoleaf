@@ -1783,4 +1783,6 @@
   "turned off": "désactivé",
   "Format Document": "Mettre en forme le document",
   "Cycle Line Wrapping": "Changer le retour à la ligne",
+  "Line width (characters):": "Largeur de ligne (caractères) :",
+  "Default 80. Format Document and the editor wrap lines at this width.": "80 par défaut. Mettre en forme le document et l'éditeur coupent les lignes à cette largeur.",
 };

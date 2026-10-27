@@ -1373,7 +1373,7 @@ checksum = "743fb55ba31b18fb1ecef6bdc9aa2743314978ac084044301a7eee33fb99a20d"
 
 [[package]]
 name = "neoleaf"
-version = "1.30.0"
+version = "1.30.1"
 dependencies = [
  "aes-gcm 0.11.1",
  "base64 0.23.1",

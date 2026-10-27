@@ -1783,4 +1783,6 @@
   "turned off": "выключен",
   "Format Document": "Форматировать документ",
   "Cycle Line Wrapping": "Переключить перенос строк",
+  "Line width (characters):": "Ширина строки (символов):",
+  "Default 80. Format Document and the editor wrap lines at this width.": "По умолчанию 80. «Форматировать документ» и редактор переносят строки по этой ширине.",
 };

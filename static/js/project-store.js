@@ -103,7 +103,8 @@
   }
   // the dictionaries of the spell check (spellcheck-dicts.js has the same list)
   const SPELL_LANGUAGES = ['auto', 'pt-BR', 'pt-PT', 'en-US', 'en-GB', 'es-ES', 'fr-FR', 'it-IT', 'de-DE'];
-  const DEFAULT_CONFIG = { mainFile: 'main.tex', engine: 'wasm-texlive', autoInstall: true, autoSync: false, autoSyncInterval: 5, spellCheck: true, spellLanguage: 'auto' };
+  const DEFAULT_CONFIG = { mainFile: 'main.tex', engine: 'wasm-texlive', autoInstall: true, autoSync: false, autoSyncInterval: 5, spellCheck: true, spellLanguage: 'auto', styleCheck: true, formatWrap: 'reflow', formatLineWidth: 80 };
+  const FORMAT_WRAPS = ['reflow', 'sentence', 'semantic', 'preserve'];
 
   async function loadConfig() {
     const cfg = { ...DEFAULT_CONFIG, ...lsGet('neoleaf.globalConfig', {}), ...((await readJson('.neoleaf/config.json')) || {}) };
@@ -111,6 +112,9 @@
     if (!validMainFile(cfg.mainFile)) cfg.mainFile = DEFAULT_CONFIG.mainFile;
     if (typeof cfg.spellCheck !== 'boolean') cfg.spellCheck = DEFAULT_CONFIG.spellCheck;
     if (!SPELL_LANGUAGES.includes(cfg.spellLanguage)) cfg.spellLanguage = DEFAULT_CONFIG.spellLanguage;
+    if (typeof cfg.styleCheck !== 'boolean') cfg.styleCheck = DEFAULT_CONFIG.styleCheck;
+    if (!FORMAT_WRAPS.includes(cfg.formatWrap)) cfg.formatWrap = DEFAULT_CONFIG.formatWrap;
+    cfg.formatLineWidth = Math.max(40, Math.min(200, parseInt(cfg.formatLineWidth, 10) || DEFAULT_CONFIG.formatLineWidth));
     return cfg;
   }
 
@@ -122,8 +126,11 @@
       autoSync: !!p.autoSync, autoSyncInterval: Math.max(1, Math.min(1440, parseInt(p.autoSyncInterval, 10) || 5)),
       spellCheck: p.spellCheck !== false,
       spellLanguage: SPELL_LANGUAGES.includes(p.spellLanguage) ? p.spellLanguage : 'auto',
+      styleCheck: p.styleCheck !== false,
+      formatWrap: FORMAT_WRAPS.includes(p.formatWrap) ? p.formatWrap : 'reflow',
+      formatLineWidth: Math.max(40, Math.min(200, parseInt(p.formatLineWidth, 10) || 80)),
     };
-    if (p.scope === 'global') lsSet('neoleaf.globalConfig', { engine: cfg.engine, autoInstall: cfg.autoInstall, autoSync: cfg.autoSync, autoSyncInterval: cfg.autoSyncInterval, spellCheck: cfg.spellCheck, spellLanguage: cfg.spellLanguage });
+    if (p.scope === 'global') lsSet('neoleaf.globalConfig', { engine: cfg.engine, autoInstall: cfg.autoInstall, autoSync: cfg.autoSync, autoSyncInterval: cfg.autoSyncInterval, spellCheck: cfg.spellCheck, spellLanguage: cfg.spellLanguage, styleCheck: cfg.styleCheck, formatWrap: cfg.formatWrap, formatLineWidth: cfg.formatLineWidth });
     else await writeJson('.neoleaf/config.json', cfg);
     return { success: true };
   }

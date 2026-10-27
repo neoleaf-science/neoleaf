@@ -53,6 +53,7 @@ pub(super) fn script_tags() -> &'static str {
     <script src="/static/js/mindmap.js"></script>
     <script src="/static/js/spellcheck-dicts.js"></script>
     <script src="/static/js/spellcheck.js"></script>
+    <script src="/static/js/badness.js"></script>
     <script src="/static/js/project-tools.js"></script>
 "##
 }

@@ -1,0 +1,28 @@
+[package]
+name = "neoleaf-badness-wasm"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "WebAssembly shim over Badness (MIT): format, lint and fix LaTeX and BibTeX in the browser"
+
+# Not part of the server build: `scripts/build_badness_vendor.sh` builds it for wasm32 and copies the result to static/vendor/badness/.
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+# Pinned commit of https://github.com/jolars/badness (MIT). Keep in step with scripts/build_badness_vendor.sh and static/vendor/NOTICES.md.
+badness = { git = "https://github.com/jolars/badness", rev = "cf35528c63f008c3ea47de1f31426058e7b479e1", default-features = false }
+badness-formatter = { git = "https://github.com/jolars/badness", rev = "cf35528c63f008c3ea47de1f31426058e7b479e1" }
+badness-parser = { git = "https://github.com/jolars/badness", rev = "cf35528c63f008c3ea47de1f31426058e7b479e1" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+wasm-bindgen = "=0.2.129"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

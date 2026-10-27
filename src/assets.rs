@@ -59,6 +59,11 @@ pub static FILES: &[(&str, &[u8])] = &[
     ),
     ("js/collab.js", include_bytes!("../static/js/collab.js")),
     ("js/comments.js", include_bytes!("../static/js/comments.js")),
+    ("js/badness.js", include_bytes!("../static/js/badness.js")),
+    (
+        "js/badness-worker.js",
+        include_bytes!("../static/js/badness-worker.js"),
+    ),
     (
         "js/compile-typst.js",
         include_bytes!("../static/js/compile-typst.js"),
@@ -321,6 +326,14 @@ pub static FILES: &[(&str, &[u8])] = &[
         include_bytes!("../static/vendor/neoleaf-mascot-agent.mjs"),
     ),
     (
+        "vendor/badness-engine.js",
+        include_bytes!("../static/vendor/badness-engine.js"),
+    ),
+    (
+        "vendor/badness-engine_bg.wasm",
+        include_bytes!("../static/vendor/badness-engine_bg.wasm"),
+    ),
+    (
         "vendor/typst-engine.min.js",
         include_bytes!("../static/vendor/typst-engine.min.js"),
     ),
@@ -344,6 +357,8 @@ pub fn find(dir: &str, name: &str) -> Option<Asset> {
         "png" => ("image/png", "public, max-age=86400"),
         "webp" => ("image/webp", "public, max-age=86400"),
         "txt" => ("text/plain; charset=utf-8", "no-cache"),
+        // requested with the build version (?v=), so a new build is a new address
+        "wasm" => ("application/wasm", "public, max-age=31536000, immutable"),
         _ => ("application/octet-stream", "no-cache"),
     };
     Some(Asset {
@@ -367,6 +382,12 @@ mod tests {
             "text/css; charset=utf-8"
         );
         assert_eq!(find("img", "logo.png").unwrap().content_type, "image/png");
+        assert_eq!(
+            find("vendor", "badness-engine_bg.wasm")
+                .unwrap()
+                .content_type,
+            "application/wasm"
+        );
         assert_eq!(
             find("vendor", "yjs.mjs").unwrap().content_type,
             "application/javascript; charset=utf-8"

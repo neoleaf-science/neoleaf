@@ -172,6 +172,26 @@ pub(super) fn project_tab_settings() -> &'static str {
                         Underlines misspelled words in the editor. Ignores LaTeX commands, math and references. Project vocabulary is kept in <code>.neoleaf/dictionary.txt</code>. Your browser downloads each dictionary when it is needed, from the LibreOffice dictionaries on GitHub, and keeps it on this device: Portuguese (Brazil and Portugal), English (US and UK), Spanish, French, Italian and German. Documents in other languages are not checked.
                     </div>
                 </div>
+                <div class="form-group" style="margin-top: 12px; margin-bottom: 12px; padding: 12px; background: var(--bg-secondary); border-radius: 6px; border: 1px solid var(--border-color);">
+                    <label class="check" style="font-weight: 500; margin-bottom: 6px;">
+                        <input type="checkbox" id="cfg-style-check" checked>
+                        Style checks and syntax errors
+                    </label>
+                    <div style="margin-left: 24px; display: flex; align-items: center; gap: 8px; font-size: 13px; margin-top: 6px; flex-wrap: wrap;">
+                        <span>Format Document:</span>
+                        <select id="cfg-format-wrap" class="form-control" style="width: auto; padding: 2px 8px; font-size: 13px;">
+                            <option value="reflow" selected>Reflow paragraphs</option>
+                            <option value="sentence">One sentence per line</option>
+                            <option value="semantic">Break at clauses</option>
+                            <option value="preserve">Keep my line breaks</option>
+                        </select>
+                        <span>Width:</span>
+                        <input type="number" id="cfg-format-width" class="form-control" min="40" max="200" value="80" style="width: 76px; padding: 2px 8px; font-size: 13px;">
+                    </div>
+                    <div class="modal-hint" style="margin-left: 24px; margin-top: 6px; font-size: 11px;" data-i18n-html>
+                        Underlines unclosed environments and braces and style slips (straight quotes, <code>$$</code>, <code>...</code>, a missing non-breaking space), with a quick fix. Format Document (Shift+Alt+F) and Fix all style issues are in the editor menu. Runs in your browser with Badness.
+                    </div>
+                </div>
                 <p class="modal-hint" data-i18n-html>The settings are stored in the project's <code>.neoleaf/config.json</code> file (and in <code>NeoLeaf/.neoleaf</code> for the global default). Anyone who edits the project can change them.</p>
                 <button class="btn btn-primary" onclick="saveSettings()">Save settings</button>
             </div>

@@ -64,6 +64,13 @@ The full texts are in <https://github.com/typst/typst-assets/blob/v0.15.1/NOTICE
 
 The Typst packages a document imports (`@preview/...`) are downloaded by the browser from packages.typst.org, each with the license its author chose.
 
+## Badness (`badness-engine.js`, `badness-engine_bg.wasm`)
+Built by `scripts/build_badness_vendor.sh` from `tools/badness-wasm` (a small shim written for NeoLeaf) and **Badness** at commit `cf35528c63f008c3ea47de1f31426058e7b479e1`
+(<https://github.com/jolars/badness>): Copyright (c) 2026 Johan Larsson, MIT License. Its Rust dependencies are compiled into the same file (120 crates, pinned in
+`tools/badness-wasm/Cargo.lock`): 117 are MIT, Apache-2.0 or both (some also Unlicense), one is Zlib and one adds Unicode-3.0 for its data tables. One, **option-ext** 0.2.0
+(through `dirs`, which Badness uses to find configuration files and which does nothing in a browser), is MPL-2.0: it is in the dependency graph and we could not confirm that the
+linker dropped it. Its source is public at <https://crates.io/crates/option-ext> and the MPL-2.0 applies to its files only.
+
 ## The MIT License (applies to every project above marked MIT)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation

@@ -40,3 +40,4 @@ tlcache/
 
 # Pyodide (Python em WebAssembly), gerado por scripts/fetch_pyodide.py
 static/pyodide/
+tools/badness-wasm/target/

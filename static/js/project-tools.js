@@ -70,6 +70,9 @@
       $('cfg-global').checked = false;
       if ($('cfg-spell-check')) $('cfg-spell-check').checked = d.config.spellCheck !== false;
       if ($('cfg-spell-lang')) $('cfg-spell-lang').value = d.config.spellLanguage || 'auto';
+      if ($('cfg-style-check')) $('cfg-style-check').checked = d.config.styleCheck !== false;
+      if ($('cfg-format-wrap')) $('cfg-format-wrap').value = d.config.formatWrap || 'reflow';
+      if ($('cfg-format-width')) $('cfg-format-width').value = d.config.formatLineWidth || 80;
       if ($('cfg-auto-sync')) $('cfg-auto-sync').checked = !!d.config.autoSync;
       if ($('cfg-auto-sync-interval')) $('cfg-auto-sync-interval').value = d.config.autoSyncInterval || 5;
       window.toggleAutoSyncIntervalVisibility();
@@ -85,14 +88,17 @@
     const autoInstall = $('cfg-auto').checked;
     const spellCheck = $('cfg-spell-check') ? $('cfg-spell-check').checked : true;
     const spellLanguage = $('cfg-spell-lang') ? $('cfg-spell-lang').value : 'auto';
+    const styleCheck = $('cfg-style-check') ? $('cfg-style-check').checked : true;
+    const formatWrap = $('cfg-format-wrap') ? $('cfg-format-wrap').value : 'reflow';
+    const formatLineWidth = $('cfg-format-width') ? parseInt($('cfg-format-width').value, 10) || 80 : 80;
     const autoSync = $('cfg-auto-sync') ? $('cfg-auto-sync').checked : false;
     const autoSyncInterval = $('cfg-auto-sync-interval') ? parseInt($('cfg-auto-sync-interval').value, 10) || 5 : 5;
     try {
-      await Project.config.save({ mainFile, engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage, scope: 'project' });
+      await Project.config.save({ mainFile, engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage, styleCheck, formatWrap, formatLineWidth, scope: 'project' });
       if ($('cfg-global').checked) {
-        await Project.config.save({ mainFile: 'main.tex', engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage, scope: 'global' });
+        await Project.config.save({ mainFile: 'main.tex', engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage, styleCheck, formatWrap, formatLineWidth, scope: 'global' });
       }
-      projectConfig = { mainFile, engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage };
+      projectConfig = { mainFile, engine, autoInstall, autoSync, autoSyncInterval, spellCheck, spellLanguage, styleCheck, formatWrap, formatLineWidth };
       if (window.BrowserGit && await BrowserGit.isCloned()) {
         try {
           await BrowserGit.writeFile('.neoleaf/config.json', JSON.stringify(projectConfig, null, 2));
@@ -100,6 +106,7 @@
         } catch (_) {}
       }
       if (window.SpellCheck && SpellCheck.applyConfig) SpellCheck.applyConfig(projectConfig);
+      if (window.LDBadness) LDBadness.applyConfig(projectConfig);
       if (window.initAutoSync) window.initAutoSync();
       const sel = $('engine-select');
       if (sel) sel.value = engine;

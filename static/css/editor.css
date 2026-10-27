@@ -1129,3 +1129,21 @@ body.resizing iframe, body.resizing .monaco-editor { pointer-events: none; }
 /* spell check: asks before a dictionary is downloaded, then says it is downloading */
 .spell-banner { position: absolute; bottom: 14px; right: 24px; z-index: 40; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; max-width: min(560px, calc(100% - 48px)); padding: 8px 12px; background: var(--bg-tertiary); color: var(--text-bright); border: 1px solid var(--border-strong); border-radius: 6px; font-size: 12px; line-height: 1.4; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); }
 .spell-banner .btn { padding: 3px 10px; font-size: 12px; }
+
+/* Complete bibliography (bib-complete.js) */
+.bibc-box { width: min(760px, 94vw); max-height: 86vh; display: flex; flex-direction: column; }
+.bibc-title { color: var(--text-bright); margin-bottom: 6px; }
+.bibc-list { overflow: auto; margin: 10px 0; display: flex; flex-direction: column; gap: 10px; min-height: 60px; }
+.bibc-entry { border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 10px; background: var(--bg-primary); }
+.bibc-head { display: flex; gap: 8px; align-items: center; margin-bottom: 4px; font-size: 13px; }
+.bibc-src { font-size: 11px; color: var(--muted); }
+.bibc-row { display: flex; gap: 8px; align-items: baseline; font-size: 13px; padding: 2px 0; cursor: pointer; }
+.bibc-row input { margin: 0; align-self: center; }
+.bibc-kind { font-size: 10px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); min-width: 56px; }
+.bibc-add .bibc-kind { color: var(--green); }
+.bibc-change { overflow-wrap: anywhere; }
+.bibc-change del { color: var(--muted); text-decoration: line-through; }
+.bibc-change ins { text-decoration: none; color: var(--text-bright); }
+.bibc-skipped, .bibc-empty { font-size: 12px; color: var(--muted); }
+.bibc-foot { display: flex; align-items: center; gap: 10px; }
+.bibc-count { font-size: 12px; color: var(--muted); }

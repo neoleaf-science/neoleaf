@@ -67,6 +67,20 @@ describe('Badness', () => {
     expect(text).toContain('author =');
   }, 60000);
 
+  test('in LaTeX and BibTeX the lines wrap at the width Format Document uses, elsewhere at the window', async () => {
+    await openInTree(s.page, 'main.tex');
+    const opt = () => s.page.evaluate(() => {
+      const m = (window as any).monaco; const e = (globalThis as any).eval('editor');
+      return { wrap: e.getOption(m.editor.EditorOption.wordWrap), column: e.getOption(m.editor.EditorOption.wordWrapColumn) };
+    });
+    expect(await opt()).toEqual({ wrap: 'bounded', column: 80 });
+    await s.page.evaluate(() => (window as any).LDBadness.applyConfig({ formatLineWidth: 100 }));
+    expect(await opt()).toEqual({ wrap: 'bounded', column: 100 });
+    await openInTree(s.page, 'references.bib');
+    expect((await opt()).wrap).toBe('bounded');
+    await s.page.evaluate(() => (window as any).LDBadness.applyConfig({ formatLineWidth: 80 }));
+  }, 60000);
+
   test('turning the style checks off clears the underlines', async () => {
     await openInTree(s.page, 'main.tex');
     await setText(s.page, 'Wait... done\n');

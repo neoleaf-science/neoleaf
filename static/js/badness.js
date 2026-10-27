@@ -241,8 +241,19 @@ const BADNESS_QUERY = (function () {
     };
   }
 
+  // In LaTeX and BibTeX files the lines wrap at the width that Format Document uses (but never wider than the window), so what is seen while typing is
+  // what the formatter will write. Other files keep wrapping at the window.
+  function applyLayout() {
+    if (typeof editor === 'undefined' || !editor || !window.monaco) return;
+    const model = editor.getModel();
+    const id = model && model.getLanguageId();
+    if (id === 'latex' || id === 'bibtex') editor.updateOptions({ wordWrap: 'bounded', wordWrapColumn: options.formatLineWidth });
+    else editor.updateOptions({ wordWrap: 'on' });
+  }
+
   function applyConfig(cfg) {
     readConfig(cfg);
+    applyLayout();
     if (!options.styleCheck) clearMarkers();
     else lintSoon();
   }
@@ -262,7 +273,9 @@ const BADNESS_QUERY = (function () {
       if (e && e.isFlush) clearMarkers();
       lintSoon();
     });
-    editor.onDidChangeModel(function () { clearMarkers(); lintSoon(); });
+    editor.onDidChangeModel(function () { clearMarkers(); lintSoon(); applyLayout(); });
+    editor.onDidChangeModelLanguage(applyLayout);
+    applyLayout();
     lintSoon();
   });
 

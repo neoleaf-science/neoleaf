@@ -45,6 +45,7 @@ pub(super) fn script_tags() -> &'static str {
     <script src="/static/js/csv-preview.js"></script>
     <script src="/static/js/ref-sources.js"></script>
     <script src="/static/js/references.js"></script>
+    <script src="/static/js/bib-complete.js"></script>
     <script src="/static/js/py-runner.js"></script>
     <script src="/static/js/py-ui.js"></script>
     <script src="/static/js/notebook.js"></script>

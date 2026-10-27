@@ -245,6 +245,10 @@ pub static FILES: &[(&str, &[u8])] = &[
         include_bytes!("../static/js/ref-sources.js"),
     ),
     (
+        "js/bib-complete.js",
+        include_bytes!("../static/js/bib-complete.js"),
+    ),
+    (
         "js/references.js",
         include_bytes!("../static/js/references.js"),
     ),

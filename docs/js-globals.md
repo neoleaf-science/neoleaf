@@ -39,6 +39,14 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `window.LDBadness` | window | project-tools.js |
 | `BADNESS_QUERY` | variable | (only itself) |
 
+## `bib-complete.js`
+
+Wrapped in an IIFE: it only exposes the `window.*` names below.
+
+| Name | Kind | Used by |
+|---|---|---|
+| `window.BibComplete` | window | (only itself) |
+
 ## `bibliography.js`
 
 | Name | Kind | Used by |
@@ -181,7 +189,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `showImportNote` | function | (only itself) |
 | `initLatexEditor` | function | (only itself) |
 | `saveCurrentFile` | function | file-tree-ops.js, git-review-modals.js, git-status.js, git-sync.js, pdf-panel.js, references.js, search.js |
-| `editor` | variable | autocomplete.js, badness.js, collab.js, comments.js, csv-preview.js, editor-toolbar.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review-open.js, git-status.js, history.js, md-preview.js, mermaid-preview.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-store-build.js, project-store.js, project-tools.js, py-ui.js, references.js, search.js, spellcheck.js, tabs.js |
+| `editor` | variable | autocomplete.js, badness.js, bib-complete.js, collab.js, comments.js, csv-preview.js, editor-toolbar.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review-open.js, git-status.js, history.js, md-preview.js, mermaid-preview.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-store-build.js, project-store.js, project-tools.js, py-ui.js, references.js, search.js, spellcheck.js, tabs.js |
 | `currentFileId` | variable | autocomplete.js, badness.js, comments.js, compile-pdflatex.js, compile-typst.js, editor-toolbar.js, file-tree-ops.js, file-tree.js, git-blame.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, history.js, md-preview.js, mermaid-preview.js, outline.js, pdf-panel.js, pdf-view.js, project-build.js, project-store-build.js, project-store.js, project-tools.js, py-ui.js, references.js, search.js, tabs.js |
 | `isDirty` | variable | collab.js, export-menu.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, git-sync.js, pdf-panel.js |
 | `saveTimeout` | variable | collab.js |
@@ -198,7 +206,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `updateStatus` | function | agent.js, badness.js, collab.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, file-tree-ops.js, font-packs.js, git-conflicts.js, git-review-open.js, git-status.js, git-sync.js, package-install.js, pdf-panel.js, project-build.js |
+| `updateStatus` | function | agent.js, badness.js, bib-complete.js, collab.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, file-tree-ops.js, font-packs.js, git-conflicts.js, git-review-open.js, git-status.js, git-sync.js, package-install.js, pdf-panel.js, project-build.js |
 | `updateDocumentOutline` | function | editor-core.js |
 | `switchTab` | function | comments.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, md-preview.js, pdf-panel.js, pdf-view.js, project-build.js, py-ui.js, references.js, search.js |
 | `escapeHtml` | function | git-review.js |
@@ -390,7 +398,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | Name | Kind | Used by |
 |---|---|---|
 | `window.LDI18n` | window | comments.js, history.js, pdf-panel.js, project-tools.js, spellcheck.js |
-| `window.T` | window | agent.js, autocomplete.js, badness.js, browser-git-compare.js, browser-git.js, collab.js, comments.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review.js, git-status.js, history.js, latex-language.js, mascot.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-tools.js, py-ui.js, references.js, search.js, share.js, storage-manager.js, theme.js, typst-language.js |
+| `window.T` | window | agent.js, autocomplete.js, badness.js, bib-complete.js, browser-git-compare.js, browser-git.js, collab.js, comments.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review.js, git-status.js, history.js, latex-language.js, mascot.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-tools.js, py-ui.js, references.js, search.js, share.js, storage-manager.js, theme.js, typst-language.js |
 | `window.alert` | window | comments.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-status.js, mermaid-preview.js, pdf-panel.js, project-tools.js, storage-manager.js |
 | `window.confirm` | window | comments.js, file-tree-ops.js, git-conflicts.js, history.js, notebook.js, project-tools.js, py-ui.js, search.js, share.js |
 | `window.prompt` | window | agent.js, notebook-frame.js, notebook.js |
@@ -593,7 +601,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.RefSources` | window | references.js |
+| `window.RefSources` | window | bib-complete.js, references.js |
 
 ## `references.js`
 

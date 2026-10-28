@@ -76,9 +76,10 @@
             </div>
         </section>
 
-        <!-- Showcase mockup of the editor and synchronized PDF -->
-        <section class="nl-showcase-container">
-            <div class="nl-mockup-window">
+        <!-- Showcase: the editor in seven real screens, each with its caption (the window frame is the same for all) -->
+        <section class="nl-showcase-container" id="screenshots">
+            <div class="nl-shots" id="nl-shots" role="group" aria-roledescription="carousel" aria-label="Screens of the editor" tabindex="0">
+                <div class="nl-mockup-window">
                 <div class="nl-mockup-titlebar">
                     <div class="nl-mockup-dots">
                         <div class="nl-mockup-dot nl-dot-red"></div>
@@ -95,14 +96,44 @@
                     </div>
                 </div>
 
-                <div class="nl-mockup-image-wrap">
-                    <img src="/static/img/editor_preview.webp" alt="Real NeoLeaf editor interface: LaTeX editing with Monaco Editor and PDF compilation side by side" class="nl-mockup-img nl-fade-1" width="1859" height="988">
-                    <img src="/static/img/editor_preview_claro.webp" alt="NeoLeaf editor in the light theme: LaTeX code and PDF side by side" class="nl-mockup-img nl-fade-2" width="1859" height="988" decoding="async">
-                    <img src="/static/img/editor_preview_2.webp" alt="NeoLeaf Map tab: the paper in the center, with sections and figures as branches" class="nl-mockup-img nl-fade-3" width="1859" height="988" decoding="async">
-                    <img src="/static/img/editor_preview_claro_2.webp" alt="NeoLeaf Map tab in the light theme: paper structure as a mind map" class="nl-mockup-img nl-fade-4" width="1859" height="988" decoding="async">
+                    <div class="nl-shots-stage">
+                    <figure class="nl-shot is-active" id="shot-1" aria-hidden="false">
+                        <picture class="nl-shot-img"><img src="/static/img/shot-1.webp" width="1600" height="850" loading="eager" fetchpriority="high" decoding="async" alt="Write, compile and see the PDF"></picture>
+                        <figcaption><h3>Write, compile and see the PDF</h3><p>The VS Code editor with your files and the document outline on the left, and the compiled PDF on the right. This conference template compiled in the browser, with the packages it needed installed on demand.</p></figcaption>
+                    </figure>
+                    <figure class="nl-shot" id="shot-2" aria-hidden="true">
+                        <picture class="nl-shot-img"><img src="/static/img/shot-2.webp" width="1600" height="850" loading="lazy" decoding="async" alt="The paper as a mind map"></picture>
+                        <figcaption><h3>The paper as a mind map</h3><p>The Map tab draws the document: sections as branches and figures as leaves with a thumbnail. Click a node to jump to the text, while other authors edit the same file with you.</p></figcaption>
+                    </figure>
+                    <figure class="nl-shot" id="shot-3" aria-hidden="true">
+                        <picture class="nl-shot-img"><img src="/static/img/shot-3.webp" width="1600" height="850" loading="lazy" decoding="async" alt="Reference search in ten sources"></picture>
+                        <figcaption><h3>Reference search in ten sources</h3><p>Search Crossref, OpenAlex, PubMed, Europe PMC and more at once, then insert the \cite, add the entry to your .bib or copy the BibTeX, each in one click.</p></figcaption>
+                    </figure>
+                    <figure class="nl-shot" id="shot-4" aria-hidden="true">
+                        <picture class="nl-shot-img"><img src="/static/img/shot-4.webp" width="1600" height="850" loading="lazy" decoding="async" alt="Mermaid diagrams"></picture>
+                        <figcaption><h3>Mermaid diagrams</h3><p>Write a Mermaid diagram and see it as you type, with ready-made examples and export to SVG or PNG.</p></figcaption>
+                    </figure>
+                    <figure class="nl-shot" id="shot-5" aria-hidden="true">
+                        <picture class="nl-shot-img"><img src="/static/img/shot-5.webp" width="1600" height="850" loading="lazy" decoding="async" alt="CSV as a table"></picture>
+                        <figcaption><h3>CSV as a table</h3><p>Open a .csv or .tsv and read it as a table, with a fixed header, a filter, separator detection and a button that copies it as a LaTeX tabular.</p></figcaption>
+                    </figure>
+                    <figure class="nl-shot" id="shot-6" aria-hidden="true">
+                        <picture class="nl-shot-img"><img src="/static/img/shot-6.webp" width="1600" height="850" loading="lazy" decoding="async" alt="Python in your browser"></picture>
+                        <figcaption><h3>Python in your browser</h3><p>Run a .py file with pandas and matplotlib, with nothing to install. The output and the figures appear beside the code, and one click saves a figure into the project.</p></figcaption>
+                    </figure>
+                    <figure class="nl-shot" id="shot-7" aria-hidden="true">
+                        <picture class="nl-shot-img"><img src="/static/img/shot-7.webp" width="1600" height="850" loading="lazy" decoding="async" alt="Jupyter notebooks"></picture>
+                        <figcaption><h3>Jupyter notebooks</h3><p>Open .ipynb files and run their cells with Python in the same window, with Markdown, formulas and outputs, saved in the project as ordinary Jupyter files.</p></figcaption>
+                    </figure>
+                    </div>
+                </div>
+                <div class="nl-shot-controls">
+                    <button type="button" class="nl-shot-nav" id="nl-shot-prev" aria-label="Previous screen">‹</button>
+                    <div class="nl-shot-dots" role="tablist" aria-label="Choose a screen"><button type="button" class="nl-shot-dot is-active" role="tab" aria-selected="true" aria-controls="shot-1" data-i="0"></button><button type="button" class="nl-shot-dot" role="tab" aria-selected="false" aria-controls="shot-2" data-i="1"></button><button type="button" class="nl-shot-dot" role="tab" aria-selected="false" aria-controls="shot-3" data-i="2"></button><button type="button" class="nl-shot-dot" role="tab" aria-selected="false" aria-controls="shot-4" data-i="3"></button><button type="button" class="nl-shot-dot" role="tab" aria-selected="false" aria-controls="shot-5" data-i="4"></button><button type="button" class="nl-shot-dot" role="tab" aria-selected="false" aria-controls="shot-6" data-i="5"></button><button type="button" class="nl-shot-dot" role="tab" aria-selected="false" aria-controls="shot-7" data-i="6"></button></div>
+                    <button type="button" class="nl-shot-nav" id="nl-shot-next" aria-label="Next screen">›</button>
+                    <button type="button" class="nl-shot-nav nl-shot-play" id="nl-shot-play" aria-label="Pause the slideshow" aria-pressed="false">❚❚</button>
                 </div>
             </div>
-
         </section>
 
         <!-- Free technologies / trust band -->
@@ -219,7 +250,7 @@ $E = mc^2$
                     </div>
                     <div class="nl-fx-body">
                         <h3>Compiling in the browser</h3>
-                        <p>pdfLaTeX, XeLaTeX and LuaLaTeX in WebAssembly: nothing to install and no server minutes to pay for.</p>
+                        <p>pdfLaTeX, XeLaTeX, LuaLaTeX and Typst in WebAssembly: nothing to install and no server minutes to pay for.</p>
                         <a class="nl-fx-more" href="#compilation">Engines and local agent →</a>
                     </div>
                 </article>
@@ -346,16 +377,76 @@ $E = mc^2$
                     </div>
                 </article>
 
+                <article class="nl-fx-card fx-clean" style="--fx:#7ee787">
+                    <div class="nl-fx-bg" aria-hidden="true"></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="10" y="8" width="280" height="114" rx="10"/>
+                            <text x="24" y="34" class="fx-code"><tspan fill="#c586c0">\section</tspan><tspan>{Results}</tspan></text>
+                            <text x="24" y="58" class="fx-code">He said "hi"... and it works.</text>
+                            <path d="M24 63 q4 -4 8 0 t8 0 t8 0 t8 0 t8 0 t8 0 t8 0" stroke="#e3b341" stroke-width="1.6" fill="none"/>
+                            <text x="24" y="82" class="fx-code">Teh results are clear.</text>
+                            <path d="M24 87 q4 -4 8 0 t8 0 t8 0 t8 0" stroke="#f85149" stroke-width="1.6" fill="none"/>
+                            <rect x="170" y="94" width="104" height="20" rx="10" class="fx-a" opacity=".3"/><text x="222" y="108" text-anchor="middle" class="fx-flag">Shift+Alt+F</text>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Clean writing</h3>
+                        <p>Format Document, syntax errors and style hints with a quick fix, and a spell check in six languages, all running in your browser.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-submit" style="--fx:#f778ba">
+                    <div class="nl-fx-bg" aria-hidden="true"></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="12" y="10" width="150" height="110" rx="8"/>
+                            <g><circle cx="32" cy="34" r="8" class="fx-a" opacity=".9"/><path d="M28 34 l3 3 l6 -7" stroke="#fff" stroke-width="2" fill="none"/><rect class="fx-l" x="48" y="31" width="90" height="6" rx="3"/></g>
+                            <g><circle cx="32" cy="62" r="8" class="fx-a" opacity=".9"/><path d="M28 62 l3 3 l6 -7" stroke="#fff" stroke-width="2" fill="none"/><rect class="fx-l" x="48" y="59" width="70" height="6" rx="3"/></g>
+                            <g><circle cx="32" cy="90" r="8" fill="#f85149"/><path d="M29 87 l6 6 M35 87 l-6 6" stroke="#fff" stroke-width="2"/><rect class="fx-l" x="48" y="87" width="100" height="6" rx="3"/></g>
+                            <path class="fx-flow" d="M172 65 H206"/><path class="fx-as" d="M198 56 L208 65 L198 74"/>
+                            <rect class="fx-s" x="214" y="34" width="72" height="62" rx="8"/><rect x="214" y="34" width="72" height="16" rx="8" class="fx-a" opacity=".3"/>
+                            <text x="250" y="86" text-anchor="middle" class="fx-flag">.zip</text><rect class="fx-l" x="228" y="58" width="44" height="5" rx="2.5"/>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Ready to submit</h3>
+                        <p>Check the project the way a journal or arXiv will meet it, then download a clean ZIP with only the files the paper uses. A GitHub workflow can also build the PDF on every push.</p>
+                    </div>
+                </article>
+
+                <article class="nl-fx-card fx-math" style="--fx:#8b9eff">
+                    <div class="nl-fx-bg" aria-hidden="true"></div>
+                    <div class="nl-fx-fig" aria-hidden="true">
+                        <svg viewBox="0 0 300 130">
+                            <rect class="fx-s" x="10" y="8" width="170" height="60" rx="8"/>
+                            <text x="22" y="30" class="fx-code">Let <tspan fill="#ff9f43">$\int_0^1 x^2dx$</tspan></text>
+                            <rect class="fx-l" x="22" y="44" width="120" height="5" rx="2.5"/>
+                            <rect x="40" y="52" width="148" height="52" rx="8" fill="var(--bg-secondary)" stroke="var(--border-color)"/>
+                            <text x="114" y="86" text-anchor="middle" font-size="19" fill="var(--text-bright)" font-family="serif" font-style="italic">&#8747;&#8320;&#185; x&#178; dx = &#8531;</text>
+                            <rect x="200" y="14" width="88" height="104" rx="8" class="fx-s"/><text x="212" y="36" class="fx-code">@article{</text><text x="212" y="54" class="fx-code fx-m">doi = {10.</text>
+                            <rect x="210" y="68" width="68" height="14" rx="7" class="fx-a" opacity=".3"/><text x="244" y="78.5" text-anchor="middle" class="fx-flag">+ journal</text>
+                            <rect x="210" y="90" width="68" height="14" rx="7" class="fx-a" opacity=".3"/><text x="244" y="100.5" text-anchor="middle" class="fx-flag">+ pages</text>
+                        </svg>
+                    </div>
+                    <div class="nl-fx-body">
+                        <h3>Formulas and references</h3>
+                        <p>Rest the mouse on a formula to see it typeset, and complete a .bib entry from its DOI, with every change shown before it is made.</p>
+                    </div>
+                </article>
+
             </div>
 
             <div class="nl-fx-banner">
                 <div class="nl-fx-swatches" aria-hidden="true">
                     <span style="--a:#0b1f2a;--b:#0b7a9c"></span><span style="--a:#ffffff;--b:#0a6f9e"></span><span style="--a:#f3f4f7;--b:#1a6fb5"></span><span style="--a:#1e1e1e;--b:#0e639c"></span><span style="--a:#1e1e2e;--b:#89b4fa"></span><span style="--a:#eff1f5;--b:#1e66f5"></span><span style="--a:#282a36;--b:#bd93f9"></span><span style="--a:#2e3440;--b:#88c0d0"></span><span style="--a:#282828;--b:#83a598"></span><span style="--a:#fdf6e3;--b:#1b6fae"></span>
                 </div>
-                <p>Ten color themes, light and dark mode, and the interface in Portuguese, English, Spanish and Chinese.</p>
-                <div class="nl-fx-flags" aria-hidden="true"><span>🇧🇷</span><span>🇺🇸</span><span>🇪🇸</span><span>🇨🇳</span></div>
+                <p>Ten color themes, light and dark mode, and the interface in 15 languages.</p>
+                <div class="nl-fx-flags" aria-hidden="true"><span>🇧🇷</span><span>🇺🇸</span><span>🇪🇸</span><span>🇨🇳</span><span>🇫🇷</span><span>🇩🇪</span><span>🇯🇵</span></div>
             </div>
         </section>
+
+
 
         <!-- How compilation works section ({why free compilation?}) -->
         <section id="compilation">
@@ -480,6 +571,16 @@ $E = mc^2$
                     <div class="nl-template-tags">
                         <span class="nl-template-tag">Slides</span>
                         <span class="nl-template-tag">Beamer</span>
+                    </div>
+                </div>
+
+                <div class="nl-template-card">
+                    <div class="nl-template-icon">✍️</div>
+                    <h4>Typst Article</h4>
+                    <p>Article in Typst with title, abstract, sections, math and a bibliography, compiled in your browser.</p>
+                    <div class="nl-template-tags">
+                        <span class="nl-template-tag">Article</span>
+                        <span class="nl-template-tag">Typst</span>
                     </div>
                 </div>
             </div>

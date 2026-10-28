@@ -93,3 +93,76 @@
             const done = () => { const o = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = o; }, 2000); };
             if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done);
         }
+
+        // Screenshots carousel in the showcase window: arrows, dots, the keyboard (left and right), a swipe, or a click on the picture. It also turns by itself every few
+        // seconds, until the person moves through the screens (from then on it is theirs), hovers or focuses it, or presses pause; it never starts for people who ask
+        // for less motion, and it waits while the tab is hidden or the carousel is out of view.
+        (function () {
+            var root = document.getElementById('nl-shots');
+            if (!root) return;
+            var figs = Array.prototype.slice.call(root.querySelectorAll('.nl-shot'));
+            var dots = Array.prototype.slice.call(root.querySelectorAll('.nl-shot-dot'));
+            var stage = root.querySelector('.nl-shots-stage');
+            var playBtn = document.getElementById('nl-shot-play');
+            var EVERY = parseInt(root.getAttribute('data-interval'), 10) || 6500;
+            var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var cur = 0, playing = !reduce, held = false, visible = true, timer = null;
+
+            function paint() {
+                // while it turns by itself nothing is announced; once it is the person's, a screen reader hears each new caption
+                stage.setAttribute('aria-live', playing ? 'off' : 'polite');
+                playBtn.setAttribute('aria-pressed', playing ? 'false' : 'true');
+                playBtn.setAttribute('aria-label', playing ? 'Pause the slideshow' : 'Play the slideshow');
+                playBtn.textContent = playing ? '\u275A\u275A' : '\u25B6';
+            }
+            function schedule() {
+                clearInterval(timer);
+                timer = null;
+                if (playing && !held && visible && !document.hidden) timer = setInterval(function () { show(cur + 1); }, EVERY);
+            }
+            function show(i) {
+                cur = (i + figs.length) % figs.length;
+                figs.forEach(function (f, k) {
+                    f.classList.toggle('is-active', k === cur);
+                    f.setAttribute('aria-hidden', k === cur ? 'false' : 'true');
+                });
+                dots.forEach(function (d, k) {
+                    d.classList.toggle('is-active', k === cur);
+                    d.setAttribute('aria-selected', k === cur ? 'true' : 'false');
+                    d.setAttribute('aria-label', 'Screen ' + (k + 1) + ' of ' + figs.length);
+                });
+                // the next picture is fetched ahead of time
+                var nxt = figs[(cur + 1) % figs.length].querySelector('img');
+                if (nxt && nxt.getAttribute('loading') === 'lazy') nxt.setAttribute('loading', 'eager');
+            }
+            // the person moves through the screens: the slideshow stops for good
+            function go(i) { playing = false; paint(); schedule(); show(i); }
+
+            document.getElementById('nl-shot-prev').addEventListener('click', function () { go(cur - 1); });
+            document.getElementById('nl-shot-next').addEventListener('click', function () { go(cur + 1); });
+            dots.forEach(function (d) { d.addEventListener('click', function () { go(parseInt(d.getAttribute('data-i'), 10)); }); });
+            figs.forEach(function (f) { f.querySelector('.nl-shot-img').addEventListener('click', function () { go(cur + 1); }); });
+            playBtn.addEventListener('click', function () { playing = !playing; paint(); schedule(); });
+            root.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowLeft') { go(cur - 1); e.preventDefault(); }
+                else if (e.key === 'ArrowRight') { go(cur + 1); e.preventDefault(); }
+            });
+            var x0 = null;
+            stage.addEventListener('touchstart', function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+            stage.addEventListener('touchend', function (e) {
+                if (x0 === null) return;
+                var dx = e.changedTouches[0].clientX - x0;
+                x0 = null;
+                if (Math.abs(dx) > 40) go(cur + (dx < 0 ? 1 : -1));
+            }, { passive: true });
+            // it waits while the mouse is on it or the focus is inside
+            root.addEventListener('mouseenter', function () { held = true; schedule(); });
+            root.addEventListener('mouseleave', function () { held = false; schedule(); });
+            root.addEventListener('focusin', function () { held = true; schedule(); });
+            root.addEventListener('focusout', function () { held = false; schedule(); });
+            document.addEventListener('visibilitychange', schedule);
+            if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { visible = es[0].isIntersecting; schedule(); }).observe(root);
+            show(0);
+            paint();
+            schedule();
+        })();

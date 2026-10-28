@@ -52,24 +52,33 @@ describe('landing page', () => {
     } finally { await sess.context.close(); }
   });
 
-  test('the four editor screens load and take turns', async () => {
-    const c2 = await (await getBrowser()).newContext({ locale: 'en-US' });
+  test('the screens of the showcase load, the first one first, and nothing of the old four-image cycle is left', async () => {
+    const c2 = await (await getBrowser()).newContext({ locale: 'en-US', reducedMotion: 'reduce' });
     const page = await c2.newPage();
     await page.goto(`${BASE_URL}/`);
-    await page.waitForSelector('.nl-mockup-img');
-    const info = await page.$$eval('.nl-mockup-img', imgs => imgs.map(i => ({ src: new URL((i as HTMLImageElement).src).pathname, ok: (i as HTMLImageElement).complete })));
-    expect(info.map(i => i.src)).toEqual(['/static/img/editor_preview.webp', '/static/img/editor_preview_claro.webp', '/static/img/editor_preview_2.webp', '/static/img/editor_preview_claro_2.webp']);
-    for (const i of info) expect((await page.request.get(`${BASE_URL}${i.src}`)).status()).toBe(200);
-    for (const i of info) expect((await page.request.get(`${BASE_URL}${i.src}`)).headers()['content-type']).toBe('image/webp');
+    await page.waitForSelector('.nl-shot img');
+    const info = await page.$$eval('.nl-shot img', imgs => imgs.map(i => ({ src: new URL((i as HTMLImageElement).src).pathname, loading: i.getAttribute('loading') })));
+    expect(info.map(i => i.src)).toEqual([1, 2, 3, 4, 5, 6, 7].map(n => `/static/img/shot-${n}.webp`));
+    expect(info[0].loading).toBe('eager');
+    for (const i of info) { const r = await page.request.get(`${BASE_URL}${i.src}`); expect(r.status()).toBe(200); expect(r.headers()['content-type']).toBe('image/webp'); }
+    expect(await page.locator('.nl-mockup-img').count()).toBe(0);
     expect(await page.locator('.nl-mockup-badge-float').count()).toBe(0); // no badge over the image
-    // one at a time is visible: every 5 s the next one
-    const visible = () => page.$$eval('.nl-mockup-img', imgs => imgs.map(i => Number(getComputedStyle(i).opacity) > 0.5));
-    await page.waitForFunction(() => document.querySelectorAll('.nl-mockup-img').length === 4);
-    const seen = new Set<number>();
-    for (let t = 0; t < 22 && seen.size < 4; t++) { const v = await visible(); const k = v.indexOf(true); if (k >= 0) seen.add(k); await page.waitForTimeout(1000); }
-    expect(seen.size).toBe(4);
+    expect((await page.request.get(`${BASE_URL}/static/img/editor_preview.webp`)).status()).toBe(404);
     await c2.close();
   }, 60000);
+
+  test('the page is not wider than the screen on phones, tablets and desktops', async () => {
+    const b = await getBrowser();
+    for (const w of [360, 390, 414, 768, 1280]) {
+      const c = await b.newContext({ viewport: { width: w, height: 800 }, reducedMotion: 'reduce' });
+      const p = await c.newPage();
+      await p.goto(`${BASE_URL}/`);
+      await p.waitForSelector('#nl-shots');
+      const r = await p.evaluate(() => ({ scroll: document.documentElement.scrollWidth, view: window.innerWidth }));
+      expect({ w, scroll: r.scroll }).toEqual({ w, scroll: r.view });
+      await c.close();
+    }
+  }, 120000);
 
   test('the Green Web Foundation badge is in the footer, sends no referrer and its text is translated', async () => {
     const page = await ctx.newPage();

@@ -8,20 +8,32 @@
 pub static FILES: &[(&str, &[u8])] = &[
     ("css/editor.css", include_bytes!("../static/css/editor.css")),
     (
-        "img/editor_preview.webp",
-        include_bytes!("../static/img/editor_preview.webp"),
+        "img/shot-1.webp",
+        include_bytes!("../static/img/shot-1.webp"),
     ),
     (
-        "img/editor_preview_2.webp",
-        include_bytes!("../static/img/editor_preview_2.webp"),
+        "img/shot-2.webp",
+        include_bytes!("../static/img/shot-2.webp"),
     ),
     (
-        "img/editor_preview_claro.webp",
-        include_bytes!("../static/img/editor_preview_claro.webp"),
+        "img/shot-3.webp",
+        include_bytes!("../static/img/shot-3.webp"),
     ),
     (
-        "img/editor_preview_claro_2.webp",
-        include_bytes!("../static/img/editor_preview_claro_2.webp"),
+        "img/shot-4.webp",
+        include_bytes!("../static/img/shot-4.webp"),
+    ),
+    (
+        "img/shot-5.webp",
+        include_bytes!("../static/img/shot-5.webp"),
+    ),
+    (
+        "img/shot-6.webp",
+        include_bytes!("../static/img/shot-6.webp"),
+    ),
+    (
+        "img/shot-7.webp",
+        include_bytes!("../static/img/shot-7.webp"),
     ),
     (
         "img/favicon.png",

@@ -1,5 +1,8 @@
 # NeoLeaf: release notes
 
+- **1.31.3**: the home page shows the editor in one place: the window at the top now holds the seven screens with their captions (they turn by themselves, with a pause button, and stop when you move through them or ask for less motion), replacing the four old pictures and the separate gallery. The page also no longer grows wider than a phone screen.
+- **1.31.2**: the home page has a gallery of seven real screens of the editor (the paper and its PDF, the mind map, reference search, Mermaid, CSV tables, Python and Jupyter notebooks), each with a caption that changes with it; arrows, dots, the keyboard and a swipe move through them.
+- **1.31.1**: the home page now describes what the editor does today: Typst, formatting and style checks, spell check, preparing a submission, the GitHub workflow, the formula preview, completing a .bib by DOI, the Typst template and the 15 interface languages.
 - **1.31.0**: prepare for submission (checks the project and builds a clean ZIP with only the files the document uses), a GitHub Actions workflow to build the PDF on every push, a formula preview when the mouse rests on a formula, and a smarter ZIP import that detects the main file and the compiler (pdfLaTeX, XeLaTeX, LuaLaTeX or Typst).
 - **1.30.1**: LaTeX and BibTeX are drawn in a monospaced font (a style rule had turned the editor text proportional), so the wrap column of the editor is exactly the formatter's width; the project setting is now labelled "Line width (characters)".
 - **1.30.0**: line wrapping in the editor can be set per person: at the formatter width (default, in LaTeX and BibTeX), at the window edge, or off. Alt+Z or the editor menu switches it; the choice stays in the browser, not in the project.

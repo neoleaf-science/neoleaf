@@ -1,5 +1,6 @@
 # NeoLeaf: release notes
 
+- **1.31.4**: double click on the PDF now leads to where the clicked words are written: a title, an author or a heading that the class prints no longer takes you to the class or to the `\maketitle` line, but to your `\title`, and a paragraph takes you to its own line (SyncTeX often points to the blank line that ends it).
 - **1.31.3**: the home page shows the editor in one place: the window at the top now holds the seven screens with their captions (they turn by themselves, with a pause button, and stop when you move through them or ask for less motion), replacing the four old pictures and the separate gallery. The page also no longer grows wider than a phone screen.
 - **1.31.2**: the home page has a gallery of seven real screens of the editor (the paper and its PDF, the mind map, reference search, Mermaid, CSV tables, Python and Jupyter notebooks), each with a caption that changes with it; arrows, dots, the keyboard and a swipe move through them.
 - **1.31.1**: the home page now describes what the editor does today: Typst, formatting and style checks, spell check, preparing a submission, the GitHub workflow, the formula preview, completing a .bib by DOI, the Typst template and the 15 interface languages.

@@ -550,7 +550,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `outputEntries` | function | compile-pdflatex.js |
 | `texmfCache` | variable | (only itself) |
 | `assetCache` | variable | (only itself) |
-| `projectConfig` | variable | agent.js, ci-workflow.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-ops.js, git-sync.js, package-install.js, pdf-panel.js, project-tools.js, submission.js |
+| `projectConfig` | variable | agent.js, ci-workflow.js, compile-lualatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, export-menu.js, file-tree-ops.js, git-sync.js, package-install.js, pdf-panel.js, pdf-view.js, project-tools.js, submission.js |
 | `lastBuild` | variable | compile-pdflatex.js |
 | `forceCleanBuild` | variable | compile-pdflatex.js, pdf-panel.js |
 | `knownTexts` | variable | (only itself) |
@@ -577,7 +577,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.Project` | window | autocomplete.js, badness.js, collab.js, comments.js, editor-core.js, editor-toolbar.js, export-menu.js, font-packs.js, git-review-open.js, git-status.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, project-build.js, project-tools.js, references.js, search.js, spellcheck.js, submission.js |
+| `window.Project` | window | autocomplete.js, badness.js, collab.js, comments.js, editor-core.js, editor-toolbar.js, export-menu.js, font-packs.js, git-review-open.js, git-status.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-tools.js, references.js, search.js, spellcheck.js, submission.js |
 | `window.__PS` | window | (only itself) |
 
 ## `project-tools.js`

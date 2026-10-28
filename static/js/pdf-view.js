@@ -198,19 +198,85 @@
   const projectPaths = () => ((window.FT && FT.entries()) || []).filter(e => !e.dir).map(e => e.path);
 
   // ------------------------------------------------------------ PDF -> code
-  function onDblClick(ev) {
+  // The text item of the PDF under (x, y) (bp from the top left of page n) and the word in it: { words, k } or null
+  async function textAt(n, x, y) {
+    const p = st.pages[n - 1];
+    if (!p) return null;
+    const tc = await p.page.getTextContent();
+    const H = p.base.height;
+    // the item that holds the point; if none does, the nearest one on the same line (a click a little before or after the words still means that line)
+    let best = null, bestScore = Infinity;
+    for (const it of tc.items) {
+      if (!it.str || !it.str.trim()) continue;
+      const t = it.transform;
+      const size = Math.max(1, it.height || Math.hypot(t[2], t[3]));
+      const left = t[4], right = t[4] + it.width, base = H - t[5];
+      if (y < base - size - 2 || y > base + size * 0.3 + 2) continue;
+      const dx = x < left ? left - x : x > right ? x - right : 0;
+      if (dx > 60) continue;
+      // the line whose middle is nearest to the point (the boxes of two lines overlap a little), then the nearest sideways
+      const dy = Math.abs(y - (base - size * 0.35));
+      const score = dy * 3 + dx;
+      if (score < bestScore) { best = { it, left, right }; bestScore = score; }
+    }
+    if (!best) return null;
+    const str = best.it.str;
+    const frac = best.right > best.left ? Math.min(1, Math.max(0, (x - best.left) / (best.right - best.left))) : 0;
+    const at = Math.min(str.length - 1, Math.floor(frac * str.length));
+    // the word that contains the clicked character, or the nearest one
+    const re = /[\p{L}\p{N}]+/gu;
+    let m, k = -1, idx = 0, nearest = 0, nd = Infinity;
+    while ((m = re.exec(str))) {
+      const d = at < m.index ? m.index - at : at >= m.index + m[0].length ? at - (m.index + m[0].length) + 1 : 0;
+      if (d < nd) { nd = d; nearest = idx; }
+      idx++;
+    }
+    k = nearest;
+    const words = SyncTeX.wordsOf(str);
+    return words.length ? { words: words, k: Math.min(k, words.length - 1) } : null;
+  }
+
+  // Is the SyncTeX answer where the clicked words are written? If not (a class or package printed them), the place they are written in the .tex files; else null.
+  async function refine(n, x, y, hit, path) {
+    const at = await textAt(n, x, y);
+    if (!at) return null;
+    const texts = ((await Project.texts()).files || []).filter(f => /\.(tex|ltx)$/i.test(f.path));
+    // the phrase around the clicked word (a word like "the" is on many lines)
+    const from = at.words.length <= 6 ? 0 : Math.max(0, at.k - 2);
+    const needle = at.words.length <= 6 ? at.words : at.words.slice(from, from + 5);
+    const focus = at.k - from;
+    if (path) {
+      const f = texts.find(t => t.path === path);
+      if (f) {
+        const near = SyncTeX.nearestLineWithPhrase(f.text, hit.line, needle, focus, 1);
+        if (near === hit.line) return null;                                          // SyncTeX is right
+        if (near !== null) return { path: path, line: near };                        // the words are on the next line or the one before: that one
+      }
+    }
+    return SyncTeX.findPhrase(texts, needle, path ? { path: path, line: hit.line } : null, (window.projectConfig && projectConfig.mainFile) || '', focus);
+  }
+
+  async function onDblClick(ev) {
     const pageEl = ev.target.closest('.pdf-page');
     if (!pageEl) return;
     if (!st.sync) { toast('No sync data: recompile the project with the browser engine (WebAssembly).'); return; }
     const r = pageEl.getBoundingClientRect();
-    const x = (ev.clientX - r.left) / st.scale, y = (ev.clientY - r.top) / st.scale;
-    const hit = SyncTeX.pdfToSource(st.sync, +pageEl.dataset.n, x, y);
-    if (!hit) { toast('Could not find this spot in the code.'); return; }
-    const path = SyncTeX.pathForTag(st.sync, hit.tag, projectPaths());
+    const px = ev.clientX - r.left, py = ev.clientY - r.top;
+    const n = +pageEl.dataset.n;
+    const x = px / st.scale, y = py / st.scale;
+    const hit = SyncTeX.pdfToSource(st.sync, n, x, y);
+    let path = hit ? SyncTeX.pathForTag(st.sync, hit.tag, projectPaths()) : null;
+    let line = hit ? hit.line : 0;
+    // what a title or a heading says is written elsewhere than where the class prints it: look for the words
+    try {
+      const better = await refine(n, x, y, hit, path);
+      if (better) { path = better.path; line = better.line; }
+    } catch (_) { /* the SyncTeX answer stands */ }
+    if (!hit && !path) { toast('Could not find this spot in the code.'); return; }
     if (!path) { toast(T('This spot comes from a file outside the project ({0}).', st.sync.inputs.get(hit.tag) || '?')); return; }
-    pulse(pageEl, ev.clientX - r.left, ev.clientY - r.top);
-    LD.smart.goTo(path, hit.line);
-    flashLine(path, hit.line);
+    pulse(pageEl, px, py);
+    LD.smart.goTo(path, line);
+    flashLine(path, line);
   }
 
   function pulse(pageEl, px, py) {
@@ -271,7 +337,7 @@
     toastTimer = setTimeout(() => { el.style.display = 'none'; }, 3500);
   }
 
-  window.PdfView = { show, setBusy, setSynctex, locate, blobUrl: () => st.url, hasPdf: () => !!st.doc };
+  window.PdfView = { show, setBusy, setSynctex, locate, textAt, refine, blobUrl: () => st.url, hasPdf: () => !!st.doc };
   window.addEventListener('editor-ready', () => {
     editor.addAction({
       id: 'ld.locate-in-pdf', label: T('Go to this point in the PDF'), contextMenuGroupId: 'navigation', contextMenuOrder: 1.5,

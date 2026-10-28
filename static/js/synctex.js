@@ -126,7 +126,98 @@
     return best;
   }
 
-  const api = { parse, pdfToSource, sourceToPdf, tagForPath, pathForTag };
+  // ------------------------------------------------------------ checking a result against the text that was clicked
+  // SyncTeX says where TeX was reading when it made a box. For text that a class or a package prints (a title, the authors, a heading) that is the macro that
+  // prints it (\maketitle, or a line inside the .cls), not the place where the person wrote the words. So the words under the click are looked for in the
+  // project's .tex files, and the SyncTeX line is only kept when it really contains them.
+
+  // a word the way it is compared: no ligatures or accents, lower case
+  const plainWord = w => String(w).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+  // the words of a piece of text, in order (what the PDF shows: letters and digits)
+  function wordsOf(text) {
+    return (String(text).match(/[\p{L}\p{N}]+/gu) || []).map(plainWord);
+  }
+
+  // the words of LaTeX source with their line: comments and command names are left out, the text in their arguments stays
+  function tokenize(text) {
+    const out = [];
+    const lines = String(text).split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i];
+      for (let k = 0; k < line.length; k++) {
+        if (line[k] === '\\') { k++; continue; }
+        if (line[k] === '%') { line = line.slice(0, k); break; }
+      }
+      line = line.replace(/\\[A-Za-z@]+\*?/g, ' ').replace(/\\./g, ' ');
+      for (const w of wordsOf(line)) out.push({ w: w, line: i + 1 });
+    }
+    return out;
+  }
+
+  // does the text around `line` (the line and `radius` lines on each side) contain the word? One line is the slack SyncTeX needs (a space or a kern belongs to the line
+  // where it was made); more would accept a \maketitle two lines below a \title as the place of the title
+  function lineHasWord(text, line, word, radius) {
+    return nearestLineWithWord(text, line, word, radius) !== null;
+  }
+
+  // the line, within `radius` of `line`, where the word is written, the nearest to `line` (the earlier one on a tie); null when it is not written there.
+  // For a paragraph SyncTeX often gives the blank line that ended it, or the \end{document} after it: the word itself is on the line above.
+  function nearestLineWithWord(text, line, word, radius) {
+    const want = plainWord(word);
+    const r = radius === undefined ? 1 : radius;
+    let best = null;
+    for (const t of tokenize(text)) {
+      if (t.w !== want || Math.abs(t.line - line) > r) continue;
+      if (best === null || Math.abs(t.line - line) < Math.abs(best - line) || (Math.abs(t.line - line) === Math.abs(best - line) && t.line < best)) best = t.line;
+    }
+    return best;
+  }
+
+  // every place where the words of `want` follow each other in `toks`: { start, end, at } with the line of the first word, of the last, and of the word `focus`
+  function phraseMatches(toks, want, focus) {
+    const out = [];
+    const f = Math.min(Math.max(0, focus || 0), want.length - 1);
+    for (let i = 0; i + want.length <= toks.length; i++) {
+      let ok = true;
+      for (let j = 0; j < want.length; j++) if (toks[i + j].w !== want[j]) { ok = false; break; }
+      if (ok) out.push({ start: toks[i].line, end: toks[i + want.length - 1].line, at: toks[i + f].line });
+    }
+    return out;
+  }
+
+  /** The line where the clicked word is written, given the SyncTeX line: `needle` is the phrase around the word, `focus` the index of the word in it. Only a match that
+   *  touches the lines within `radius` of `line` counts, and the nearest wins (the earlier one on a tie). A phrase tells places apart where a word like "the" cannot.
+   *  Returns the line, or null. */
+  function nearestLineWithPhrase(text, line, needle, focus, radius) {
+    const want = needle.map(plainWord).filter(Boolean);
+    if (!want.length) return null;
+    const r = radius === undefined ? 1 : radius;
+    let best = null;
+    for (const m of phraseMatches(tokenize(text), want, focus)) {
+      const d = line >= m.start && line <= m.end ? 0 : Math.min(Math.abs(m.start - line), Math.abs(m.end - line));
+      if (d > r) continue;
+      if (best === null || Math.abs(m.at - line) < Math.abs(best - line) || (Math.abs(m.at - line) === Math.abs(best - line) && m.at < best)) best = m.at;
+    }
+    return best;
+  }
+
+  /** Where the words of `needle` (an array, in order) are written: files = [{ path, text }]. `focus` is the index of the clicked word in it (the answer is its line).
+   *  `prefer` ({ path, line }) is the SyncTeX answer: the nearest match to it wins, then a match in `mainPath`. A single short word is not enough to tell places apart,
+   *  so it must be 4 letters or more and appear only once. Returns { path, line } or null. */
+  function findPhrase(files, needle, prefer, mainPath, focus) {
+    const want = needle.map(plainWord).filter(Boolean);
+    if (!want.length) return null;
+    const found = [];
+    for (const f of files) for (const m of phraseMatches(tokenize(f.text), want, focus)) found.push({ path: f.path, line: m.at });
+    if (!found.length) return null;
+    if (want.length === 1 && (want[0].length < 4 || found.length > 1)) return null;
+    const score = m => (prefer && m.path === prefer.path ? Math.abs(m.line - prefer.line) : 100000) + (m.path === mainPath ? 0 : 0.5);
+    found.sort((a, b) => score(a) - score(b));
+    return found[0];
+  }
+
+  const api = { parse, pdfToSource, sourceToPdf, tagForPath, pathForTag, wordsOf, tokenize, lineHasWord, nearestLineWithWord, nearestLineWithPhrase, findPhrase };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.SyncTeX = api;
 })();

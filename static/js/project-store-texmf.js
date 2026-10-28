@@ -81,6 +81,9 @@
     } catch (_) {}
   }
 
+  // a package's BibTeX option file (abntex2-options.bib): abntex2cite adds it to every \bibliography; other .bib files in bibtex/bib/ are examples
+  const isOptionBib = p => p.startsWith('bibtex/bib/') && p.toLowerCase().endsWith('-options.bib');
+
   /** Picks, among a zip's files, only those LaTeX reads (flattened by name), as the server used to do. */
   function sanitizeZipEntries(entries) {
     const isTds = entries.some(e => e.name.startsWith('tex/'));
@@ -90,12 +93,12 @@
     for (const e of entries) {
       const path = e.name.replace(/\\/g, '/');
       if (path.startsWith('/') || path.split('/').some(seg => seg === '..' || seg.startsWith('.'))) continue;
-      if (isTds && !path.startsWith('tex/') && !(path.startsWith('bibtex/bst/') && path.endsWith('.bst')) && !path.startsWith('fonts/')) continue;
+      if (isTds && !path.startsWith('tex/') && !(path.startsWith('bibtex/bst/') && path.endsWith('.bst')) && !isOptionBib(path) && !path.startsWith('fonts/')) continue;
       if (!isTds && path.toLowerCase().split('/').some(seg => ['doc', 'docs', 'example', 'examples', 'source', 'test', 'tests'].includes(seg))) continue;
       const base = safeBasename(path);
       if (!base) continue;
       const x = ext(base);
-      if (!TEXMF_ALLOWED.includes(x) || (x === 'tex' && !isTds)) continue;
+      if ((!TEXMF_ALLOWED.includes(x) && !(isTds && isOptionBib(path))) || (x === 'tex' && !isTds)) continue;
       if (['pdf', 'png', 'jpg', 'jpeg'].includes(x) && !(isTds && path.startsWith('tex/'))) continue;   // images only from tex/ (beamer icons); in ordinary zips PDF is manual
       if (e.bytes.length > MAX_TEXMF_FILE || seen.has(base)) continue;
       seen.add(base);

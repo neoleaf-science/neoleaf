@@ -4,7 +4,7 @@ authors:
   - family-names: "Virgínio"
     given-names: "Tássio"
 title: "NeoLeaf: collaborative online LaTeX editor"
-version: 1.31.4
+version: 1.31.5
 date-released: 2026-10-24
 url: "https://neoleaf.science"
 license: "MIT OR Apache-2.0"

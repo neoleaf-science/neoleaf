@@ -100,6 +100,10 @@ function missingFromLog(log) {
     const base = name.replace(/\.bst$/i, '');
     if (/^[A-Za-z0-9_.+-]+$/.test(base)) add(base + '.bst', [base.toLowerCase()]);
   }
+  // BibTeX: "I couldn't open database file ./abntex2-options.bib" (the option file a package adds to \bibliography)
+  for (const m of log.matchAll(/I couldn't open database file (?:\.\/)?([A-Za-z0-9_.+-]+-options\.bib)/g)) {
+    add(m[1], [m[1].replace(/-options\.bib$/i, '').toLowerCase()]);
+  }
   // Plain TeX: "! I can't find file `xkeyval'." (an \\input of a .tex file, usually inside a package)
   for (const m of log.matchAll(/I can't find file [`']([^'`\s]+)'/g)) {
     const name = m[1].trim();

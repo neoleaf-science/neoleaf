@@ -35,10 +35,15 @@ pub(super) fn parse_tlpdb(text: &str) -> HashMap<String, String> {
             let is_style = path.ends_with(".bst")
                 && (path.starts_with("texmf-dist/bibtex/bst/")
                     || path.starts_with("RELOC/bibtex/bst/"));
+            let is_options = is_option_bib(
+                path.trim_start_matches("texmf-dist/")
+                    .trim_start_matches("RELOC/"),
+            );
             let is_font = path.starts_with("texmf-dist/fonts/") || path.starts_with("RELOC/fonts/");
             if !(path.starts_with("texmf-dist/tex/")
                 || path.starts_with("RELOC/tex/")
                 || is_style
+                || is_options
                 || is_font)
             {
                 continue;
@@ -46,7 +51,7 @@ pub(super) fn parse_tlpdb(text: &str) -> HashMap<String, String> {
             let Some(base) = path.rsplit('/').next() else {
                 continue;
             };
-            if ALLOWED_EXT.contains(&ext_of(base).as_str()) && !pkg.contains('.') {
+            if (ALLOWED_EXT.contains(&ext_of(base).as_str()) || is_options) && !pkg.contains('.') {
                 all.entry(base.to_string())
                     .or_default()
                     .push(pkg.to_string());
@@ -313,6 +318,13 @@ mod tests {
             ".bst styles enter the index"
         );
         assert!(!mb.contains_key("x.bib"));
+        let dbo = "name abntex2\nrunfiles size=2\n texmf-dist/bibtex/bib/abntex2/abntex2-options.bib\n texmf-dist/bibtex/bib/abntex2/exemplo.bib\n";
+        let mo = parse_tlpdb(dbo);
+        assert_eq!(
+            mo.get("abntex2-options.bib").map(String::as_str),
+            Some("abntex2")
+        );
+        assert!(!mo.contains_key("exemplo.bib"));
         let db2 = "name xkeyval\nrunfiles size=3\n texmf-dist/tex/latex/xkeyval/xkeyval.sty\n texmf-dist/tex/generic/xkeyval/xkeyval.tex\n texmf-dist/doc/latex/xkeyval/leia.tex\n";
         let m2 = parse_tlpdb(db2);
         assert_eq!(

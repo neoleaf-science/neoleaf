@@ -18,6 +18,12 @@ pub(super) fn is_image_ext(ext: &str) -> bool {
     matches!(ext, "pdf" | "png" | "jpg" | "jpeg")
 }
 
+/// A package's BibTeX option file (`abntex2-options.bib`): `abntex2cite` adds it to every `\bibliography`, so without it BibTeX
+/// skips the whole command. Other `.bib` files in `bibtex/bib/` are examples and stay out.
+pub(super) fn is_option_bib(path: &str) -> bool {
+    path.starts_with("bibtex/bib/") && path.to_ascii_lowercase().ends_with("-options.bib")
+}
+
 pub(super) fn ext_of(name: &str) -> String {
     name.rsplit_once('.')
         .map(|(_, e)| e.to_ascii_lowercase())
@@ -75,6 +81,7 @@ impl Collector {
         if self.is_tds
             && !path.starts_with("tex/")
             && !(path.starts_with("bibtex/bst/") && path.ends_with(".bst"))
+            && !is_option_bib(&path)
             && !path.starts_with("fonts/")
         {
             return Ok(());
@@ -95,7 +102,7 @@ impl Collector {
             return Ok(());
         };
         let ext = ext_of(&base);
-        if !ALLOWED_EXT.contains(&ext.as_str()) {
+        if !ALLOWED_EXT.contains(&ext.as_str()) && !(self.is_tds && is_option_bib(&path)) {
             return Ok(());
         }
         if is_image_ext(&ext) && !(self.is_tds && path.starts_with("tex/")) {
@@ -269,6 +276,8 @@ mod tests {
             ("tex/latex/beamer/beamericonbook.pdf", "pdf"),
             ("doc/latex/abntex2/manual.pdf", "pdf"),
             ("bibtex/bst/abntex2/abntex2-alf.bst", "bst"),
+            ("bibtex/bib/abntex2/abntex2-options.bib", "bib"),
+            ("bibtex/bib/abntex2/sample.bib", "no"),
         ]);
         let mut names: Vec<String> = sanitize_zip(&z).unwrap().into_iter().map(|f| f.0).collect();
         names.sort();
@@ -277,6 +286,7 @@ mod tests {
             vec![
                 "abntex2-alf.bbx",
                 "abntex2-alf.bst",
+                "abntex2-options.bib",
                 "abntex2.cls",
                 "beamericonbook.pdf",
                 "example.tex"

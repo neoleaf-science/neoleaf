@@ -2,10 +2,11 @@
 //
 // API: PdfView.show(bytes, synctexGzBytes|null)  PdfView.blobUrl()  PdfView.locate()  PdfView.setSynctex(bytes|null)
 (function () {
-  const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
-  // Subresource Integrity: a changed file on the CDN is not run (regenerate with openssl dgst -sha384 -binary | openssl base64 -A when the version changes)
-  const SRI_LIB = 'sha384-/1qUCSGwTur9vjf/z9lmu/eCUYbpOTgSjmpbMQZ1/CtX2v/WcAIKqRv+U1DUCG6e';
-  const SRI_WORKER = 'SnzOobpRMLXZ52iJvZm/C0fYw0OQemTXzTjIsdsfMcrCtCEe9qgzxTd3RSklO5x2';
+  const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/6.4.299/';
+  // Subresource Integrity: a changed file on the CDN is not run (regenerate with openssl dgst -sha384 -binary | openssl base64 -A when the version changes).
+  // From pdf.js 4 the library is an ES module (pdf.min.mjs) and `<script integrity>` does not cover it, so both files are downloaded, checked and used from a local blob
+  const SRI_LIB = 'sha384-QCvhu/UPp22U/TNLVbQNONL82ES2yY717GAiqP9VVu37Y7+m9VPKvadGx9XlFvcp';
+  const SRI_WORKER = 'sha384-NfW/OTMWezITv4oaALvfH7MFLwzPxEvpySmDpoALa1mtTY8MC200l0ZNFD+SOlrM';
   const $ = id => document.getElementById(id);
 
   const st = {
@@ -14,24 +15,24 @@
   };
 
   // ------------------------------------------------------------ PDF.js
+  // Downloads a file of the CDN and returns a blob URL for it, only if its SHA-384 is the expected one
+  async function checkedBlobUrl(file, sri) {
+    const res = await fetch(PDFJS + file);
+    if (!res.ok) throw new Error('Could not load PDF.js');
+    const buf = await res.arrayBuffer();
+    const digest = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-384', buf))));
+    if ('sha384-' + digest !== sri) throw new Error('PDF.js failed the integrity check (' + file + ')');
+    return URL.createObjectURL(new Blob([buf], { type: 'text/javascript' }));
+  }
+
   async function loadLib() {
     if (st.lib) return st.lib;
-    await new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = PDFJS + 'pdf.min.js';
-      s.integrity = SRI_LIB;
-      s.crossOrigin = 'anonymous';
-      s.onload = resolve;
-      s.onerror = () => reject(new Error('Could not load PDF.js'));
-      document.head.appendChild(s);
-    });
-    // the Worker cannot be created directly from another domain: download the script and use a local blob
-    const buf = await (await fetch(PDFJS + 'pdf.worker.min.js')).arrayBuffer();
-    const digest = btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-384', buf))));
-    if ('sha384-' + digest !== 'sha384-' + SRI_WORKER) throw new Error('PDF.js worker failed the integrity check');
-    const code = new TextDecoder().decode(buf);
-    window.pdfjsLib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
-    st.lib = window.pdfjsLib;
+    const libUrl = await checkedBlobUrl('pdf.min.mjs', SRI_LIB);
+    let lib;
+    try { lib = await import(libUrl); } catch (e) { throw new Error('Could not load PDF.js'); } finally { URL.revokeObjectURL(libUrl); }
+    // the Worker cannot be created directly from another domain: it is created from the checked local blob
+    lib.GlobalWorkerOptions.workerSrc = await checkedBlobUrl('pdf.worker.min.mjs', SRI_WORKER);
+    st.lib = lib;
     return st.lib;
   }
 
@@ -166,9 +167,11 @@
     setSynctex(synctexBytes);
     const lib = await loadLib();
     const keep = st.doc ? { top: st.scroll.scrollTop, page: currentPage() } : null;
-    // isEvalSupported:false: pdf.js 3.x runs font programs through eval, which CVE-2024-4367 turns into code execution from a crafted PDF
-    const doc = await lib.getDocument({ data: copy.slice(), isEvalSupported: false }).promise;
-    if (st.doc) st.doc.destroy();
+    // (pdf.js before 4.2.67 ran font programs through eval, which CVE-2024-4367 turned into code execution from a crafted PDF; this version does not)
+    const task = lib.getDocument({ data: copy.slice() });
+    const doc = await task.promise;
+    if (st.task) st.task.destroy();                 // from pdf.js 4 the loading task frees the previous document, the document no longer has destroy()
+    st.task = task;
     st.doc = doc;
     st.pagesBox.textContent = '';
     st.pages = [];

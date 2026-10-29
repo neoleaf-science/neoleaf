@@ -23,7 +23,7 @@ Rust dependency lists, is served at `/licenses`.
 | `badness-engine.js`, `badness-engine_bg.wasm` | Badness (commit pinned in `tools/badness-wasm/Cargo.toml`) behind the shim in `tools/badness-wasm`, with its Rust dependencies | MIT; dependencies MIT, Apache-2.0, Zlib, Unicode-3.0 and one MPL-2.0 (option-ext) |
 | `neoleaf-mascot.mjs` | clippyjs (fork) | MIT |
 
-Copyright lines and the MIT text are in [`static/vendor/NOTICES.md`](static/vendor/NOTICES.md). Monaco Editor 0.45.0 (MIT) and pdf.js 3.11.174
+Copyright lines and the MIT text are in [`static/vendor/NOTICES.md`](static/vendor/NOTICES.md). Monaco Editor 0.45.0 (MIT) and pdf.js 6.4.299
 (Apache-2.0) are loaded from a CDN and not redistributed. Pyodide 314.0.7 (MPL-2.0) and its Python packages are downloaded by
 `scripts/fetch_pyodide.py` and not included in the repository. The toolbar icons use paths from Material Icons (Google, Apache-2.0).
 The Codeberg mark comes from Simple Icons (CC0); it belongs to Codeberg e.V.

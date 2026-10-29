@@ -70,6 +70,7 @@ pub fn render(
             ("INVITATIONS", &invitations_html),
             ("ADMIN_SIDEBAR_LINK", admin_sidebar_link),
             ("PROVIDER", user.provider.id()),
+            ("APP_VERSION", env!("CARGO_PKG_VERSION")),
         ],
     )
 }

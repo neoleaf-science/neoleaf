@@ -51,6 +51,7 @@ pub(super) fn sidebar() -> &'static str {
                 <a href="/terms" style="color: var(--muted); text-decoration: none;">📄 Terms of Use</a>
                 <a href="/licenses" style="color: var(--muted); text-decoration: none;">📜 Licenses</a>
                 <span style="font-size: 10px; margin-top: 4px;">Contact: <a href="mailto:contact@neoleaf.science" style="color: var(--muted); text-decoration: underline;">contact@neoleaf.science</a></span>
+                <span id="pl-version" style="font-size: 10px; opacity: 0.8;">NeoLeaf v{{APP_VERSION}}</span>
             </div>
         </aside>"##
 }

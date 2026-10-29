@@ -57,7 +57,7 @@ function missingFromLog(log) {
   const found = new Map();
   const add = (file, cands) => { if (!found.has(file)) found.set(file, cands); };
   for (const m of log.matchAll(/File [`']([^'`]+)' not found/g)) {
-    const file = m[1].trim();
+    const file = m[1].trim().replace(/^(?:\.\/)+/, '');   // a class can ask for "./abntex2cite": the package is looked up by the bare name
     const base = file.replace(/\.(sty|cls|clo|def|cfg|fd|bbx|cbx|lbx|ldf|sto|ltx|rtx|tex|otf|ttf|tfm)$/i, '');
     if (!/\.(sty|cls|clo|def|cfg|fd|bbx|cbx|lbx|ldf|sto|ltx|rtx|tex|otf|ttf|tfm)$/i.test(file) || !/^[A-Za-z0-9_.+-]+$/.test(base)) continue;
     if (/\.ldf$/i.test(file)) add(file, [LDF_TO_PACKAGE[base.toLowerCase()], 'babel-' + base.toLowerCase()].filter(Boolean));

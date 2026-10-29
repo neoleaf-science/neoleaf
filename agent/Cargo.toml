@@ -1,6 +1,6 @@
 [package]
 name = "neoleaf-agent"
-version = "0.4.14"
+version = "0.4.15"
 edition = "2024"
 description = "NeoLeaf local agent: compiles LaTeX projects with the TeX Live (or Tectonic) installed on this machine"
 

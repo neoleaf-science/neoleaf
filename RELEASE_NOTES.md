@@ -1,5 +1,6 @@
 # NeoLeaf: release notes
 
+- **1.34.1**: local agent 0.4.15 (checks of downloaded files and random values updated to the new `sha2`, `rand` and `base64`; no change in what it does). People who already have the agent get the notice or the automatic update as usual.
 - **1.34.0**: the code editor is Monaco 0.56 (was 0.45): colours, completion, shortcuts, line wrapping and collaboration work as before. The loader is still checked against a fixed SHA-384.
 - **1.33.2**: the project list shows the NeoLeaf version at the bottom of the sidebar, below the contact line.
 - **1.33.1**: the PDF viewer uses pdf.js 6.4.299 (was 3.11). The library and its worker are still checked against a fixed SHA-384 before they run, now from a local blob because pdf.js 4 and later are ES modules. Double click on the PDF, zoom and rendering work as before; the workaround for CVE-2024-4367 is no longer needed.

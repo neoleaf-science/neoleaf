@@ -1,6 +1,6 @@
 [package]
 name = "neoleaf"
-version = "1.31.8"
+version = "1.32.0"
 edition = "2024"
 authors = ["Tássio Virgínio"]
 license = "MIT OR Apache-2.0"
@@ -10,14 +10,14 @@ libc = "0.2"
 bytes = "1"
 http-body = "1"
 http-body-util = "0.1"
-sha2 = "0.10"
+sha2 = "0.11"
 base64 = "0.23.1"
 cookie = "0.18.2"
 dotenvy = "0.15.7"
 flate2 = "1.1.10"
 futures-util = "0.3.34"
 lzma-rs = "0.3.0"
-rand = "0.9"
+rand = "0.10"
 regex = "1.13.1"
 reqwest = { version = "0.13.5", features = ["form", "json", "multipart", "stream"] }
 serde = { version = "1.0.229", features = ["derive"] }

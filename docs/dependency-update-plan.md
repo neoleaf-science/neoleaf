@@ -23,11 +23,11 @@ No code change. Rust 1.99 is required (installed: 1.99.1). Checked: build, clipp
 | marked (vendored) | 18.0.14 | 18.1.1 (18.1.2 is under 2 weeks old) | E2E `markdown-preview`, `markdown-editor`, `notebook` |
 | DOMPurify (vendored) | 3.4.16 | 3.4.17 | same specs, plus `privacy-statements` |
 
-## Phase 2: major Rust versions (1.32.0), one commit each
+## Phase 2: major Rust versions (1.32.0), done 2026-10-29 (sha2, rand, base64, windows-sys; zbus kept)
 1. **sha2 0.10 -> 0.11** (`src/ctan/cache.rs`, `agent/src/{net,project,auth}.rs`): `ctan::fetch` and `ctan::index` tests (they check SHA-512), known-vector tests for SHA-256, E2E `agent-update`, `agent-service`.
 2. **rand 0.9 -> 0.10** (`session.rs`, `routes/http.rs`, `agent/src/*`): the API names change often, so the compiler decides; E2E `auth`, `account-delete`, `collab-security`, `agent-rc`; a test that draws 10 000 values and checks there are no repeats.
 3. **base64 0.22 -> 0.23 in the agent** (the server already uses 0.23): E2E `agent-context`, `agent-subdir`, `agent`.
-4. **zbus 5 -> 6, windows-sys 0.60 -> 0.61** (agent): `cargo check` and `agent-tray` on Linux; Windows only by cross-check, otherwise left out and said so.
+4. **windows-sys 0.60 -> 0.61** (agent): `cargo check --target x86_64-pc-windows-gnu` (cross-check only; it was not run on Windows). **zbus stays on 5**: `ksni` 0.3.7 still depends on zbus 5, and the agent uses the same version to read the D-Bus tray registration.
 
 ## Phase 3: JavaScript with more risk (1.32.x), one per version, screenshots before and after
 1. **KaTeX 0.18.10 -> 0.19.1**: only after 2026-11-06 (published 2026-10-23). E2E `math-preview`, `notebook`, `markdown-preview`; known formulas; the 20 `.woff2` fonts and the CSS still load; update `LICENSES.md`.

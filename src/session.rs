@@ -497,6 +497,24 @@ pub async fn active(sid: &str) -> Option<Active> {
 mod tests {
     use super::*;
 
+    #[test]
+    fn random_session_ids_do_not_repeat() {
+        let ids: std::collections::HashSet<String> = (0..10_000).map(|_| new_sid()).collect();
+        assert_eq!(ids.len(), 10_000);
+        assert!(
+            ids.iter().all(|i| i.len() == 43),
+            "32 bytes in unpadded base64url"
+        );
+    }
+
+    #[test]
+    fn sealed_values_use_a_fresh_nonce_and_open_again() {
+        let key = [7u8; 32];
+        let a = seal(&key, b"same text").unwrap();
+        let b = seal(&key, b"same text").unwrap();
+        assert_ne!(a, b, "the nonce must change on every seal");
+    }
+
     /// Valid access token of a session (only tests need this).
     async fn token_for(sid: &str) -> Result<String, String> {
         active(sid)

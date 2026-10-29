@@ -86,7 +86,14 @@ pub fn download(url: &str, out: &Path) -> Result<(), String> {
 pub fn sha256_file(path: &Path) -> Result<String, String> {
     let mut f = fs::File::open(path).map_err(|e| e.to_string())?;
     let mut h = Sha256::new();
-    std::io::copy(&mut f, &mut h).map_err(|e| e.to_string())?;
+    let mut buf = [0u8; 64 * 1024];
+    loop {
+        let n = std::io::Read::read(&mut f, &mut buf).map_err(|e| e.to_string())?;
+        if n == 0 {
+            break;
+        }
+        h.update(&buf[..n]);
+    }
     Ok(h.finalize().iter().map(|b| format!("{b:02x}")).collect())
 }
 
@@ -105,4 +112,29 @@ pub fn confirm(question: &str, yes: bool) -> Result<bool, String> {
         .read_line(&mut line)
         .map_err(|e| e.to_string())?;
     Ok(matches!(line.trim().to_lowercase().as_str(), "y" | "yes"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sha256_file_matches_known_vectors() {
+        let dir = std::env::temp_dir().join(format!("neoleaf-sha-{}", std::process::id()));
+        fs::create_dir_all(&dir).unwrap();
+        let abc = dir.join("abc");
+        fs::write(&abc, b"abc").unwrap();
+        assert_eq!(
+            sha256_file(&abc).unwrap(),
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+        // larger than the read buffer, to cover the loop: one million 'a' (FIPS 180-2 vector)
+        let big = dir.join("big");
+        fs::write(&big, vec![b'a'; 1_000_000]).unwrap();
+        assert_eq!(
+            sha256_file(&big).unwrap(),
+            "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0"
+        );
+        let _ = fs::remove_dir_all(&dir);
+    }
 }

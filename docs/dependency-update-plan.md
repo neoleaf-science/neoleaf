@@ -29,10 +29,10 @@ No code change. Rust 1.99 is required (installed: 1.99.1). Checked: build, clipp
 3. **base64 0.22 -> 0.23 in the agent** (the server already uses 0.23): E2E `agent-context`, `agent-subdir`, `agent`.
 4. **windows-sys 0.60 -> 0.61** (agent): `cargo check --target x86_64-pc-windows-gnu` (cross-check only; it was not run on Windows). **zbus stays on 5**: `ksni` 0.3.7 still depends on zbus 5, and the agent uses the same version to read the D-Bus tray registration.
 
-## Phase 3: JavaScript with more risk (1.32.x), one per version, screenshots before and after
-1. **KaTeX 0.18.10 -> 0.19.1**: only after 2026-11-06 (published 2026-10-23). E2E `math-preview`, `notebook`, `markdown-preview`; known formulas; the 20 `.woff2` fonts and the CSS still load; update `LICENSES.md`.
-2. **Mermaid 11.17.2 -> 12.2.0** (major, 3.5 MB bundle): E2E `mermaid-preview`; a fixed set of diagrams (flow, sequence, class, Gantt, mind map) compared before and after; console free of CSP or `securityLevel` errors.
-3. **isomorphic-git, lightning-fs, Yjs**: first find the embedded versions (`NOTICES.md` does not record them). If behind: E2E `git` (run three times), `clone-safety`, `legacy-paths`, `history`, `collab-*`.
+## Phase 3: JavaScript with more risk (1.33.0), done 2026-10-29
+1. **KaTeX 0.18.10 -> 0.19.1** (done 2026-10-29 at the owner's request; published 2026-10-23, so the 2-week rule was waived; 0.19.0 was the one that met it). E2E `math-preview`, `notebook`, `markdown-preview`; known formulas; the 20 `.woff2` fonts and the CSS still load; update `LICENSES.md`.
+2. **Mermaid 11.17.2 -> 12.2.0** (done; the bundle grew from 3.5 to 5.5 MB; ten test diagrams rendered with both versions, same errors and no script in the injection case; new default look): E2E `mermaid-preview`; a fixed set of diagrams (flow, sequence, class, Gantt, mind map) compared before and after; console free of CSP or `securityLevel` errors.
+3. **isomorphic-git, lightning-fs, Yjs** (done): the embedded versions were 1.27.0, unidentified and unidentified. Now isomorphic-git 1.34.2 (1.35.0 and later lose the Buffer polyfill and fail with "Missing Buffer dependency"; moving past 1.34.2 needs a Buffer polyfill file), lightning-fs 4.10.3 and Yjs 13.6.33 (+ lib0 0.2.119). `scripts/build_js_vendor.sh` rebuilds them from pinned versions; both libraries keep their local UMD-wrapper change for Monaco's AMD loader.
 
 ## Phase 4: libraries loaded from the CDN (1.33.0)
 1. **pdf.js 3.11.174 -> 6.4.299** (four majors): contact points are `GlobalWorkerOptions.workerSrc`, `getTextContent` (double click on the PDF) and page rendering; the module/worker layout changed in 4.x. E2E `synctex-refine`, `compile`, `compile-engines`, `editor`; real PDFs (147-page dissertation, large figure, accented text); zoom, scroll, double click on a title, a paragraph and a margin; check the CDN URL and `integrity`, and the privacy policy.

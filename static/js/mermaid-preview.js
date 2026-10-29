@@ -32,7 +32,7 @@
   // ---- library (the isolated frame cannot reach the server; the page does the fetching)
   function loadLib() {
     if (!libPromise) {
-      libPromise = fetch('/static/vendor/mermaid.min.js?v=11.17.2')
+      libPromise = fetch('/static/vendor/mermaid.min.js?v=12.2.0')
         .then(r => { if (!r.ok) throw new Error('mermaid'); return r.text(); })
         .then(t => { libText = t; })
         .catch(e => { libPromise = null; throw e; });

@@ -1,5 +1,6 @@
 # NeoLeaf: release notes
 
+- **1.33.0**: libraries updated: Mermaid 12 (diagrams get the new default look: boxes with shadows and right-angle arrows; long labels in the centre of a mind map are no longer cut), KaTeX 0.19.1 for formulas, Yjs 13.6.33 for collaboration, LightningFS 4.10.3 and isomorphic-git 1.34.2 for Git in the browser. The versions of these files are now pinned and rebuilt by `scripts/build_js_vendor.sh`.
 - **1.32.0**: internal libraries updated (sha2 0.11, rand 0.10 and, in the agent, base64 0.23 and windows-sys 0.61); no change in how the editor works. The agent's SHA-256 file check was rewritten for the new sha2 and now has a test with the standard vectors.
 - **1.31.8**: Topcoat 0.11 and updated libraries (tokio, serde_json, zip, libc, the agent's ksni, marked 18.1.1 and DOMPurify 3.4.17 for the Markdown preview, Playwright for the tests); no change in how the editor works.
 - **1.31.7**: a package that a class asks for with a leading `./` (for example `./abntex2cite.sty`) is now installed automatically; before, the request was ignored and the compilation stopped with "File not found".

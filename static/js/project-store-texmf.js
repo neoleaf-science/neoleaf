@@ -116,7 +116,7 @@
       const out = [];
       for (const e of await Zip.read(bytes)) {
         const base = safeBasename(e.name);
-        if (base && TEXMF_ALLOWED.includes(ext(base)) && e.bytes.length <= MAX_TEXMF_FILE) out.push({ name: base, bytes: e.bytes });
+        if (base && (TEXMF_ALLOWED.includes(ext(base)) || (ext(base) === 'bib' && /-options\.bib$/i.test(base))) && e.bytes.length <= MAX_TEXMF_FILE) out.push({ name: base, bytes: e.bytes });
       }
       return out.sort((a, b) => a.name.localeCompare(b.name));
     }

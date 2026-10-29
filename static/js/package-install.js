@@ -227,7 +227,7 @@ async function compileWithAutoInstall() {
         }
       }
     }
-    if (res.success || !auto || missing.length === 0) {
+    if ((res.success && !missing.some(([f]) => /-options\.bib$/i.test(f))) || !auto || missing.length === 0) {   // a successful run can still have lost the references (BibTeX could not open a package option file)
       const notes = [];
       if (installed.length) notes.push('Packages installed automatically (TeX Live): ' + installed.join(', '));
       if (failed.length) notes.push('Could not install automatically: ' + failed.join(', ') + '. Use ⚙ Project → Packages to upload them.');

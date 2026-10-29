@@ -94,7 +94,7 @@ pub(super) fn tlpdb_urls() -> Vec<String> {
 // sorted, queried by binary search with small reads (the system page cache keeps what is used and
 // gives it back by itself if RAM gets tight). Since TeX Live 2023 is frozen, the file is built once and reused across startups.
 
-pub(super) const IDX_VERSION: &str = "v1";
+pub(super) const IDX_VERSION: &str = "v2";
 pub(super) const KEY_W: usize = 64; // file name (longer ones do not exist in TeX Live; they are ignored)
 pub(super) const PKG_W: usize = 48; // package name
 pub(super) const SUM_KEY_W: usize = 48;

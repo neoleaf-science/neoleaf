@@ -1,5 +1,6 @@
 # NeoLeaf: release notes
 
+- **1.31.6**: the missing BibTeX option file of a package (`abntex2-options.bib`) is now fetched even when the PDF was produced (before, installation only started after a failed compile, and a run with an empty reference list counts as successful); the package index is rebuilt to include it.
 - **1.31.5**: projects that use `abntex2` (or another package whose `\bibliography` gets an extra `*-options.bib`) now get that file installed with the package; before, BibTeX could not open `abntex2-options.bib`, skipped the whole `\bibliography` command and the reference list came out empty.
 - **1.31.4**: double click on the PDF now leads to where the clicked words are written: a title, an author or a heading that the class prints no longer takes you to the class or to the `\maketitle` line, but to your `\title`, and a paragraph takes you to its own line (SyncTeX often points to the blank line that ends it).
 - **1.31.3**: the home page shows the editor in one place: the window at the top now holds the seven screens with their captions (they turn by themselves, with a pause button, and stop when you move through them or ask for less motion), replacing the four old pictures and the separate gallery. The page also no longer grows wider than a phone screen.

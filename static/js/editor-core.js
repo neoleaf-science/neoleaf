@@ -488,7 +488,7 @@ function initLatexEditor(initialContent, fileId) {
   }
   currentFileId = fileId;
 
-  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' } });
+  require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.56.0/min/vs' } });
 
   require(['vs/editor/editor.main'], function () {
     registerEditorLanguages();

@@ -24,7 +24,7 @@ pub(super) fn head() -> &'static str {
     <script src="/static/js/project-store-texmf.js"></script>
     <script src="/static/js/project-store-build.js"></script>
     <!-- Monaco Editor Loader -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs/loader.min.js" integrity="sha384-UcP5/iVWyRzIhnVjcB2o9W1eoYKL5fAhHTRzvFZg8ctOsoAoDeBQyQuyIk+BJ/nh" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.56.0/min/vs/loader.min.js" integrity="sha384-5Ubp2dzZW9MAJXGpSFXLlurRaPg3+ktYfisBzghShdarxz8R37mhDy2svDenxogJ" crossorigin="anonymous"></script>
     <!-- Yjs (CRDT) for real-time collaborative editing -->
     <script type="module">
         import * as Y from '/static/vendor/yjs.mjs';

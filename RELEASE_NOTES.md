@@ -1,5 +1,6 @@
 # NeoLeaf: release notes
 
+- **1.34.0**: the code editor is Monaco 0.56 (was 0.45): colours, completion, shortcuts, line wrapping and collaboration work as before. The loader is still checked against a fixed SHA-384.
 - **1.33.2**: the project list shows the NeoLeaf version at the bottom of the sidebar, below the contact line.
 - **1.33.1**: the PDF viewer uses pdf.js 6.4.299 (was 3.11). The library and its worker are still checked against a fixed SHA-384 before they run, now from a local blob because pdf.js 4 and later are ES modules. Double click on the PDF, zoom and rendering work as before; the workaround for CVE-2024-4367 is no longer needed.
 - **1.33.0**: libraries updated: Mermaid 12 (diagrams get the new default look: boxes with shadows and right-angle arrows; long labels in the centre of a mind map are no longer cut), KaTeX 0.19.1 for formulas, Yjs 13.6.33 for collaboration, LightningFS 4.10.3 and isomorphic-git 1.34.2 for Git in the browser. The versions of these files are now pinned and rebuilt by `scripts/build_js_vendor.sh`.

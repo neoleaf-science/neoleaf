@@ -50,6 +50,10 @@ struct RawProvider {
     enabled: Option<bool>,
     client_id: Option<String>,
     client_secret_env: Option<String>,
+    /// only for your own Git server: `forgejo` or `gitea`
+    kind: Option<String>,
+    url: Option<String>,
+    label: Option<String>,
 }
 
 /// An image of the institution, already checked, kept in memory.
@@ -82,11 +86,27 @@ struct ProviderCfg {
     client_secret_env: Option<String>,
 }
 
+/// Your own Git server (Forgejo or Gitea) used as a sign-in provider.
+#[derive(Debug, Clone)]
+pub struct CustomProvider {
+    pub id: String,
+    /// text of the sign-in button, written by the administrator (shown as it is)
+    pub label: String,
+    /// `https://git.example.edu` (no trailing slash)
+    pub url: String,
+    /// host part of `url`, for the "no reply" e-mail addresses
+    pub host: String,
+}
+
+/// More than this many of your own Git servers in one installation is almost certainly a mistake.
+pub const MAX_CUSTOM_PROVIDERS: usize = 8;
+
 #[derive(Debug, Clone)]
 pub struct Config {
     pub brand: Brand,
     pub legal: Legal,
     providers: HashMap<Provider, ProviderCfg>,
+    custom: Vec<CustomProvider>,
 }
 
 impl Config {
@@ -106,12 +126,23 @@ impl Config {
             .and_then(|c| c.client_secret_env.clone())
     }
 
-    /// Providers that are on in the file, in a fixed order.
+    /// Your own Git server with this id, if the file has it.
+    pub fn custom_provider(&self, id: &str) -> Option<&CustomProvider> {
+        self.custom.iter().find(|c| c.id == id)
+    }
+
+    /// Providers that are on in the file, in a fixed order: GitHub, Codeberg, then your own servers by id.
     pub fn enabled_providers(&self) -> Vec<Provider> {
-        [Provider::GitHub, Provider::Codeberg]
+        let mut out: Vec<Provider> = [Provider::GitHub, Provider::Codeberg]
             .into_iter()
             .filter(|p| self.provider_enabled(*p))
-            .collect()
+            .collect();
+        for c in &self.custom {
+            if let Some(p) = Provider::from_stored(&c.id).filter(|p| self.provider_enabled(*p)) {
+                out.push(p);
+            }
+        }
+        out
     }
 }
 
@@ -180,13 +211,29 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
     };
 
     let mut providers = HashMap::new();
+    let mut custom = Vec::new();
     let mut ids: Vec<_> = raw.providers.unwrap_or_default().into_iter().collect();
     ids.sort_by(|a, b| a.0.cmp(&b.0));
     for (id, p) in ids {
-        let Some(prov) = Provider::from_id(&id) else {
-            return Err(format!(
-                "providers.{id}: not supported yet (supported: github, codeberg)"
-            ));
+        let builtin = matches!(id.as_str(), "github" | "codeberg");
+        let prov = if builtin {
+            if p.kind.is_some() || p.url.is_some() || p.label.is_some() {
+                return Err(format!(
+                    "providers.{id}: kind, url and label are only for your own Git server (use another id, such as git-myuniversity)"
+                ));
+            }
+            Provider::from_stored(&id).expect("built-in id")
+        } else {
+            let c = parse_custom(&id, &p)?;
+            if custom.len() >= MAX_CUSTOM_PROVIDERS {
+                return Err(format!(
+                    "providers: at most {MAX_CUSTOM_PROVIDERS} Git servers of your own"
+                ));
+            }
+            let prov = Provider::from_stored(&c.id)
+                .ok_or_else(|| format!("providers.{id}: too many different providers"))?;
+            custom.push(c);
+            prov
         };
         let client_id = match p.client_id.as_deref().map(str::trim) {
             None | Some("") => None,
@@ -224,6 +271,60 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
         },
         legal,
         providers,
+        custom,
+    })
+}
+
+/// `[providers.<id>]` of your own Git server: the id, `kind`, `url` and `label` are checked here.
+fn parse_custom(id: &str, p: &RawProvider) -> Result<CustomProvider, String> {
+    if !crate::provider::valid_custom_id(id) {
+        return Err(format!(
+            "providers.{id}: the id of your own Git server is lowercase letters, digits and hyphen, starting with a letter (up to 32), and not github or codeberg"
+        ));
+    }
+    match p.kind.as_deref().map(str::trim) {
+        Some("forgejo" | "gitea") => {}
+        Some("gitlab") => {
+            return Err(format!(
+                "providers.{id}.kind: gitlab is not supported yet (supported: forgejo, gitea)"
+            ));
+        }
+        _ => {
+            return Err(format!(
+                "providers.{id}.kind: required, forgejo or gitea (the server behind the url)"
+            ));
+        }
+    }
+    let url = valid_url(p.url.as_deref(), &format!("providers.{id}.url"))?
+        .ok_or_else(|| format!("providers.{id}.url: required (the address of the Git server)"))?;
+    let url = url.trim_end_matches('/').to_string();
+    let rest = url.split_once("://").map(|x| x.1).unwrap_or("");
+    let host = rest.split('/').next().unwrap_or("");
+    if url.contains(['?', '#']) || host.is_empty() || host.contains('@') {
+        return Err(format!(
+            "providers.{id}.url: only the address of the server (no user, query or #)"
+        ));
+    }
+    let host = host
+        .rsplit_once(':')
+        .filter(|(_, port)| port.bytes().all(|b| b.is_ascii_digit()))
+        .map_or(host, |(h, _)| h)
+        .trim_matches(['[', ']'])
+        .to_ascii_lowercase();
+    let label = match p.label.as_deref().map(str::trim) {
+        None | Some("") => id.to_string(),
+        Some(l) if l.chars().count() <= 60 && !l.chars().any(char::is_control) => l.to_string(),
+        Some(_) => {
+            return Err(format!(
+                "providers.{id}.label: up to 60 characters, no control characters"
+            ));
+        }
+    };
+    Ok(CustomProvider {
+        id: id.to_string(),
+        label,
+        url,
+        host,
     })
 }
 
@@ -387,6 +488,22 @@ pub fn summary(cfg: &Config) -> Vec<String> {
         };
         out.push(format!("provider {}: {state}", p.id()));
     }
+    for c in &cfg.custom {
+        let Some(p) = Provider::from_stored(&c.id) else {
+            continue;
+        };
+        let on = cfg.provider_enabled(p);
+        let keys = !p.client_id().is_empty() && !p.client_secret().is_empty();
+        let state = match (on, keys) {
+            (false, _) => "off",
+            (true, true) => "on",
+            (true, false) => "ON BUT THE CLIENT ID OR SECRET IS MISSING (it will not be shown)",
+        };
+        out.push(format!(
+            "provider {} ({} at {}): {state}",
+            c.id, c.label, c.url
+        ));
+    }
     out
 }
 
@@ -471,7 +588,11 @@ mod tests {
         assert!(err("[brand]\nlogo = \"missing.png\"").contains("cannot read"));
         assert!(err("[legal]\nterms_url = \"http://example.com/t\"").contains("https"));
         assert!(err("[legal]\nterms_url = \"javascript:alert(1)\"").contains("https"));
-        assert!(err("[providers.gitlab]\nenabled = true").contains("not supported yet"));
+        assert!(err("[providers.gitlab]\nenabled = true").contains("kind: required"));
+        assert!(
+            err("[providers.gitlab]\nkind = \"gitlab\"\nurl = \"https://g.edu\"")
+                .contains("gitlab is not supported yet")
+        );
         assert!(
             err("[providers.github]\nclient_secret_env = \"abc def\"")
                 .contains("NAME of an environment variable")
@@ -503,6 +624,71 @@ mod tests {
         );
         // PNG bytes under an .svg name are not an SVG
         assert!(parse("[brand]\nlogo = \"p.svg\"", d.path()).is_err());
+    }
+
+    #[test]
+    fn your_own_git_server_is_read_and_checked() {
+        let d = dir_with(&[]);
+        let c = parse(
+            r#"
+            [providers.git-ifto]
+            kind = "forgejo"
+            url = "https://git.ifto.edu.br/"
+            label = "Entrar com a conta do IFTO"
+            enabled = true
+            client_id = "abc"
+            client_secret_env = "GIT_IFTO_SECRET"
+            [providers.git-lab]
+            kind = "gitea"
+            url = "http://localhost:3000"
+            "#,
+            d.path(),
+        )
+        .unwrap();
+        let a = c.custom_provider("git-ifto").unwrap();
+        assert_eq!(a.url, "https://git.ifto.edu.br", "trailing slash removed");
+        assert_eq!(a.host, "git.ifto.edu.br");
+        assert_eq!(a.label, "Entrar com a conta do IFTO");
+        let b = c.custom_provider("git-lab").unwrap();
+        assert_eq!(
+            (b.host.as_str(), b.label.as_str()),
+            ("localhost", "git-lab")
+        );
+        let on = c.enabled_providers();
+        assert_eq!(on.len(), 1, "only the one that is on");
+        assert_eq!(on[0].id(), "git-ifto");
+    }
+
+    #[test]
+    fn your_own_git_server_errors_are_clear() {
+        let d = dir_with(&[]);
+        let err = |t: &str| parse(t, d.path()).unwrap_err();
+        let base = "kind = \"forgejo\"\nurl = \"https://g.edu\"\n";
+        assert!(
+            err("[providers.GitIfto]\nkind=\"forgejo\"\nurl=\"https://g.edu\"")
+                .contains("lowercase letters")
+        );
+        assert!(err("[providers.git-x]\nurl = \"https://g.edu\"").contains("kind: required"));
+        assert!(err("[providers.git-x]\nkind = \"forgejo\"").contains("url: required"));
+        assert!(
+            err("[providers.git-x]\nkind = \"forgejo\"\nurl = \"http://g.edu\"").contains("https")
+        );
+        assert!(
+            err("[providers.git-x]\nkind = \"forgejo\"\nurl = \"https://u:p@g.edu\"")
+                .contains("no user")
+        );
+        assert!(
+            err("[providers.git-x]\nkind = \"forgejo\"\nurl = \"https://g.edu/?a=1\"")
+                .contains("no user, query")
+        );
+        assert!(err(&format!("[providers.git-x]\n{base}label = \"a\\nb\"")).contains("label"));
+        assert!(
+            err("[providers.github]\nkind = \"forgejo\"").contains("only for your own Git server")
+        );
+        let many: String = (0..9)
+            .map(|i| format!("[providers.git-{}]\n{base}\n", (b'a' + i) as char))
+            .collect();
+        assert!(err(&many).contains("at most 8"));
     }
 
     #[test]

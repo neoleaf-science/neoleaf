@@ -336,7 +336,7 @@ pub(super) fn actions_script() -> &'static str {
             [['article', 'Scientific Article (Default)'], ['report', 'Technical Report'], ['beamer', 'Slide Presentation (Beamer)'], ['typst', 'Typst Article']].forEach(([k, n]) => box.appendChild(tplCard(k, tr(n), '', '', '', '')));
             pickTemplate(document.getElementById('proj-template').value || 'article');
             // catalog templates come from GitHub repositories: with a Codeberg session they are not offered
-            if ((document.getElementById('new-project-modal').dataset.provider || '') === 'codeberg') {
+            if ((document.getElementById('new-project-modal').dataset.provider || 'github') !== 'github') {
                 const note = document.createElement('p');
                 note.className = 'tpl-meta';
                 note.style.gridColumn = '1 / -1';

@@ -75,7 +75,7 @@
   }
 
   function isGitHub() {
-    try { return !(window.__BG && __BG.user() && __BG.user().provider === 'codeberg'); } catch (_) { return true; }
+    try { return !(window.__BG && __BG.user() && __BG.user().provider && __BG.user().provider !== 'github'); } catch (_) { return true; }
   }
 
   async function open() {

@@ -187,7 +187,8 @@ describe('with neoleaf.toml', () => {
     for (const [text, msg] of [
       ['[brand]\nlogo = "../x.png"', 'no ..'],
       ['[brand]\naccent = "green"', 'brand.accent'],
-      ['[providers.gitlab]\nenabled = true', 'not supported yet'],
+      ['[providers.gitlab]\nkind = "gitlab"\nurl = "https://git.example.edu"', 'not supported yet'],
+      ['[providers.git-x]\nenabled = true', 'kind: required'],
       ['[brand\nname=', 'TOML'],
     ] as const) {
       fs.writeFileSync(bad, text);

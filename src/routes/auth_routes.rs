@@ -207,40 +207,69 @@ pub(crate) async fn handle_github_callback(cx: &Cx) -> Result<SeeOther> {
     Ok(see_other("/"))
 }
 
-// GET /auth/login/codeberg - redirects to the Codeberg OAuth (only if the server has the application keys)
-#[route(GET "/auth/login/codeberg")]
-pub(crate) async fn auth_login_codeberg(cx: &Cx) -> Result<SeeOther> {
-    let prov = provider::Provider::Codeberg;
+path_param!(pub provider_id: String);
+
+/// The Forgejo-style provider named in the address: Codeberg, or your own server that `neoleaf.toml` has.
+/// `Err` carries the answer: with no `neoleaf.toml` an unknown name is a plain 404 (the public site has no such route).
+fn forgejo_provider(cx: &Cx) -> std::result::Result<provider::Provider, Box<Response>> {
+    let id = topcoat::router::path_param::<ProviderId>(cx)
+        .map_err(|_| Box::new(plain(404, "not found")))?;
+    match provider::Provider::from_id(id) {
+        Some(p) if p.kind() == provider::Kind::Forgejo => Ok(p),
+        _ if config::get().is_none() => Err(Box::new(plain(404, "not found"))),
+        _ => Err(Box::new(redirect_home())),
+    }
+}
+
+fn redirect_home() -> Response {
+    Response::builder()
+        .status(303)
+        .header("Location", "/")
+        .body(Body::empty())
+        .unwrap()
+}
+
+// GET /auth/login/{provider_id} - redirects to the OAuth of Codeberg or of your own Forgejo/Gitea (only if it is on and has its keys)
+#[route(GET "/auth/login/{provider_id}")]
+pub(crate) async fn auth_login_forgejo(cx: &Cx) -> Result<Response> {
+    let prov = match forgejo_provider(cx) {
+        Ok(p) => p,
+        Err(r) => return Ok(*r),
+    };
     if !prov.enabled() {
-        return Ok(see_other("/"));
+        return Ok(redirect_home());
     }
     let state = random_state();
     cookies(cx).add(build_cookie("oauth_state", state.clone(), 600));
-    Ok(see_other(auth::forgejo::get_auth_url(
-        prov,
-        &prov.client_id(),
-        &prov.redirect_uri(),
-        &state,
-    )))
+    let url = auth::forgejo::get_auth_url(prov, &prov.client_id(), &prov.redirect_uri(), &state);
+    Ok(Response::builder()
+        .status(303)
+        .header("Location", url)
+        .body(Body::empty())
+        .unwrap())
 }
 
-// GET /auth/callback/codeberg - back from Codeberg with the code; creates the session (the token expires and is renewed with the refresh token)
-#[route(GET "/auth/callback/codeberg")]
-pub(crate) async fn auth_callback_codeberg(cx: &Cx) -> Result<SeeOther> {
-    let prov = provider::Provider::Codeberg;
+// GET /auth/callback/{provider_id} - back from the provider with the code; creates the session (the token expires and is renewed with the refresh token)
+#[route(GET "/auth/callback/{provider_id}")]
+pub(crate) async fn auth_callback_forgejo(cx: &Cx) -> Result<Response> {
+    let prov = match forgejo_provider(cx) {
+        Ok(p) => p,
+        Err(r) => return Ok(*r),
+    };
     let expected = cookies(cx)
         .get("oauth_state")
         .map(|c| c.value().to_string());
     clear_cookie(cx, "oauth_state");
     if !prov.enabled() {
-        return Ok(see_other("/"));
+        return Ok(redirect_home());
     }
+    let label = prov.label();
     if let Ok(query) = topcoat::router::query_params::<CallbackQuery>(cx) {
         let state_ok =
             matches!((&expected, &query.state), (Some(e), Some(g)) if !e.is_empty() && e == g);
         if !state_ok {
             eprintln!("Login refused: OAuth state missing or different");
-            return Ok(see_other("/"));
+            return Ok(redirect_home());
         }
         if let Some(code) = &query.code {
             let http = session::http_client();
@@ -259,7 +288,11 @@ pub(crate) async fn auth_callback_codeberg(cx: &Cx) -> Result<SeeOther> {
                         Ok(user) => {
                             if blocklist::is_blocked(user.provider, user.id, &user.login) {
                                 eprintln!("Login refused: @{} is blocked", user.login);
-                                return Ok(see_other("/?blocked=1"));
+                                return Ok(Response::builder()
+                                    .status(303)
+                                    .header("Location", "/?blocked=1")
+                                    .body(Body::empty())
+                                    .unwrap());
                             }
                             let sid = session::create(
                                 user,
@@ -270,14 +303,14 @@ pub(crate) async fn auth_callback_codeberg(cx: &Cx) -> Result<SeeOther> {
                             .await;
                             set_session(cx, sid);
                         }
-                        Err(e) => eprintln!("Error reading the user data from Codeberg: {e}"),
+                        Err(e) => eprintln!("Error reading the user data from {label}: {e}"),
                     }
                 }
-                Err(e) => eprintln!("Error exchanging the Codeberg code for a token: {e}"),
+                Err(e) => eprintln!("Error exchanging the {label} code for a token: {e}"),
             }
         }
     }
-    Ok(see_other("/"))
+    Ok(redirect_home())
 }
 
 #[route(GET "/auth/callback")]

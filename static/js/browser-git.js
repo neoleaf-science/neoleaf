@@ -40,12 +40,23 @@
     return { fs, pfs };
   }
 
+  /** Provider id of a signed-in user (`github`, `codeberg` or the id of the institution's own Git server). */
+  function providerOf(user) {
+    return user && typeof user.provider === 'string' && /^[a-z][a-z0-9-]*$/.test(user.provider) ? user.provider : 'github';
+  }
+
+  /** Local folder prefix: GitHub has none; every other provider gets `<id>.` (a GitHub login has no dot, so the two never clash). */
+  function dirPrefix(user) {
+    const p = providerOf(user);
+    return p === 'github' ? '' : p + '.';
+  }
+
   /** Which account opened this local copy (the Storage tab lists only the copies of the account that is signed in). */
   async function rememberAccount(pfs, dirOwner, repo) {
     try {
       if (!currentUser || !currentUser.login) return;
       await pfs.mkdir('/meta').catch(() => {});
-      const rec = { login: String(currentUser.login), provider: currentUser.provider === 'codeberg' ? 'codeberg' : 'github', at: Date.now() };
+      const rec = { login: String(currentUser.login), provider: providerOf(currentUser), at: Date.now() };
       await pfs.writeFile('/meta/' + encodeURIComponent(`${dirOwner}/${repo}`) + '.json', JSON.stringify(rec));
     } catch (_) { /* only a convenience: the list falls back to the owner's name */ }
   }
@@ -55,8 +66,8 @@
       currentOwner = owner;
       currentRepo = repo;
       if (user) currentUser = user;
-      // the same owner/repo on GitHub and Codeberg are different projects: Codeberg gets a prefix in the local folder
-      const dirOwner = currentUser && currentUser.provider === 'codeberg' ? `codeberg.${owner}` : owner;
+      // the same owner/repo on two providers are different projects: every provider but GitHub gets a prefix in the local folder
+      const dirOwner = dirPrefix(currentUser) + owner;
       currentRepoDir = `/repos/${dirOwner}/${repo}`;
 
       const { pfs } = initFs();

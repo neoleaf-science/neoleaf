@@ -463,6 +463,11 @@ pub async fn active(sid: &str) -> Option<Active> {
         return None;
     }
 
+    // a provider that left `neoleaf.toml`: nothing can be done with the token, but the session is kept for when it returns
+    if !current.user.provider.known() {
+        return None;
+    }
+
     // blocked by the administrator: the session stops being valid immediately
     if crate::blocklist::is_blocked(current.user.provider, current.user.id, &current.user.login) {
         remove(sid).await;

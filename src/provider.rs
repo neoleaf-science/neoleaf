@@ -1,14 +1,64 @@
-//! Repository providers: GitHub (the default) and Codeberg (Forgejo). Each session belongs to one provider, chosen at login;
+//! Repository providers: GitHub (the default), Codeberg (Forgejo) and, in an institution install (`neoleaf.toml`), the
+//! institution's own Git server (Forgejo or Gitea). Each session belongs to one provider, chosen at login;
 //! projects are always repositories of that provider, and the project id (`owner__repo`) is valid within it.
+//!
+//! A provider is a small `Copy` handle written as its id (`"github"`, `"codeberg"`, or the id of your own server). Ids found in
+//! `sessions.json` and `blocked.json` are kept even when the configuration no longer has them (a provider switched off for a day
+//! must not lose its sessions or blocks): such a provider simply cannot be used, and everything about it is empty.
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::sync::Mutex;
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash, Serialize, Deserialize)]
-#[serde(rename_all = "lowercase")]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
 pub enum Provider {
     #[default]
     GitHub,
     Codeberg,
+    /// The institution's own Git server, by id (see `config::CustomProvider`).
+    Custom(&'static str),
+}
+
+/// Ids seen so far, leaked once so that `Provider` can stay `Copy`. Bounded: an id that is not in the configuration only gets here
+/// by being written in a local file, and 64 distinct ones is far more than any installation has.
+static INTERNED: Mutex<Vec<&'static str>> = Mutex::new(Vec::new());
+const MAX_INTERNED: usize = 64;
+
+/// Id of your own Git server: lowercase letters, digits and hyphen, starting with a letter, up to 32; never a built-in name.
+pub fn valid_custom_id(id: &str) -> bool {
+    let b = id.as_bytes();
+    !b.is_empty()
+        && b.len() <= 32
+        && b[0].is_ascii_lowercase()
+        && b.iter()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || *c == b'-')
+        && !matches!(id, "github" | "codeberg")
+}
+
+fn intern(id: &str) -> Option<&'static str> {
+    let mut g = INTERNED.lock().unwrap_or_else(|e| e.into_inner());
+    if let Some(s) = g.iter().find(|s| **s == id) {
+        return Some(s);
+    }
+    if g.len() >= MAX_INTERNED {
+        return None;
+    }
+    let s: &'static str = Box::leak(id.to_string().into_boxed_str());
+    g.push(s);
+    Some(s)
+}
+
+impl Serialize for Provider {
+    fn serialize<S: Serializer>(&self, s: S) -> Result<S::Ok, S::Error> {
+        s.serialize_str(self.id())
+    }
+}
+
+impl<'de> Deserialize<'de> for Provider {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        let id = String::deserialize(d)?;
+        Provider::from_stored(&id)
+            .ok_or_else(|| serde::de::Error::custom(format!("unknown provider {id:?}")))
+    }
 }
 
 fn env_url(name: &str, default: &str) -> String {
@@ -37,7 +87,22 @@ impl Provider {
     pub fn kind(self) -> Kind {
         match self {
             Provider::GitHub => Kind::GitHub,
-            Provider::Codeberg => Kind::Forgejo,
+            // Gitea speaks the same dialect as Forgejo for everything NeoLeaf uses
+            Provider::Codeberg | Provider::Custom(_) => Kind::Forgejo,
+        }
+    }
+
+    /// Can sessions of this provider be used now? Always for GitHub and Codeberg; for your own server only while `neoleaf.toml` has it.
+    /// (A session of a server that left the file stays on disk, unused, and works again if the server comes back.)
+    pub fn known(self) -> bool {
+        !matches!(self, Provider::Custom(_)) || self.custom().is_some()
+    }
+
+    /// The institution's server behind a `Custom` provider, if the configuration still has it.
+    fn custom(self) -> Option<&'static crate::config::CustomProvider> {
+        match self {
+            Provider::Custom(id) => crate::config::get().and_then(|c| c.custom_provider(id)),
+            _ => None,
         }
     }
 
@@ -59,6 +124,7 @@ impl Provider {
         match self {
             Provider::GitHub => "github.com",
             Provider::Codeberg => "codeberg.org",
+            Provider::Custom(_) => self.custom().map_or("localhost", |c| c.host.as_str()),
         }
     }
 
@@ -67,6 +133,7 @@ impl Provider {
         match self {
             Provider::GitHub => format!("{id}+{login}@users.noreply.github.com"),
             Provider::Codeberg => format!("{id}+{login}@noreply.codeberg.org"),
+            Provider::Custom(_) => format!("{id}+{login}@noreply.{}", self.noreply_host()),
         }
     }
 
@@ -83,6 +150,7 @@ impl Provider {
         match self {
             Provider::GitHub => "github",
             Provider::Codeberg => "codeberg",
+            Provider::Custom(id) => id,
         }
     }
 
@@ -91,13 +159,29 @@ impl Provider {
         match self {
             Provider::GitHub => "GitHub",
             Provider::Codeberg => "Codeberg",
+            Provider::Custom(id) => self.custom().map_or(id, |c| c.label.as_str()),
         }
     }
 
+    /// A provider that can be used now: GitHub, Codeberg, or your own server that the configuration has.
+    /// (For ids typed by someone, such as the administrator's block form.)
     pub fn from_id(id: &str) -> Option<Provider> {
+        let id = id.to_ascii_lowercase();
+        match id.as_str() {
+            "github" => Some(Provider::GitHub),
+            "codeberg" => Some(Provider::Codeberg),
+            _ => crate::config::get()
+                .and_then(|c| c.custom_provider(&id))
+                .and_then(|c| Provider::from_stored(&c.id)),
+        }
+    }
+
+    /// Any well-formed id, even one the configuration does not have (what the files on disk may hold).
+    pub fn from_stored(id: &str) -> Option<Provider> {
         match id.to_ascii_lowercase().as_str() {
             "github" => Some(Provider::GitHub),
             "codeberg" => Some(Provider::Codeberg),
+            other if valid_custom_id(other) => intern(other).map(Provider::Custom),
             _ => None,
         }
     }
@@ -107,6 +191,7 @@ impl Provider {
         match self {
             Provider::GitHub => crate::drive::client::github_web(),
             Provider::Codeberg => codeberg_web(),
+            Provider::Custom(_) => self.custom().map(|c| c.url.clone()).unwrap_or_default(),
         }
     }
 
@@ -115,6 +200,7 @@ impl Provider {
         match self {
             Provider::GitHub => crate::drive::client::github_api(),
             Provider::Codeberg => format!("{}/api/v1", codeberg_web()),
+            Provider::Custom(_) => format!("{}/api/v1", self.web()),
         }
     }
 
@@ -123,10 +209,12 @@ impl Provider {
         if let Some(id) = crate::config::get().and_then(|c| c.provider_client_id(self)) {
             return id;
         }
-        std::env::var(match self {
-            Provider::GitHub => "GITHUB_CLIENT_ID",
-            Provider::Codeberg => "CODEBERG_CLIENT_ID",
-        })
+        match self {
+            Provider::GitHub => std::env::var("GITHUB_CLIENT_ID"),
+            Provider::Codeberg => std::env::var("CODEBERG_CLIENT_ID"),
+            // your own server has its keys in the file only
+            Provider::Custom(_) => Ok(String::new()),
+        }
         .unwrap_or_default()
     }
 
@@ -134,14 +222,12 @@ impl Provider {
     pub fn client_secret(self) -> String {
         let name = crate::config::get()
             .and_then(|c| c.provider_secret_env(self))
-            .unwrap_or_else(|| {
-                match self {
-                    Provider::GitHub => "GITHUB_CLIENT_SECRET",
-                    Provider::Codeberg => "CODEBERG_CLIENT_SECRET",
-                }
-                .to_string()
+            .or_else(|| match self {
+                Provider::GitHub => Some("GITHUB_CLIENT_SECRET".to_string()),
+                Provider::Codeberg => Some("CODEBERG_CLIENT_SECRET".to_string()),
+                Provider::Custom(_) => None,
             });
-        std::env::var(name).unwrap_or_default()
+        name.and_then(|n| std::env::var(n).ok()).unwrap_or_default()
     }
 
     /// Is login with this provider on? Without `neoleaf.toml`: GitHub always shows, Codeberg only with the OAuth app keys.
@@ -149,10 +235,14 @@ impl Provider {
     pub fn enabled(self) -> bool {
         let keys = !self.client_id().is_empty() && !self.client_secret().is_empty();
         match crate::config::get() {
-            Some(c) => c.provider_enabled(self) && keys,
+            Some(c) => {
+                let known = !matches!(self, Provider::Custom(_)) || self.custom().is_some();
+                known && c.provider_enabled(self) && keys
+            }
             None => match self {
                 Provider::GitHub => true,
                 Provider::Codeberg => keys,
+                Provider::Custom(_) => false,
             },
         }
     }
@@ -167,6 +257,7 @@ impl Provider {
                 .ok()
                 .filter(|v| !v.is_empty())
                 .unwrap_or_else(|| format!("{}/codeberg", github.trim_end_matches('/'))),
+            Provider::Custom(id) => format!("{}/{id}", github.trim_end_matches('/')),
         }
     }
 
@@ -184,7 +275,7 @@ mod tests {
     fn ids_e_nomes() {
         assert_eq!(Provider::default(), Provider::GitHub);
         assert_eq!(Provider::from_id("Codeberg"), Some(Provider::Codeberg));
-        assert_eq!(Provider::from_id("gitlab"), None);
+        assert_eq!(Provider::from_id("gitlab"), None, "not configured");
         assert_eq!(
             serde_json::to_string(&Provider::Codeberg).unwrap(),
             "\"codeberg\""
@@ -244,5 +335,39 @@ mod tests {
         let u: crate::auth::github::GitHubUser = serde_json::from_str(user).unwrap();
         assert_eq!(u.provider, Provider::Codeberg);
         assert_eq!(serde_json::to_value(&u).unwrap()["provider"], "codeberg");
+    }
+
+    /// Your own Git server: ids are interned, serialized as written, and kept even when nothing in the configuration has them.
+    #[test]
+    fn custom_ids_round_trip_and_survive_without_configuration() {
+        let a = Provider::from_stored("git-ifto").unwrap();
+        assert_eq!(a, Provider::from_stored("GIT-IFTO").unwrap(), "same handle");
+        assert_eq!(a.id(), "git-ifto");
+        assert_eq!(serde_json::to_string(&a).unwrap(), "\"git-ifto\"");
+        assert_eq!(serde_json::from_str::<Provider>("\"git-ifto\"").unwrap(), a);
+        // not configured here: it exists as data, but nothing about it can be used
+        assert!(!a.enabled());
+        assert_eq!(Provider::from_id("git-ifto"), None, "not for typed ids");
+        assert_eq!((a.web().as_str(), a.label()), ("", "git-ifto"));
+        assert_eq!(a.kind(), Kind::Forgejo);
+        assert_ne!(a, Provider::Codeberg);
+        // what is not an id at all is an error, not a provider
+        let too_long = "a".repeat(33);
+        for bad in ["", "git_x", "9x", "a b", "x/../y", too_long.as_str()] {
+            let json = serde_json::to_string(bad).unwrap();
+            assert!(serde_json::from_str::<Provider>(&json).is_err(), "{bad:?}");
+        }
+        assert!(Provider::from_stored("github").is_some_and(|p| p == Provider::GitHub));
+    }
+
+    #[test]
+    fn same_login_on_two_providers_is_two_people() {
+        let a = Provider::from_stored("git-a").unwrap();
+        let b = Provider::from_stored("git-b").unwrap();
+        let mut m = std::collections::HashMap::new();
+        m.insert((a, 5u64), "a");
+        m.insert((b, 5u64), "b");
+        m.insert((Provider::Codeberg, 5u64), "c");
+        assert_eq!(m.len(), 3);
     }
 }

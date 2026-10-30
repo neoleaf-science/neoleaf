@@ -30,3 +30,15 @@ enabled = true
 
 [providers.codeberg]
 enabled = false
+
+# Your own Git server (Forgejo or Gitea). The id (the name after "providers.") is yours: lowercase letters, digits and hyphen.
+# People sign in with the account of that server, and their projects are repositories on it.
+# On the server, create an OAuth2 application with the redirect address  <your NeoLeaf address>/auth/callback/<id>
+# (for the id below: https://latex.university.edu/auth/callback/git-university).
+# [providers.git-university]
+# enabled = true
+# kind = "forgejo"                          # forgejo or gitea (gitlab is not supported yet)
+# url = "https://git.university.edu"        # https only (http only for localhost)
+# label = "Sign in with your university account"   # the whole text of the button, shown as written
+# client_id = "..."
+# client_secret_env = "GIT_UNIVERSITY_SECRET"      # NAME of the variable that holds the secret (the secret never goes in this file)

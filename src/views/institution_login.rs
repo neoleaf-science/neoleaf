@@ -30,8 +30,13 @@ impl Notice {
 
 fn button(p: Provider) -> String {
     let (href, label) = match p {
-        Provider::GitHub => ("/auth/login", "Sign in with GitHub"),
-        Provider::Codeberg => ("/auth/login/codeberg", "Sign in with Codeberg"),
+        Provider::GitHub => ("/auth/login".to_string(), "Sign in with GitHub".to_string()),
+        Provider::Codeberg => (
+            "/auth/login/codeberg".to_string(),
+            "Sign in with Codeberg".to_string(),
+        ),
+        // the administrator writes the whole text of the button (`label` in neoleaf.toml), so it is shown as written
+        Provider::Custom(id) => (format!("/auth/login/{id}"), esc(p.label())),
     };
     format!(
         r#"<a class="inst-btn" href="{href}">{}<span>{label}</span></a>"#,

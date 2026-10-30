@@ -67,13 +67,15 @@
     for (const o of owners) {
       let repos = [];
       try { repos = await pfs.readdir('/repos/' + o); } catch (_) { continue; }
-      const codeberg = o.startsWith('codeberg.');
-      const ownerLogin = o.replace(/^codeberg\./, '');
+      // `<provider>.<owner>` for every provider but GitHub (a GitHub login never has a dot; the provider id never does either)
+      const dot = o.indexOf('.');
+      const provider = dot > 0 && /^[a-z][a-z0-9-]*$/.test(o.slice(0, dot)) ? o.slice(0, dot) : 'github';
+      const ownerLogin = provider === 'github' ? o : o.slice(dot + 1);
       for (const r of repos) {
         const meta = await readMeta(pfs, o, r);
         // the account that opened it; for copies from before this was recorded, the owner of the repository
-        const who = meta ? { login: String(meta.login).toLowerCase(), provider: meta.provider } : { login: ownerLogin.toLowerCase(), provider: codeberg ? 'codeberg' : 'github' };
-        out.push({ dir: `/repos/${o}/${r}`, owner: o, repo: r, codeberg, name: `${ownerLogin}/${r}`, size: null, mine: !!me.login && who.login === me.login && who.provider === me.provider });
+        const who = meta ? { login: String(meta.login).toLowerCase(), provider: meta.provider } : { login: ownerLogin.toLowerCase(), provider };
+        out.push({ dir: `/repos/${o}/${r}`, owner: o, repo: r, provider, name: `${ownerLogin}/${r}`, size: null, mine: !!me.login && who.login === me.login && who.provider === me.provider });
       }
     }
     return out.sort((a, b) => a.name.localeCompare(b.name));
@@ -232,9 +234,9 @@
       name.textContent = p.name;
       name.title = p.name;
       row.appendChild(name);
-      if (p.codeberg) {
+      if (p.provider !== 'github') {
         const b = document.createElement('span');
-        b.textContent = 'Codeberg';
+        b.textContent = p.provider === 'codeberg' ? 'Codeberg' : p.provider;
         b.style.cssText = 'font-size:10px;background:rgba(33,133,208,.18);color:#58a6ff;padding:1px 6px;border-radius:8px;';
         row.appendChild(b);
       }
@@ -396,7 +398,8 @@
   function localDirOf(id) {
     const i = id.indexOf('__');
     if (i < 0) return null;
-    const prefix = account().provider === 'codeberg' ? 'codeberg.' : '';
+    const prov = account().provider;
+    const prefix = prov && prov !== 'github' ? prov + '.' : '';
     const owner = id.slice(0, i), repo = id.slice(i + 2);
     return { dir: `/repos/${prefix}${owner}/${repo}`, owner: prefix + owner, repo, name: `${owner}/${repo}` };
   }

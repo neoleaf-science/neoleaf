@@ -70,6 +70,8 @@ Each step is one delivery (one version). Order matters: step 1 changes no behavi
   - Production check after deploy: landing, `/auth/login` redirect, Terms, Privacy, as for 1.35.0.
 
 ### Step 2: custom providers of kind `forgejo` and `gitea` in `neoleaf.toml`
+
+**Status: done in 1.36.0** (checked against the fake Forgejo; the real Forgejo and Gitea runs are step 5). The handle is `Provider::Custom(&'static str)`, interned, instead of an index into a table: ids found in the files on disk are kept as data even when the file does not know them. `tests/e2e/specs/forge-provider.test.ts` covers the sign-in screen, off or unknown providers, the full OAuth flow, the Git proxy, the local folder `git-test.demo`, sharing, tags, ZIP, and a session that survives the provider leaving the file and comes back with it. Per-provider administrators are step 3.
 - Config parsing and validation (`kind`, `url`, `label`, `admins`, limits), table construction, `/auth/login/{id}` and `/auth/callback/{id}`, sign-in screen buttons (generic icon with the label), per-provider redirect URI (`<REDIRECT base>/auth/callback/<id>`), `--check-config` lines, token refresh as for Codeberg.
 - Validation:
   - Unit tests for every config error (bad kind, `http://` URL, duplicate or reserved id, too many providers, secret instead of variable name).

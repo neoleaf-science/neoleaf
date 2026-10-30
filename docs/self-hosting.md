@@ -54,4 +54,10 @@ show a button. Without the file the server behaves exactly as described above.
 - The logo is a file inside the folder of `neoleaf.toml` (PNG, JPEG, GIF, WebP or SVG, up to 512 KiB). It is read at startup.
 - The client secret never goes in the file: `client_secret_env` names the environment variable that holds it.
 - `./neoleaf --check-config` validates the file and prints what it means, without starting the server. An invalid file stops the server on start.
-- Not covered yet: your own Git server (GitLab, Forgejo, Gitea) as a provider, and the name and logo outside the sign-in screen.
+- **Your own Git server (Forgejo or Gitea)** as a provider: add a `[providers.<id>]` block with `kind` (`forgejo` or `gitea`), `url`, `label` (the whole text of the
+  sign-in button), `client_id` and `client_secret_env`. On the server, create an OAuth2 application whose redirect address is
+  `https://your.domain/auth/callback/<id>`. People sign in with that server's account (so whatever login the server already uses, such as CAFe, Google or LDAP,
+  applies), their projects are repositories there, and their local copies in the browser are kept apart from other providers (`<id>.<owner>`). Up to 8 servers;
+  GitHub and Codeberg can stay on at the same time. A server that is taken out of the file stops working but its sessions and blocks are kept for when it comes back.
+  Administrators of the installation (the `/admin` page) are still GitHub accounts only; that comes with the next step.
+- Not covered yet: GitLab, administrators from your own server, and the name and logo outside the sign-in screen.

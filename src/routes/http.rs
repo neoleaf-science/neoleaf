@@ -150,7 +150,7 @@ pub(crate) fn random_state() -> String {
 }
 
 pub(crate) fn github_configured() -> bool {
-    let id = std::env::var("GITHUB_CLIENT_ID").unwrap_or_default();
+    let id = provider::Provider::GitHub.client_id();
     !id.is_empty() && !id.contains("seu_")
 }
 

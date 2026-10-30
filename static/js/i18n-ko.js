@@ -1865,4 +1865,10 @@
   "Open .ipynb files and run their cells with Python in the same window, with Markdown, formulas and outputs, saved in the project as ordinary Jupyter files.": ".ipynb 파일을 열고 같은 창에서 Python으로 셀을 실행하세요. Markdown, 수식, 출력이 지원되며 프로젝트에 일반 Jupyter 파일로 저장됩니다.",
   "Pause the slideshow": "슬라이드쇼 일시 정지",
   "Play the slideshow": "슬라이드쇼 재생",
+  "Collaborative LaTeX editor": "협업 LaTeX 편집기",
+  "No sign-in method is enabled. Ask the administrator of this server.": "사용할 수 있는 로그인 방법이 없습니다. 이 서버의 관리자에게 문의하세요.",
+  "Your session expired or was revoked. Please sign in again.": "세션이 만료되었거나 취소되었습니다. 다시 로그인하세요.",
+  "This account was blocked by the administrator.": "이 계정은 관리자에 의해 차단되었습니다.",
+  "Your stored session was removed from this server. Your repositories were not changed.": "저장된 세션이 이 서버에서 삭제되었습니다. 저장소는 변경되지 않았습니다.",
+  "Terms of Use": "이용 약관",
 };

@@ -1,0 +1,32 @@
+# NeoLeaf institution file. Copy it to `neoleaf.toml` next to the executable (or point NEOLEAF_CONFIG at it).
+#
+# Without a `neoleaf.toml` the server behaves as the public NeoLeaf site (landing page, GitHub, Codeberg if configured).
+# With it, the home page for people who are not signed in is a plain sign-in screen with your name and logo.
+#
+# Check it before starting:   ./neoleaf --check-config
+# An invalid file stops the server with a message that says what to fix.
+#
+# Secrets never go in this file: use the environment (or .env) for the client secrets.
+
+[brand]
+name = "My University LaTeX"            # shown on the sign-in screen and in the tab title (default: NeoLeaf)
+logo = "brand/logo.svg"                 # PNG, JPEG, GIF, WebP or SVG up to 512 KiB, path inside this folder (no ..)
+logo_dark = "brand/logo-dark.svg"       # optional: used with the dark themes
+accent = "#1a7f37"                      # optional: colour of the sign-in buttons, #rrggbb (default: the NeoLeaf theme)
+contact_email = "support@university.edu"
+
+# Your own Terms and Privacy pages. When set, /terms and /privacy go there; when empty, the built-in pages
+# (which speak for neoleaf.science, not for your institution) are shown. Set both for a real install.
+[legal]
+terms_url = "https://university.edu/latex/terms"
+privacy_url = "https://university.edu/latex/privacy"
+
+# Which sign-in providers are on. A provider that is not listed, or has enabled = false, is off
+# (its sign-in address answers with a redirect to /).
+[providers.github]
+enabled = true
+# client_id = "..."                     # optional: otherwise GITHUB_CLIENT_ID
+# client_secret_env = "MY_GH_SECRET"    # optional: NAME of the variable that holds the secret, otherwise GITHUB_CLIENT_SECRET
+
+[providers.codeberg]
+enabled = false

@@ -33,8 +33,8 @@ pub(crate) async fn delete_own_account(
     let revoked = if me.user.provider != provider::Provider::GitHub {
         false
     } else {
-        let id = std::env::var("GITHUB_CLIENT_ID").unwrap_or_default();
-        let secret = std::env::var("GITHUB_CLIENT_SECRET").unwrap_or_default();
+        let id = provider::Provider::GitHub.client_id();
+        let secret = provider::Provider::GitHub.client_secret();
         match account::revoke_github_grant(&id, &secret, &me.access_token).await {
             Ok(()) => true,
             Err(e) => {
@@ -58,7 +58,11 @@ pub(crate) async fn delete_own_account(
 // GET /auth/login - Redirect to GitHub OAuth
 #[route(GET "/auth/login")]
 pub(crate) async fn auth_login(cx: &Cx) -> Result<SeeOther> {
-    let client_id = std::env::var("GITHUB_CLIENT_ID").unwrap_or_default();
+    // with `neoleaf.toml` a provider that is not switched on cannot be used, even by typing the address
+    if config::get().is_some() && !provider::Provider::GitHub.enabled() {
+        return Ok(see_other("/"));
+    }
+    let client_id = provider::Provider::GitHub.client_id();
     let redirect_uri = std::env::var("REDIRECT_URI")
         .unwrap_or_else(|_| "http://localhost:3000/auth/callback".to_string());
 
@@ -158,8 +162,11 @@ pub(crate) struct CallbackQuery {
 }
 
 pub(crate) async fn handle_github_callback(cx: &Cx) -> Result<SeeOther> {
-    let client_id = std::env::var("GITHUB_CLIENT_ID").unwrap_or_default();
-    let client_secret = std::env::var("GITHUB_CLIENT_SECRET").unwrap_or_default();
+    if config::get().is_some() && !provider::Provider::GitHub.enabled() {
+        return Ok(see_other("/"));
+    }
+    let client_id = provider::Provider::GitHub.client_id();
+    let client_secret = provider::Provider::GitHub.client_secret();
     let redirect_uri = std::env::var("REDIRECT_URI")
         .unwrap_or_else(|_| "http://localhost:3000/auth/callback".to_string());
 

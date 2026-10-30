@@ -22,6 +22,7 @@ mod auth;
 mod blocklist;
 mod catalog;
 mod collab;
+mod config;
 mod ctan;
 mod deps;
 mod drive;
@@ -77,6 +78,29 @@ fn main() {
 
 async fn run() {
     let _ = dotenvy::dotenv();
+    // `neoleaf --check-config`: validates neoleaf.toml, prints what it means (never a secret) and exits
+    let check = std::env::args().any(|a| a == "--check-config");
+    match config::load() {
+        Ok(Some(cfg)) => {
+            println!("📄 Institution mode: neoleaf.toml loaded");
+            if check {
+                for line in config::summary(cfg) {
+                    println!("   {line}");
+                }
+                return;
+            }
+        }
+        Ok(None) => {
+            if check {
+                println!("No neoleaf.toml: the server runs as the public NeoLeaf site.");
+                return;
+            }
+        }
+        Err(e) => {
+            eprintln!("❌ Invalid configuration: {e}");
+            std::process::exit(1);
+        }
+    }
     admin::init_process_start();
     // TeX Live index ready before the first package request (and to check what goes into the disk cache)
     tokio::spawn(ctan::warm_index());
@@ -160,6 +184,8 @@ async fn run() {
         .route(agent_page)
         .route(agent_legacy)
         .route(agent_download_redirect)
+        .route(brand_logo)
+        .route(brand_logo_dark)
         .route(auth_login)
         .route(auth_login_codeberg)
         .route(auth_callback_codeberg)

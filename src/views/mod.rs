@@ -2,6 +2,7 @@ pub mod admin_page;
 pub mod agent_page;
 pub mod dashboard_page;
 pub mod editor_page;
+pub mod institution_login;
 pub mod licenses_page;
 pub mod login_page;
 pub mod privacy_page;

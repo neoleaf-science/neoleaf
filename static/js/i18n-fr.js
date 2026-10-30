@@ -1865,4 +1865,10 @@
   "Open .ipynb files and run their cells with Python in the same window, with Markdown, formulas and outputs, saved in the project as ordinary Jupyter files.": "Ouvrez des fichiers .ipynb et exécutez leurs cellules avec Python dans la même fenêtre, avec Markdown, formules et sorties, enregistrés dans le projet comme de simples fichiers Jupyter.",
   "Pause the slideshow": "Mettre le diaporama en pause",
   "Play the slideshow": "Lancer le diaporama",
+  "Collaborative LaTeX editor": "Éditeur LaTeX collaboratif",
+  "No sign-in method is enabled. Ask the administrator of this server.": "Aucune méthode de connexion n'est activée. Contactez l'administrateur de ce serveur.",
+  "Your session expired or was revoked. Please sign in again.": "Votre session a expiré ou a été révoquée. Reconnectez-vous.",
+  "This account was blocked by the administrator.": "Ce compte a été bloqué par l'administrateur.",
+  "Your stored session was removed from this server. Your repositories were not changed.": "Votre session enregistrée a été supprimée de ce serveur. Vos dépôts n'ont pas été modifiés.",
+  "Terms of Use": "Conditions d'utilisation",
 };

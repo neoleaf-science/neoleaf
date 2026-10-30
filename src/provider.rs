@@ -66,7 +66,11 @@ impl Provider {
         }
     }
 
+    /// OAuth client id: from `neoleaf.toml` when the file gives one, otherwise from the environment.
     pub fn client_id(self) -> String {
+        if let Some(id) = crate::config::get().and_then(|c| c.provider_client_id(self)) {
+            return id;
+        }
         std::env::var(match self {
             Provider::GitHub => "GITHUB_CLIENT_ID",
             Provider::Codeberg => "CODEBERG_CLIENT_ID",
@@ -74,19 +78,30 @@ impl Provider {
         .unwrap_or_default()
     }
 
+    /// OAuth client secret: from the environment variable that `neoleaf.toml` names (`client_secret_env`), otherwise the usual one.
     pub fn client_secret(self) -> String {
-        std::env::var(match self {
-            Provider::GitHub => "GITHUB_CLIENT_SECRET",
-            Provider::Codeberg => "CODEBERG_CLIENT_SECRET",
-        })
-        .unwrap_or_default()
+        let name = crate::config::get()
+            .and_then(|c| c.provider_secret_env(self))
+            .unwrap_or_else(|| {
+                match self {
+                    Provider::GitHub => "GITHUB_CLIENT_SECRET",
+                    Provider::Codeberg => "CODEBERG_CLIENT_SECRET",
+                }
+                .to_string()
+            });
+        std::env::var(name).unwrap_or_default()
     }
 
-    /// Is login with this provider configured? (GitHub always shows; Codeberg only with the OAuth app keys)
+    /// Is login with this provider on? Without `neoleaf.toml`: GitHub always shows, Codeberg only with the OAuth app keys.
+    /// With the file: only the providers it switches on, and only when their keys are set.
     pub fn enabled(self) -> bool {
-        match self {
-            Provider::GitHub => true,
-            Provider::Codeberg => !self.client_id().is_empty() && !self.client_secret().is_empty(),
+        let keys = !self.client_id().is_empty() && !self.client_secret().is_empty();
+        match crate::config::get() {
+            Some(c) => c.provider_enabled(self) && keys,
+            None => match self {
+                Provider::GitHub => true,
+                Provider::Codeberg => keys,
+            },
         }
     }
 

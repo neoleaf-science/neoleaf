@@ -1,5 +1,7 @@
 /target
 .env
+# institution install (see neoleaf.example.toml)
+neoleaf.toml
 
 sessions.json
 sessions.tmp

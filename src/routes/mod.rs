@@ -21,6 +21,7 @@ macro_rules! need_project {
 
 mod admin_routes;
 mod auth_routes;
+mod brand_routes;
 mod catalog_routes;
 mod git_proxy;
 mod http;
@@ -31,6 +32,7 @@ mod static_files;
 
 pub(crate) use admin_routes::*;
 pub(crate) use auth_routes::*;
+pub(crate) use brand_routes::*;
 pub(crate) use catalog_routes::*;
 pub(crate) use git_proxy::*;
 pub(crate) use http::*;

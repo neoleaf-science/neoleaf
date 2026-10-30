@@ -1,5 +1,6 @@
 # NeoLeaf: release notes
 
+- **1.35.0**: institution install: an optional `neoleaf.toml` (example in `neoleaf.example.toml`) sets the name, logo, accent colour and contact of an institution, which sign-in providers are on, and where its own Terms and Privacy pages are; with it the home page for people who are not signed in is a plain branded sign-in screen. `neoleaf --check-config` validates the file. Without the file the server works exactly as before.
 - **1.34.1**: local agent 0.4.15 (checks of downloaded files and random values updated to the new `sha2`, `rand` and `base64`; no change in what it does). People who already have the agent get the notice or the automatic update as usual.
 - **1.34.0**: the code editor is Monaco 0.56 (was 0.45): colours, completion, shortcuts, line wrapping and collaboration work as before. The loader is still checked against a fixed SHA-384.
 - **1.33.2**: the project list shows the NeoLeaf version at the bottom of the sidebar, below the contact line.

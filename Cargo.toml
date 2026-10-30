@@ -1,6 +1,6 @@
 [package]
 name = "neoleaf"
-version = "1.34.1"
+version = "1.35.0"
 edition = "2024"
 authors = ["Tássio Virgínio"]
 license = "MIT OR Apache-2.0"
@@ -31,3 +31,4 @@ urlencoding = "2.1.3"
 yrs = "0.28.0"
 zip = { version = "9.0.0", default-features = false, features = ["deflate"] }
 aes-gcm = "0.11.1"
+toml = "1"

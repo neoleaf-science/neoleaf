@@ -152,8 +152,18 @@ at login (`/auth/login` and `/auth/login/codeberg`). The provider goes in `GitHu
 - **Sessions** (`src/session.rs`): at most 8 per person (provider + numeric id; `MAX_SESSIONS_PER_USER`), the next sign-in evicts that person's own oldest; the 2000 global cap is only a last resort and takes from whoever holds the most. A Codeberg token refresh is serialized per session (the refresh token is single use); only a definitive refusal (HTTP 400/401 with an OAuth error, except `invalid_client`) ends the session, a transient failure (network, timeout, 5xx) keeps it and answers "not signed in" for that request only. The session expires 30 days after sign-in (absolute, not by inactivity). Cookies are `Secure` unless `REDIRECT_URI` starts with `http://localhost` or `http://127.0.0.1`. `GET /auth/logout` stays only for the interface's sign-out links; `POST /auth/logout` does the same.
 - Codeberg only appears at login if `CODEBERG_CLIENT_ID` and `CODEBERG_CLIENT_SECRET` are set (`CODEBERG_URL` changes the instance;
   `CODEBERG_REDIRECT_URI`, by default `<REDIRECT_URI>/codeberg`). In the tests, `tests/fake-github/server.ts` also answers as Codeberg at `/api/v1`.
-- **It was only verified against the fake server.** The OAuth app still has to be registered on Codeberg and tested for real (in particular the
-  Git Basic authentication with the OAuth token).
+- **Verified for real on codeberg.org (owner, 2026-10-30):** sign-in, creating a project, editing, syncing (Git Basic authentication with the OAuth
+  token) and the rest of the flow all worked. The automated tests still use the fake server (`tests/fake-github/server.ts`).
+
+### Institution install (`neoleaf.toml`)
+
+An optional file (`src/config.rs`; example in `neoleaf.example.toml`; user guide in `docs/self-hosting.md` section 5) for universities and companies that run their own NeoLeaf.
+**Without it nothing changes**: the public site runs without it and must keep behaving exactly as before. The test `tests/e2e/specs/institution.test.ts` checks both modes.
+- Path: `NEOLEAF_CONFIG`, otherwise `neoleaf.toml` in the working directory (git-ignored). Read **once at startup** and validated completely; an invalid file stops the server (`neoleaf --check-config` validates and prints a summary, never a secret).
+- `[brand]` (`name`, `logo`, `logo_dark`, `accent`, `contact_email`) and `[legal]` (`terms_url`, `privacy_url`): with the file, `/` for people who are not signed in is `views/institution_login.rs` (plain branded sign-in screen), not the landing page. `/terms` and `/privacy` redirect (303) to the institution's URLs when set: the built-in texts speak for neoleaf.science, not for another operator.
+- `[providers.github|codeberg]` `enabled`, `client_id`, `client_secret_env` (the NAME of the variable that holds the secret; secrets never live in the file). With the file a provider that is not switched on cannot be used even by typing its sign-in address (`Provider::enabled`, `auth_login*`, callbacks).
+- Logos are read into memory at startup from inside the folder of the file (no `..`, symlinks resolved and checked, up to 512 KiB, the type decided by the bytes and the extension together) and served by `routes/brand_routes.rs` as images with `nosniff` and `Content-Security-Policy: default-src 'none'; sandbox`. Never inline SVG, never HTML from the file: every text is escaped (`views::esc`) and the accent is a validated `#rrggbb`.
+- New interface strings of that page are in the 14 `i18n-*.js` files. Not covered yet: another Git server (GitLab, Forgejo, Gitea) as a provider, per-installation admin ids, and the name and logo outside the sign-in screen.
 
 ---
 

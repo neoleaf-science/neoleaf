@@ -1865,4 +1865,10 @@
   "Open .ipynb files and run their cells with Python in the same window, with Markdown, formulas and outputs, saved in the project as ordinary Jupyter files.": "Aynı pencerede .ipynb dosyalarını açın ve hücrelerini Python ile çalıştırın; Markdown, formüller ve çıktılarla, projede sıradan Jupyter dosyaları olarak saklanır.",
   "Pause the slideshow": "Slayt gösterisini duraklat",
   "Play the slideshow": "Slayt gösterisini başlat",
+  "Collaborative LaTeX editor": "İş birliğine dayalı LaTeX düzenleyici",
+  "No sign-in method is enabled. Ask the administrator of this server.": "Hiçbir oturum açma yöntemi etkin değil. Bu sunucunun yöneticisiyle iletişime geçin.",
+  "Your session expired or was revoked. Please sign in again.": "Oturumunuzun süresi doldu veya iptal edildi. Lütfen tekrar oturum açın.",
+  "This account was blocked by the administrator.": "Bu hesap yönetici tarafından engellendi.",
+  "Your stored session was removed from this server. Your repositories were not changed.": "Kayıtlı oturumunuz bu sunucudan silindi. Depolarınız değiştirilmedi.",
+  "Terms of Use": "Kullanım Koşulları",
 };

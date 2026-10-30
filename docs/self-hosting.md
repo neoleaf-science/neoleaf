@@ -43,3 +43,15 @@ Open your address: the landing page appears, sign in with GitHub, create a proje
 - Keep `.env` and `sessions.json` private; never commit them.
 - The GPL-licensed TeX engines are served as separate programs; their source is listed at `/licenses`.
 - The spell check dictionaries are not part of the archive or of the server: each person's browser downloads the one it needs from GitHub (pinned commit, SHA-256 checked, with a jsDelivr mirror) and keeps it on the device. Your server needs nothing for it.
+
+## 5. For an institution: your name, logo and sign-in providers (optional)
+Copy `neoleaf.example.toml` to `neoleaf.toml` next to the executable. With that file the page that people see before signing in is a plain
+sign-in screen with your logo and name (accent colour and contact e-mail optional), and only the providers you switch on (`github`, `codeberg`)
+show a button. Without the file the server behaves exactly as described above.
+
+- `[legal]`: the built-in Terms and Privacy pages speak for neoleaf.science. Set `terms_url` and `privacy_url` to your institution's own pages and
+  `/terms` and `/privacy` redirect there.
+- The logo is a file inside the folder of `neoleaf.toml` (PNG, JPEG, GIF, WebP or SVG, up to 512 KiB). It is read at startup.
+- The client secret never goes in the file: `client_secret_env` names the environment variable that holds it.
+- `./neoleaf --check-config` validates the file and prints what it means, without starting the server. An invalid file stops the server on start.
+- Not covered yet: your own Git server (GitLab, Forgejo, Gitea) as a provider, and the name and logo outside the sign-in screen.

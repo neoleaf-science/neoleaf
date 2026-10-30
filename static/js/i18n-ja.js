@@ -1865,4 +1865,10 @@
   "Open .ipynb files and run their cells with Python in the same window, with Markdown, formulas and outputs, saved in the project as ordinary Jupyter files.": ".ipynb ファイルを開き、同じウィンドウで Python によってセルを実行できます。Markdown、数式、出力に対応し、プロジェクトには通常の Jupyter ファイルとして保存されます。",
   "Pause the slideshow": "スライドショーを一時停止",
   "Play the slideshow": "スライドショーを再生",
+  "Collaborative LaTeX editor": "共同編集できる LaTeX エディタ",
+  "No sign-in method is enabled. Ask the administrator of this server.": "利用できるサインイン方法がありません。このサーバーの管理者に問い合わせてください。",
+  "Your session expired or was revoked. Please sign in again.": "セッションの有効期限が切れたか、取り消されました。もう一度サインインしてください。",
+  "This account was blocked by the administrator.": "このアカウントは管理者によってブロックされています。",
+  "Your stored session was removed from this server. Your repositories were not changed.": "保存されていたセッションはこのサーバーから削除されました。リポジトリは変更されていません。",
+  "Terms of Use": "利用規約",
 };

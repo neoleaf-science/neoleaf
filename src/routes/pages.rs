@@ -34,9 +34,32 @@ pub(crate) async fn home(cx: &Cx) -> Result<Response> {
         );
         Ok(html_response(html))
     } else {
+        let query = topcoat::router::query_params::<HomeQuery>(cx).ok();
+        // with `neoleaf.toml` (an institution install) the sign-in screen is the branded one; without it, the NeoLeaf landing page
+        if let Some(cfg) = config::get() {
+            let notice = match query.as_ref() {
+                Some(q) if q.deleted.is_some() => {
+                    Some(views::institution_login::Notice::AccountDeleted)
+                }
+                Some(q) if q.blocked.is_some() => {
+                    Some(views::institution_login::Notice::AccountBlocked)
+                }
+                Some(q) if q.expired.is_some() => {
+                    Some(views::institution_login::Notice::SessionExpired)
+                }
+                _ => None,
+            };
+            let providers: Vec<_> = cfg
+                .enabled_providers()
+                .into_iter()
+                .filter(|p| p.enabled())
+                .collect();
+            return Ok(html_response(views::institution_login::render(
+                cfg, &providers, notice,
+            )));
+        }
         let mut html =
             views::login_page::render(has_github_creds, provider::Provider::Codeberg.enabled());
-        let query = topcoat::router::query_params::<HomeQuery>(cx).ok();
         if query.as_ref().and_then(|q| q.deleted.clone()).is_some() {
             html = views::with_account_deleted_notice(&html);
         } else if query.as_ref().and_then(|q| q.blocked.clone()).is_some() {
@@ -51,12 +74,19 @@ pub(crate) async fn home(cx: &Cx) -> Result<Response> {
 // GET /privacy - Privacy Policy
 #[route(GET "/privacy")]
 pub(crate) async fn privacy(_cx: &Cx) -> Result<Response> {
+    // an institution install points to its own policy (`[legal]` in neoleaf.toml); the built-in text speaks for neoleaf.science
+    if let Some(url) = config::get().and_then(|c| c.legal.privacy_url.clone()) {
+        return Ok(redirect_to(&url));
+    }
     Ok(html_response(views::privacy_page::render()))
 }
 
 // GET /terms - Terms of Use
 #[route(GET "/terms")]
 pub(crate) async fn terms(_cx: &Cx) -> Result<Response> {
+    if let Some(url) = config::get().and_then(|c| c.legal.terms_url.clone()) {
+        return Ok(redirect_to(&url));
+    }
     Ok(html_response(views::terms_page::render()))
 }
 
@@ -99,4 +129,14 @@ pub(crate) struct HomeQuery {
     pub(crate) expired: Option<String>,
     pub(crate) blocked: Option<String>,
     pub(crate) deleted: Option<String>,
+}
+
+/// 303 to an address that `config.rs` already validated (https, no spaces or quotes).
+fn redirect_to(url: &str) -> Response {
+    Response::builder()
+        .status(303)
+        .header("Location", url)
+        .header("Cache-Control", "no-store")
+        .body(Body::empty())
+        .unwrap()
 }

@@ -1937,4 +1937,10 @@
   "Open .ipynb files and run their cells with Python in the same window, with Markdown, formulas and outputs, saved in the project as ordinary Jupyter files.": "打开 .ipynb 文件，在同一窗口中用 Python 运行单元格，支持 Markdown、公式和输出，并以普通 Jupyter 文件保存在项目中。",
   "Pause the slideshow": "暂停轮播",
   "Play the slideshow": "开始轮播",
+  "Collaborative LaTeX editor": "协作式 LaTeX 编辑器",
+  "No sign-in method is enabled. Ask the administrator of this server.": "未启用任何登录方式。请联系此服务器的管理员。",
+  "Your session expired or was revoked. Please sign in again.": "您的会话已过期或已被撤销。请重新登录。",
+  "This account was blocked by the administrator.": "此账户已被管理员封锁。",
+  "Your stored session was removed from this server. Your repositories were not changed.": "您存储的会话已从此服务器中删除。您的仓库未被更改。",
+  "Terms of Use": "使用条款",
 };

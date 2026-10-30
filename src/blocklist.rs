@@ -114,15 +114,15 @@ pub fn list() -> Vec<Blocked> {
 
 /// Valid login for the service: GitHub allows letters, digits and hyphen (up to 39 characters); Codeberg also `.` and `_`.
 pub fn valid_login(provider: Provider, login: &str) -> bool {
-    match provider {
-        Provider::GitHub => {
+    match provider.kind() {
+        crate::provider::Kind::GitHub => {
             !login.is_empty()
                 && login.len() <= 39
                 && login
                     .bytes()
                     .all(|c| c.is_ascii_alphanumeric() || c == b'-')
         }
-        Provider::Codeberg => crate::ids::valid_login(login),
+        crate::provider::Kind::Forgejo => crate::ids::valid_login(login),
     }
 }
 

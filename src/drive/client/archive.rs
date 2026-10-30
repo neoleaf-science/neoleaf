@@ -10,7 +10,7 @@ impl DriveClient {
         full_name: &str,
         git_ref: &str,
     ) -> Result<reqwest::Response, String> {
-        let url = if self.codeberg() {
+        let url = if self.forgejo() {
             // Forgejo requires the ref: without it, use the repository's default branch
             let git_ref = if git_ref.is_empty() {
                 self.gh_json(

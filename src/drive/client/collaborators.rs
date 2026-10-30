@@ -193,7 +193,7 @@ impl DriveClient {
         }
 
         let collabs: Vec<Collab> = resp.json().await.unwrap_or_default();
-        let forgejo_roles = if self.codeberg() {
+        let forgejo_roles = if self.forgejo() {
             self.forgejo_roles(&repo, &collabs).await
         } else {
             Default::default()
@@ -233,7 +233,7 @@ impl DriveClient {
             })
             .collect();
 
-        if self.codeberg() {
+        if self.forgejo() {
             return Ok(perms); // Forgejo has no pending invitations: the person joins directly
         }
         self.push_pending_invitations(&repo, &mut perms).await;
@@ -251,7 +251,7 @@ impl DriveClient {
             return Err("Invalid user name".to_string());
         }
         let repo = repo_full_name(project_id);
-        let gh_role = match (role, self.codeberg()) {
+        let gh_role = match (role, self.forgejo()) {
             ("admin" | "owner", _) => "admin",
             ("reader", true) => "read",
             ("reader", false) => "pull",
@@ -299,7 +299,7 @@ impl DriveClient {
     ) -> Result<(), String> {
         if let Some(inv_id) = username_or_inv.strip_prefix("inv_") {
             // a pending invitation is not a user: change the permission of the invitation itself (GitHub only; Forgejo has none)
-            if self.codeberg() || !crate::ids::valid_permission_id(username_or_inv) {
+            if self.forgejo() || !crate::ids::valid_permission_id(username_or_inv) {
                 return Err("Pending invitations cannot be changed here; remove the invitation and invite again".to_string());
             }
             let gh_role = match role {
@@ -345,7 +345,7 @@ impl DriveClient {
             return Err("Invalid permission ID".to_string());
         }
         let repo = repo_full_name(project_id);
-        let url = match (username_or_inv.strip_prefix("inv_"), self.codeberg()) {
+        let url = match (username_or_inv.strip_prefix("inv_"), self.forgejo()) {
             (Some(inv_id), false) => self.u(format!(
                 "https://api.github.com/repos/{}/invitations/{}",
                 repo, inv_id
@@ -378,7 +378,7 @@ impl DriveClient {
     }
 
     pub async fn list_invitations(&self) -> Result<Vec<NeoLeafInvitation>, String> {
-        if self.codeberg() {
+        if self.forgejo() {
             return Ok(Vec::new()); // on Forgejo whoever is added as a collaborator joins directly, without an invitation
         }
         let resp = self
@@ -423,7 +423,7 @@ impl DriveClient {
     }
 
     pub async fn accept_invitation(&self, invitation_id: u64) -> Result<(), String> {
-        if self.codeberg() {
+        if self.forgejo() {
             return Err("Codeberg does not use invitations.".to_string());
         }
         let url = self.u(format!(
@@ -451,7 +451,7 @@ impl DriveClient {
     }
 
     pub async fn decline_invitation(&self, invitation_id: u64) -> Result<(), String> {
-        if self.codeberg() {
+        if self.forgejo() {
             return Err("Codeberg does not use invitations.".to_string());
         }
         let url = self.u(format!(

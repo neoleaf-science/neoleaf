@@ -97,7 +97,7 @@ impl DriveClient {
             return Err(format!("GitHub returned {status}: {body}"));
         }
 
-        if self.codeberg() {
+        if self.forgejo() {
             return Ok(names); // Forgejo answers 204, with no body
         }
         #[derive(Deserialize)]

@@ -174,10 +174,7 @@ fn git_resp_stream(cx: &Cx, status: u16, upstream: reqwest::Response, slot: GitS
 
 /// Git proxy authentication. GitHub: `x-access-token:<token>`; Codeberg (Forgejo): `<login>:<token>`.
 pub(crate) fn git_basic_auth(s: &session::Active) -> String {
-    let user = match s.user.provider {
-        provider::Provider::GitHub => "x-access-token".to_string(),
-        provider::Provider::Codeberg => s.user.login.clone(),
-    };
+    let user = s.user.provider.git_user(&s.user.login);
     format!(
         "Basic {}",
         base64::engine::general_purpose::STANDARD.encode(format!("{user}:{}", s.access_token))

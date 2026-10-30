@@ -505,11 +505,7 @@ pub async fn serve(
         format!(
             "{}@users.noreply.{}",
             user.login,
-            if user.provider == crate::provider::Provider::Codeberg {
-                "codeberg.org"
-            } else {
-                "github.com"
-            }
+            user.provider.noreply_host()
         )
     });
     let me = Peer {

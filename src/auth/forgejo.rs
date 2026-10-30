@@ -3,12 +3,12 @@
 use serde::Deserialize;
 
 use crate::auth::github::{GitHubUser, TokenResponse};
-use crate::provider::{Provider, codeberg_web};
+use crate::provider::Provider;
 
-pub fn get_auth_url(client_id: &str, redirect_uri: &str, state: &str) -> String {
+pub fn get_auth_url(prov: Provider, client_id: &str, redirect_uri: &str, state: &str) -> String {
     format!(
         "{}/login/oauth/authorize?client_id={}&redirect_uri={}&response_type=code&state={}",
-        codeberg_web(),
+        prov.web(),
         urlencoding::encode(client_id),
         urlencoding::encode(redirect_uri),
         urlencoding::encode(state)
@@ -43,10 +43,11 @@ fn is_definitive_refusal(status: u16, body: &str) -> bool {
 
 async fn token_request(
     client: &reqwest::Client,
+    prov: Provider,
     params: &[(&str, &str)],
 ) -> Result<TokenResponse, RefreshError> {
     let resp = client
-        .post(format!("{}/login/oauth/access_token", codeberg_web()))
+        .post(format!("{}/login/oauth/access_token", prov.web()))
         .header("Accept", "application/json")
         .header("User-Agent", "NeoLeaf-LaTeX")
         .form(params)
@@ -56,7 +57,7 @@ async fn token_request(
     let status = resp.status();
     if !status.is_success() {
         let body = resp.text().await.unwrap_or_default();
-        let msg = format!("Codeberg rejected the request ({status})");
+        let msg = format!("{} rejected the request ({status})", prov.label());
         return Err(if is_definitive_refusal(status.as_u16(), &body) {
             RefreshError::Refused(msg)
         } else {
@@ -76,6 +77,7 @@ fn message(e: RefreshError) -> String {
 
 pub async fn exchange_code(
     client: &reqwest::Client,
+    prov: Provider,
     code: &str,
     client_id: &str,
     client_secret: &str,
@@ -83,6 +85,7 @@ pub async fn exchange_code(
 ) -> Result<TokenResponse, String> {
     token_request(
         client,
+        prov,
         &[
             ("grant_type", "authorization_code"),
             ("code", code),
@@ -97,15 +100,17 @@ pub async fn exchange_code(
 
 pub async fn refresh(
     client: &reqwest::Client,
+    prov: Provider,
     refresh_token: &str,
 ) -> Result<TokenResponse, RefreshError> {
     token_request(
         client,
+        prov,
         &[
             ("grant_type", "refresh_token"),
             ("refresh_token", refresh_token),
-            ("client_id", &Provider::Codeberg.client_id()),
-            ("client_secret", &Provider::Codeberg.client_secret()),
+            ("client_id", &prov.client_id()),
+            ("client_secret", &prov.client_secret()),
         ],
     )
     .await
@@ -138,9 +143,9 @@ struct ForgejoUser {
 }
 
 impl ForgejoUser {
-    fn into_user(self) -> GitHubUser {
+    fn into_user(self, prov: Provider) -> GitHubUser {
         GitHubUser {
-            provider: Provider::Codeberg,
+            provider: prov,
             id: self.id,
             login: self.login,
             name: self.full_name,
@@ -162,23 +167,28 @@ impl ForgejoUser {
 
 pub async fn get_user_info(
     client: &reqwest::Client,
+    prov: Provider,
     access_token: &str,
 ) -> Result<GitHubUser, String> {
     let resp = client
-        .get(format!("{}/user", Provider::Codeberg.api()))
+        .get(format!("{}/user", prov.api()))
         .header("Authorization", format!("Bearer {access_token}"))
         .header("User-Agent", "NeoLeaf-LaTeX")
         .send()
         .await
         .map_err(|e| e.to_string())?;
     if !resp.status().is_success() {
-        return Err(format!("Codeberg rejected the token ({})", resp.status()));
+        return Err(format!(
+            "{} rejected the token ({})",
+            prov.label(),
+            resp.status()
+        ));
     }
     Ok(resp
         .json::<ForgejoUser>()
         .await
         .map_err(|e| e.to_string())?
-        .into_user())
+        .into_user(prov))
 }
 
 #[cfg(test)]
@@ -188,7 +198,7 @@ mod tests {
     #[test]
     fn forgejo_user_becomes_the_neoleaf_user() {
         let v: ForgejoUser = serde_json::from_str(r#"{"id":7,"login":"ana","full_name":"Ana Souza","email":"","avatar_url":"https://x/a.png","html_url":"https://codeberg.org/ana","description":"","location":"Salvador","website":"","followers_count":3,"following_count":4,"created":"2024-01-01T00:00:00Z"}"#).unwrap();
-        let u = v.into_user();
+        let u = v.into_user(Provider::Codeberg);
         assert_eq!(u.provider, Provider::Codeberg);
         assert_eq!(
             (u.id, u.login.as_str(), u.name.as_deref()),
@@ -220,7 +230,12 @@ mod tests {
 
     #[test]
     fn endereco_de_login() {
-        let u = get_auth_url("id", "http://localhost:3000/auth/callback/codeberg", "st");
+        let u = get_auth_url(
+            Provider::Codeberg,
+            "id",
+            "http://localhost:3000/auth/callback/codeberg",
+            "st",
+        );
         assert!(
             u.contains("/login/oauth/authorize?client_id=id")
                 && u.contains("response_type=code")

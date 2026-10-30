@@ -25,7 +25,59 @@ pub fn codeberg_web() -> String {
     env_url("CODEBERG_URL", "https://codeberg.org")
 }
 
+/// The API dialect of a provider: what decides how NeoLeaf talks to it (paths, tokens, Git login), as opposed to who it is.
+/// GitHub-style paths are the base; Forgejo (Codeberg, and any Forgejo or Gitea) differs in a few places that the code names by `Kind`.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Kind {
+    GitHub,
+    Forgejo,
+}
+
 impl Provider {
+    pub fn kind(self) -> Kind {
+        match self {
+            Provider::GitHub => Kind::GitHub,
+            Provider::Codeberg => Kind::Forgejo,
+        }
+    }
+
+    /// Does the access token expire and get renewed with a refresh token? (Forgejo: after 1 hour by default; GitHub: no.)
+    pub fn renews_token(self) -> bool {
+        self.kind() == Kind::Forgejo
+    }
+
+    /// User name of the Git over HTTP login: GitHub wants `x-access-token`, Forgejo the person's own login.
+    pub fn git_user(self, login: &str) -> String {
+        match self.kind() {
+            Kind::GitHub => "x-access-token".to_string(),
+            Kind::Forgejo => login.to_string(),
+        }
+    }
+
+    /// Host of the "no reply" e-mail the provider gives to people who hide theirs.
+    pub fn noreply_host(self) -> &'static str {
+        match self {
+            Provider::GitHub => "github.com",
+            Provider::Codeberg => "codeberg.org",
+        }
+    }
+
+    /// Author e-mail for commits made by the person (their provider's "no reply" address).
+    pub fn commit_email(self, id: u64, login: &str) -> String {
+        match self {
+            Provider::GitHub => format!("{id}+{login}@users.noreply.github.com"),
+            Provider::Codeberg => format!("{id}+{login}@noreply.codeberg.org"),
+        }
+    }
+
+    /// What a valid login looks like, for the administrator's error message.
+    pub fn login_rule(self) -> &'static str {
+        match self.kind() {
+            Kind::GitHub => "letters, numbers and hyphen",
+            Kind::Forgejo => "letters, numbers, hyphen, underscore and dot",
+        }
+    }
+
     /// Short identifier (cookie, JSON, `blocked.json`).
     pub fn id(self) -> &'static str {
         match self {
@@ -151,5 +203,46 @@ mod tests {
         )
         .unwrap();
         assert_eq!(u.provider, Provider::GitHub);
+    }
+
+    #[test]
+    fn dialect_of_each_provider_keeps_the_behavior_it_had() {
+        use super::Kind;
+        assert_eq!(Provider::GitHub.kind(), Kind::GitHub);
+        assert_eq!(Provider::Codeberg.kind(), Kind::Forgejo);
+        assert!(!Provider::GitHub.renews_token() && Provider::Codeberg.renews_token());
+        assert_eq!(Provider::GitHub.git_user("ana"), "x-access-token");
+        assert_eq!(Provider::Codeberg.git_user("ana"), "ana");
+        assert_eq!(Provider::GitHub.noreply_host(), "github.com");
+        assert_eq!(Provider::Codeberg.noreply_host(), "codeberg.org");
+        assert_eq!(
+            Provider::GitHub.commit_email(7, "ana"),
+            "7+ana@users.noreply.github.com"
+        );
+        assert_eq!(
+            Provider::Codeberg.commit_email(7, "ana"),
+            "7+ana@noreply.codeberg.org"
+        );
+    }
+
+    /// Files written by 1.35.0 (before `Kind` existed) must still load, and what is written back keeps the same shape.
+    #[test]
+    fn files_of_the_previous_version_still_load_and_keep_their_shape() {
+        let old = r#"[{"provider":"codeberg","id":5,"login":"ana_cb","name":null,"avatar_url":null,"reason":"x","blocked_at":1,"blocked_by":"adm"},
+                      {"id":6,"login":"bob","name":null,"avatar_url":null,"reason":"y","blocked_at":2,"blocked_by":"adm"}]"#;
+        let v: Vec<crate::blocklist::Blocked> = serde_json::from_str(old).unwrap();
+        assert_eq!(v[0].provider, Provider::Codeberg);
+        assert_eq!(
+            v[1].provider,
+            Provider::GitHub,
+            "no provider field means GitHub"
+        );
+        let back = serde_json::to_value(&v).unwrap();
+        assert_eq!(back[0]["provider"], "codeberg");
+        assert_eq!(back[1]["provider"], "github");
+        let user = r#"{"provider":"codeberg","id":1,"login":"a","name":null,"email":null,"avatar_url":null}"#;
+        let u: crate::auth::github::GitHubUser = serde_json::from_str(user).unwrap();
+        assert_eq!(u.provider, Provider::Codeberg);
+        assert_eq!(serde_json::to_value(&u).unwrap()["provider"], "codeberg");
     }
 }

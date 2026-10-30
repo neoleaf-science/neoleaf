@@ -93,10 +93,13 @@ fn template() -> String {
 fn current_user_json(user: &crate::auth::github::GitHubUser) -> String {
     let user_name = user.display_name();
     // author of commits made in the browser: real name and login, and the GitHub private email (id+login) so the commit links to the account
-    js_json(&serde_json::json!({
-        "name": user_name,
-        "login": user.login,
-        "provider": user.provider.id(),
-        "email": if user.provider == crate::provider::Provider::Codeberg { format!("{}+{}@noreply.codeberg.org", user.id, user.login) } else { format!("{}+{}@users.noreply.github.com", user.id, user.login) },
-    }).to_string())
+    js_json(
+        &serde_json::json!({
+            "name": user_name,
+            "login": user.login,
+            "provider": user.provider.id(),
+            "email": user.provider.commit_email(user.id, &user.login),
+        })
+        .to_string(),
+    )
 }

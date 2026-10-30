@@ -108,14 +108,12 @@ pub(crate) async fn api_user_profile(cx: &Cx) -> Result<Json<serde_json::Value>>
     // re-read the profile from the provider at most once every 5 minutes per session; the file is rewritten only if it changed
     if session::profile_refresh_due(&session.sid).await {
         let client = session::http_client();
-        let fresh = match session.user.provider {
-            provider::Provider::GitHub => {
-                auth::github::get_user_info(client, &session.access_token)
-                    .await
-                    .map_err(|_| ())
-            }
-            provider::Provider::Codeberg => {
-                auth::forgejo::get_user_info(client, &session.access_token)
+        let fresh = match session.user.provider.kind() {
+            provider::Kind::GitHub => auth::github::get_user_info(client, &session.access_token)
+                .await
+                .map_err(|_| ()),
+            provider::Kind::Forgejo => {
+                auth::forgejo::get_user_info(client, session.user.provider, &session.access_token)
                     .await
                     .map_err(|_| ())
             }
@@ -219,6 +217,7 @@ pub(crate) async fn auth_login_codeberg(cx: &Cx) -> Result<SeeOther> {
     let state = random_state();
     cookies(cx).add(build_cookie("oauth_state", state.clone(), 600));
     Ok(see_other(auth::forgejo::get_auth_url(
+        prov,
         &prov.client_id(),
         &prov.redirect_uri(),
         &state,
@@ -247,6 +246,7 @@ pub(crate) async fn auth_callback_codeberg(cx: &Cx) -> Result<SeeOther> {
             let http = session::http_client();
             match auth::forgejo::exchange_code(
                 http,
+                prov,
                 code,
                 &prov.client_id(),
                 &prov.client_secret(),
@@ -254,23 +254,25 @@ pub(crate) async fn auth_callback_codeberg(cx: &Cx) -> Result<SeeOther> {
             )
             .await
             {
-                Ok(tok) => match auth::forgejo::get_user_info(http, &tok.access_token).await {
-                    Ok(user) => {
-                        if blocklist::is_blocked(user.provider, user.id, &user.login) {
-                            eprintln!("Login refused: @{} is blocked", user.login);
-                            return Ok(see_other("/?blocked=1"));
+                Ok(tok) => {
+                    match auth::forgejo::get_user_info(http, prov, &tok.access_token).await {
+                        Ok(user) => {
+                            if blocklist::is_blocked(user.provider, user.id, &user.login) {
+                                eprintln!("Login refused: @{} is blocked", user.login);
+                                return Ok(see_other("/?blocked=1"));
+                            }
+                            let sid = session::create(
+                                user,
+                                tok.access_token,
+                                tok.refresh_token,
+                                Some(tok.expires_in.unwrap_or(3600)),
+                            )
+                            .await;
+                            set_session(cx, sid);
                         }
-                        let sid = session::create(
-                            user,
-                            tok.access_token,
-                            tok.refresh_token,
-                            Some(tok.expires_in.unwrap_or(3600)),
-                        )
-                        .await;
-                        set_session(cx, sid);
+                        Err(e) => eprintln!("Error reading the user data from Codeberg: {e}"),
                     }
-                    Err(e) => eprintln!("Error reading the user data from Codeberg: {e}"),
-                },
+                }
                 Err(e) => eprintln!("Error exchanging the Codeberg code for a token: {e}"),
             }
         }

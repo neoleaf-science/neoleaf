@@ -422,7 +422,7 @@ async fn renew_locked(sid: &str) -> Renewal {
     let Some(rt) = current.refresh_token.clone() else {
         return Renewal::Refused;
     };
-    match crate::auth::forgejo::refresh(http_client(), &rt).await {
+    match crate::auth::forgejo::refresh(http_client(), current.user.provider, &rt).await {
         Ok(tok) => {
             let fresh = {
                 let mut map = store().lock().await;
@@ -474,8 +474,7 @@ pub async fn active(sid: &str) -> Option<Active> {
     // this request only: handing out the expired token would make the next API call fail with 401, and the browser treats that
     // as a revoked session and signs the person out, so the next request (after the provider recovers) renews it instead.
     let mut current = current;
-    if current.expires_at <= t + 60 && current.user.provider == crate::provider::Provider::Codeberg
-    {
+    if current.expires_at <= t + 60 && current.user.provider.renews_token() {
         match renew(sid).await {
             Renewal::Fresh(s) => current = *s,
             Renewal::Refused => {

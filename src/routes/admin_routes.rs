@@ -85,14 +85,11 @@ pub(crate) async fn admin_block_user(
         .and_then(provider::Provider::from_id)
         .unwrap_or_default();
     if !blocklist::valid_login(prov, &login) {
-        return Ok(err_json(match prov {
-            provider::Provider::GitHub => {
-                "Invalid login (use the GitHub login: letters, numbers and hyphen)"
-            }
-            provider::Provider::Codeberg => {
-                "Invalid login (use the Codeberg login: letters, numbers, hyphen, underscore and dot)"
-            }
-        }));
+        return Ok(err_json(format!(
+            "Invalid login (use the {} login: {})",
+            prov.label(),
+            prov.login_rule()
+        )));
     }
     // if the person has a session, we use its data (id, name, email, to know whether they are an administrator)
     let known = session::list_sessions()

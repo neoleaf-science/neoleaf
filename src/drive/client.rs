@@ -59,17 +59,18 @@ impl DriveClient {
         Self::with_provider(session.access_token.clone(), session.user.provider)
     }
 
-    fn codeberg(&self) -> bool {
-        self.provider == Provider::Codeberg
+    /// Does the provider speak the Forgejo dialect (Codeberg, Forgejo, Gitea)? Otherwise it is GitHub's.
+    fn forgejo(&self) -> bool {
+        self.provider.kind() == crate::provider::Kind::Forgejo
     }
 
     /// Address on the service API: paths are written as in the GitHub API (`https://api.github.com/...`) and, on Codeberg,
     /// the prefix becomes `<codeberg>/api/v1` (the Forgejo API has almost the same paths).
     fn u(&self, url: String) -> String {
-        match self.provider {
-            Provider::GitHub => gh(url),
-            Provider::Codeberg => {
-                url.replacen("https://api.github.com", &Provider::Codeberg.api(), 1)
+        match self.provider.kind() {
+            crate::provider::Kind::GitHub => gh(url),
+            crate::provider::Kind::Forgejo => {
+                url.replacen("https://api.github.com", &self.provider.api(), 1)
             }
         }
     }
@@ -147,7 +148,7 @@ impl DriveClient {
 
     /// Body of the tags PUT: GitHub uses `names`, Forgejo uses `topics`.
     fn topics_body(&self, names: &[String]) -> serde_json::Value {
-        if self.codeberg() {
+        if self.forgejo() {
             serde_json::json!({ "topics": names })
         } else {
             serde_json::json!({ "names": names })

@@ -46,7 +46,7 @@ impl DriveClient {
     }
 
     pub async fn list_projects(&self) -> Result<(Vec<ProjectInfo>, Option<String>), String> {
-        let repos: Vec<GitHubRepo> = if self.codeberg() {
+        let repos: Vec<GitHubRepo> = if self.forgejo() {
             self.forgejo_repos().await?
         } else {
             self.github_repos().await?

@@ -18,6 +18,7 @@ const KEY = Buffer.alloc(32, 9);
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 let dir = '';
+let demoId = 0; // the id the fake Forgejo gives to `demo`: the administrator listed in neoleaf.toml
 let fake: FakeGithub;
 let child: ChildProcess | null = null;
 
@@ -32,6 +33,7 @@ kind = "gitea"
 url = "${fake.url}"
 label = "Entrar com a conta da instituição"
 enabled = true
+admins = [${demoId}]
 client_id = "forge-client"
 client_secret_env = "FORGE_SECRET"
 [providers.git-off]
@@ -89,9 +91,21 @@ function readSessions(): string {
   return Buffer.concat([d.update(raw.subarray(16, raw.length - 16)), d.final()]).toString('utf8');
 }
 
+
+/** Signs in as `login` through the OAuth redirects by hand (the fake server authorizes whoever `?login=` names). */
+async function signInAs(login: string) {
+  const r1 = await fetch(`${BASE}/auth/login/git-test`, { redirect: 'manual' });
+  const state = (r1.headers.getSetCookie().find(c => c.startsWith('oauth_state=')) || '').split(';')[0];
+  const r2 = await fetch(`${r1.headers.get('location')}&login=${login}`, { redirect: 'manual' });
+  const r3 = await fetch(r2.headers.get('location')!, { redirect: 'manual', headers: { cookie: state } });
+  const sid = (r3.headers.getSetCookie().find(c => c.startsWith('latex_session=')) || '').split(';')[0].split('=')[1] || '';
+  return { location: r3.headers.get('location'), sid };
+}
+
 beforeAll(async () => {
   dir = fs.mkdtempSync(path.join(os.tmpdir(), 'neoleaf-forge-'));
   fake = await startFakeGithub({ root: path.join(dir, 'forge') });
+  demoId = (await (await fetch(`${fake.url}/api/v1/user`, { headers: { Authorization: 'Bearer fake-demo' } })).json()).id;
   await startNeoleaf(true);
 }, 300000);
 
@@ -174,6 +188,100 @@ describe('your own Forgejo/Gitea server as a provider', () => {
     expect((await zip.body()).subarray(0, 2).toString()).toBe('PK');
     await page.request.post(`${BASE}/api/project/demo__artigo-1/permissions/colleague-gt/remove`, { data: {} });
   });
+
+  test('administrators: the id listed in neoleaf.toml opens /admin (without the Templates tab); another account does not', async () => {
+    const adm = await fetch(`${BASE}/admin`, { headers: { cookie: `latex_session=${sid}` } });
+    expect(adm.status).toBe(200);
+    const html = await adm.text();
+    expect(html).toContain('Users');
+    expect(html).not.toContain('tabbtn-models');
+    expect((await fetch(`${BASE}/api/admin/stats`, { headers: { cookie: `latex_session=${sid}` } })).status).toBe(200);
+    const other = await signInAs('alice');
+    expect(other.location).toBe('/');
+    expect(other.sid).not.toBe('');
+    expect((await fetch(`${BASE}/admin`, { headers: { cookie: `latex_session=${other.sid}` } })).status).toBe(403);
+    expect((await fetch(`${BASE}/api/admin/stats`, { headers: { cookie: `latex_session=${other.sid}` } })).status).toBe(403);
+  });
+
+  test('an administrator blocks an account of that server by login, and it cannot sign in again', async () => {
+    const r = await (await fetch(`${BASE}/api/admin/users/block`, { method: 'POST', headers: { cookie: `latex_session=${sid}`, 'content-type': 'application/json' }, body: JSON.stringify({ login: 'alice', provider: 'git-test', id: 0, reason: 'e2e' }) })).json();
+    expect(r.error).toBeUndefined();
+    const again = await signInAs('alice');
+    expect(again.location).toBe('/?blocked=1');
+    expect(again.sid).toBe('');
+    // blocked by provider: the same login on another provider is not affected, and an unknown provider is refused
+    const bad = await (await fetch(`${BASE}/api/admin/users/block`, { method: 'POST', headers: { cookie: `latex_session=${sid}`, 'content-type': 'application/json' }, body: JSON.stringify({ login: 'x_y', provider: 'github', id: 0, reason: 'e2e' }) })).json();
+    expect(String(bad.error || '')).toContain('Invalid login');
+    const un = await (await fetch(`${BASE}/api/admin/users/unblock`, { method: 'POST', headers: { cookie: `latex_session=${sid}`, 'content-type': 'application/json' }, body: JSON.stringify({ login: 'alice', provider: 'git-test' }) })).json();
+    expect(un.error).toBeUndefined();
+    expect((await signInAs('alice')).location).toBe('/');
+  });
+
+  // ---- the browser side: the local copies of two providers (or of GitHub) with the same owner and name never mix
+
+  /** Runs `code` against the browser's file system (the same database the page uses) and flushes it. */
+  const fsDo = (code: string) => page.evaluate(async (c: string) => {
+    const pfs = new (window as any).LightningFS('neoleaf-git').promises;
+    const out = await (new Function('pfs', 'return (async () => {' + c + '})()'))(pfs);
+    if (pfs.flush) await pfs.flush();
+    return out;
+  }, code);
+  const clone = (dir: string) => `
+    for (const d of ${JSON.stringify(dir.split('/').slice(1).map((_, i, a) => '/' + a.slice(0, i + 1).join('/')))}) { try { await pfs.mkdir(d); } catch (_) {} }
+    try { await pfs.mkdir(${JSON.stringify(dir + '/.git')}); } catch (_) {}
+    await pfs.writeFile(${JSON.stringify(dir + '/.git/HEAD')}, 'ref: refs/heads/main\\n');
+    await pfs.writeFile(${JSON.stringify(dir + '/marker.txt')}, 'old');`;
+
+  test('copies from earlier versions (GitHub: demo/..., Codeberg: codeberg.demo/...) sit beside the provider copy and are not listed as ours', async () => {
+    page.on('dialog', d => d.accept());
+    await page.addInitScript(() => { try { localStorage.setItem('ld-lang', 'en'); } catch (_) {} });
+    await fsDo(clone('/repos/demo/artigo-1') + clone('/repos/codeberg.demo/artigo-1'));
+    await page.goto(BASE + '/');
+    await page.evaluate(() => (window as any).openUserProfileModal());
+    await page.click('#upm-tab-btn-storage');
+    const row = page.locator('.upm-st-row', { hasText: 'demo/artigo-1' });
+    await row.waitFor({ timeout: 15000 });
+    expect(await row.count()).toBe(1); // only the one of this account: the other two are another provider's
+    expect(await row.textContent()).toContain('git-test'); // the badge names the provider
+    await page.waitForFunction(() => /2 project\(s\) from other accounts/.test(document.getElementById('upm-st-others')?.textContent || ''), null, { timeout: 15000 });
+  });
+
+  test('"Clear" on the project list removes only this provider\'s copy; the same name on GitHub and Codeberg stays', async () => {
+    await page.goto(BASE + '/');
+    const cell = page.locator('#proj-row-demo__artigo-1 .pl-local');
+    await cell.locator('.pl-local-yes').waitFor({ timeout: 15000 });
+    await cell.locator('.pl-local-clear').click();
+    await cell.locator('.pl-local-no').waitFor({ timeout: 15000 });
+    const left = await fsDo(`const r = {}; for (const d of ['/repos/git-test.demo', '/repos/demo', '/repos/codeberg.demo']) r[d] = await pfs.readdir(d).catch(() => []); return r;`);
+    expect(left['/repos/git-test.demo']).not.toContain('artigo-1');
+    expect(left['/repos/demo']).toContain('artigo-1');
+    expect(left['/repos/codeberg.demo']).toContain('artigo-1');
+    // and opening the project again downloads it into the provider's own folder
+    await page.goto(`${BASE}/project/demo__artigo-1`);
+    await page.waitForFunction(async () => (await (window as any).BrowserGit.isCloned()), null, { timeout: 60000 });
+    expect(await fsDo(`return pfs.readdir('/repos/git-test.demo');`)).toContain('artigo-1');
+    expect(await fsDo(`return pfs.readFile('/repos/demo/artigo-1/marker.txt', 'utf8');`)).toBe('old');
+  });
+
+  test('a project created in NeoLeaf can pull what someone else committed on the server (it has no clone-made fetch settings)', async () => {
+    const name = 'pull-after-create';
+    await page.goto(BASE + '/');
+    await page.evaluate(() => (window as any).openNewProjectModal());
+    await page.fill('#proj-name', name);
+    await page.click('#btn-create-submit');
+    await page.waitForURL(new RegExp(`/project/demo__${name}`), { timeout: 60000 });
+    for (let i = 0; i < 60 && !fake.tree('demo', name).includes('main.tex'); i++) await sleep(500);
+    expect(fake.tree('demo', name)).toContain('main.tex');
+    // someone else commits on the server (not through NeoLeaf)
+    fake.addCommit('demo', name, 'from-outside.txt', 'written elsewhere');
+    const got = await page.evaluate(async () => {
+      const bg = (window as any).BrowserGit;
+      const r = await bg.pull();
+      return { r, text: await bg.readFile('from-outside.txt') };
+    });
+    expect(got.r.success).toBe(true);
+    expect(got.text).toBe('written elsewhere');
+  }, 180000);
 
   test('the session is stored with the provider id, and survives the server leaving neoleaf.toml (unused, not deleted)', async () => {
     await page.close();

@@ -59,5 +59,8 @@ show a button. Without the file the server behaves exactly as described above.
   `https://your.domain/auth/callback/<id>`. People sign in with that server's account (so whatever login the server already uses, such as CAFe, Google or LDAP,
   applies), their projects are repositories there, and their local copies in the browser are kept apart from other providers (`<id>.<owner>`). Up to 8 servers;
   GitHub and Codeberg can stay on at the same time. A server that is taken out of the file stops working but its sessions and blocks are kept for when it comes back.
-  Administrators of the installation (the `/admin` page) are still GitHub accounts only; that comes with the next step.
-- Not covered yet: GitLab, administrators from your own server, and the name and logo outside the sign-in screen.
+- **Administrators** (`/admin`): `admins = [12, 34]` in a provider's block lists the **numeric ids** of the accounts that administer NeoLeaf when they sign in with
+  that provider (a login or an e-mail can change hands, an id cannot; the id is `id` in the server's `/api/v1/user`, or in `https://api.github.com/users/<login>`).
+  When a provider has a list, only those ids count for it; without a list, GitHub keeps the old rule (`ADMIN_GITHUB_IDS`, then `ADMIN_EMAILS`) and every other provider has no
+  administrator. Administrators who signed in with your own server or Codeberg see the Overview and Users tabs; the template catalog lives in GitHub repositories, so its tab is for GitHub administrators.
+- Not covered yet: GitLab, and the name and logo outside the sign-in screen.

@@ -55,12 +55,19 @@ pub(super) fn page_header() -> &'static str {
 }
 
 /// Tab buttons (overview, users, templates).
-pub(super) fn tabs_nav() -> &'static str {
-    r##"        <div class="admin-tabs" role="tablist">
+pub(super) fn tabs_nav(templates: bool) -> String {
+    let models = if templates {
+        r##"
+            <button type="button" class="admin-tab" id="tabbtn-models" onclick="showAdminTab('models')">📚 Templates</button>"##
+    } else {
+        ""
+    };
+    format!(
+        r##"        <div class="admin-tabs" role="tablist">
             <button type="button" class="admin-tab active" id="tabbtn-overview" onclick="showAdminTab('overview')">📊 Overview</button>
-            <button type="button" class="admin-tab" id="tabbtn-users" onclick="showAdminTab('users')">👥 Users</button>
-            <button type="button" class="admin-tab" id="tabbtn-models" onclick="showAdminTab('models')">📚 Templates</button>
+            <button type="button" class="admin-tab" id="tabbtn-users" onclick="showAdminTab('users')">👥 Users</button>{models}
         </div>"##
+    )
 }
 
 /// Overview: CPU, RAM, disk and uptime/process cards.

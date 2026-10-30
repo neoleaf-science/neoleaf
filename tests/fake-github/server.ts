@@ -27,6 +27,8 @@ export interface FakeGithub {
   setDescription: (owner: string, repo: string, description: string) => void;
   /** Creates a repository already with files (and, if given, a tag on the initial commit). */
   seedRepo: (owner: string, name: string, files: Record<string, string>, topics?: string[], tag?: string) => void;
+  /** Adds a commit on the main branch with one new or changed file, as another person would from outside NeoLeaf. */
+  addCommit: (owner: string, repo: string, filePath: string, content: string, message?: string) => void;
   /** Copies a real bare repository (with all tags and commits) into the fake server. */
   importBare: (owner: string, name: string, srcBare: string) => void;
   /** Requests the article search proxy (src/scholar.rs) made to the fake arXiv and DBLP (`/scholar/arxiv`, `/scholar/dblp`). */
@@ -377,6 +379,19 @@ export async function startFakeGithub(opts: { port?: number; root?: string; seed
     description: (owner, repo) => repos.get(key(owner, repo))?.description || '',
     setDescription: (owner, repo, description) => { const r = repos.get(key(owner, repo)); if (r) r.description = description; },
     seedRepo: (owner, name, files, topics = [], tag) => seedRepo(owner, name, files, topics, tag),
+    addCommit: (owner, name, filePath, content, message = 'commit from outside') => {
+      const work = fs.mkdtempSync(path.join(os.tmpdir(), 'fake-commit-'));
+      try {
+        git(['clone', '-q', '-b', 'main', bare(owner, name), work]);
+        fs.mkdirSync(path.dirname(path.join(work, filePath)), { recursive: true });
+        fs.writeFileSync(path.join(work, filePath), content);
+        git(['add', '-A'], { cwd: work });
+        git(['-c', 'user.name=Outside', '-c', 'user.email=outside@neoleaf.local', 'commit', '-q', '-m', message], { cwd: work });
+        git(['push', '-q', 'origin', 'main'], { cwd: work });
+      } finally {
+        fs.rmSync(work, { recursive: true, force: true });
+      }
+    },
     importBare: (owner, name, srcBare) => {
       fs.mkdirSync(path.dirname(bare(owner, name)), { recursive: true });
       fs.cpSync(srcBare, bare(owner, name), { recursive: true });

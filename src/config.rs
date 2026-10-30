@@ -50,11 +50,24 @@ struct RawProvider {
     enabled: Option<bool>,
     client_id: Option<String>,
     client_secret_env: Option<String>,
+    /// numeric ids of the administrators of this installation who sign in with this provider
+    admins: Option<Vec<RawId>>,
     /// only for your own Git server: `forgejo` or `gitea`
     kind: Option<String>,
     url: Option<String>,
     label: Option<String>,
 }
+
+/// An id written as a number (`12`) or as text (`"12"`).
+#[derive(Debug, Deserialize)]
+#[serde(untagged)]
+enum RawId {
+    Num(u64),
+    Text(String),
+}
+
+/// At most this many administrators per provider (a safety bound, not a design limit).
+const MAX_ADMINS: usize = 100;
 
 /// An image of the institution, already checked, kept in memory.
 #[derive(Debug, Clone)]
@@ -82,6 +95,7 @@ pub struct Legal {
 #[derive(Debug, Clone, Default)]
 struct ProviderCfg {
     enabled: bool,
+    admins: Vec<u64>,
     client_id: Option<String>,
     client_secret_env: Option<String>,
 }
@@ -124,6 +138,11 @@ impl Config {
         self.providers
             .get(&p)
             .and_then(|c| c.client_secret_env.clone())
+    }
+
+    /// Numeric ids of the administrators the file lists for this provider (empty: the file names none).
+    pub fn provider_admins(&self, p: Provider) -> &[u64] {
+        self.providers.get(&p).map_or(&[], |c| c.admins.as_slice())
     }
 
     /// Your own Git server with this id, if the file has it.
@@ -251,10 +270,12 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
                 ));
             }
         };
+        let admins = parse_admins(&id, p.admins.as_deref())?;
         providers.insert(
             prov,
             ProviderCfg {
                 enabled: p.enabled.unwrap_or(false),
+                admins,
                 client_id,
                 client_secret_env,
             },
@@ -273,6 +294,35 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
         providers,
         custom,
     })
+}
+
+/// `admins = [12, "34"]`: numeric ids only. A login or an e-mail can change hands, an id cannot.
+fn parse_admins(id: &str, raw: Option<&[RawId]>) -> Result<Vec<u64>, String> {
+    let mut out = Vec::new();
+    for r in raw.unwrap_or(&[]) {
+        let n = match r {
+            RawId::Num(n) => Some(*n),
+            RawId::Text(t) => t.trim().parse::<u64>().ok(),
+        };
+        match n {
+            Some(n) if n > 0 => {
+                if !out.contains(&n) {
+                    out.push(n);
+                }
+            }
+            _ => {
+                return Err(format!(
+                    "providers.{id}.admins: only numeric account ids (not logins or e-mails, which can change hands)"
+                ));
+            }
+        }
+    }
+    if out.len() > MAX_ADMINS {
+        return Err(format!(
+            "providers.{id}.admins: at most {MAX_ADMINS} administrators"
+        ));
+    }
+    Ok(out)
 }
 
 /// `[providers.<id>]` of your own Git server: the id, `kind`, `url` and `label` are checked here.
@@ -486,7 +536,11 @@ pub fn summary(cfg: &Config) -> Vec<String> {
             (true, true) => "on",
             (true, false) => "ON BUT THE CLIENT ID OR SECRET IS MISSING (it will not be shown)",
         };
-        out.push(format!("provider {}: {state}", p.id()));
+        out.push(format!(
+            "provider {}: {state}, {} administrator(s) listed",
+            p.id(),
+            cfg.provider_admins(p).len()
+        ));
     }
     for c in &cfg.custom {
         let Some(p) = Provider::from_stored(&c.id) else {
@@ -500,8 +554,11 @@ pub fn summary(cfg: &Config) -> Vec<String> {
             (true, false) => "ON BUT THE CLIENT ID OR SECRET IS MISSING (it will not be shown)",
         };
         out.push(format!(
-            "provider {} ({} at {}): {state}",
-            c.id, c.label, c.url
+            "provider {} ({} at {}): {state}, {} administrator(s) listed",
+            c.id,
+            c.label,
+            c.url,
+            cfg.provider_admins(p).len()
         ));
     }
     out
@@ -689,6 +746,45 @@ mod tests {
             .map(|i| format!("[providers.git-{}]\n{base}\n", (b'a' + i) as char))
             .collect();
         assert!(err(&many).contains("at most 8"));
+    }
+
+    #[test]
+    fn administrators_are_numeric_ids_per_provider() {
+        let d = dir_with(&[]);
+        let c = parse(
+            r#"
+            [providers.github]
+            enabled = true
+            admins = [12, "34", 12]
+            [providers.git-x]
+            kind = "forgejo"
+            url = "https://g.edu"
+            admins = ["77"]
+            "#,
+            d.path(),
+        )
+        .unwrap();
+        assert_eq!(
+            c.provider_admins(Provider::GitHub),
+            &[12, 34],
+            "numbers or text, no duplicates"
+        );
+        assert_eq!(
+            c.provider_admins(Provider::from_stored("git-x").unwrap()),
+            &[77]
+        );
+        assert!(c.provider_admins(Provider::Codeberg).is_empty());
+        let err = |t: &str| parse(t, d.path()).unwrap_err();
+        for bad in ["[\"ana\"]", "[\"a@b.c\"]", "[0]", "[\"\"]", "[-3]"] {
+            let e = err(&format!("[providers.github]\nadmins = {bad}"));
+            assert!(e.contains("admins") || e.contains("expected"), "{bad}: {e}");
+        }
+        assert!(err("[providers.github]\nadmins = [\"ana\"]").contains("numeric account ids"));
+        let many = (1..=101)
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>()
+            .join(",");
+        assert!(err(&format!("[providers.github]\nadmins = [{many}]")).contains("at most 100"));
     }
 
     #[test]

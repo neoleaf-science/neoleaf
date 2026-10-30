@@ -91,6 +91,10 @@ run = "cargo outdated -R"
 description = "Run the automated E2E test suite in the local browser (Playwright)"
 run = "cd tests/e2e && bun test --timeout 180000"
 
+[tasks."test:forge"]
+description = "E2E tests against a REAL Forgejo and a REAL Gitea in Docker (slow; pulls the pinned images the first time). Optional argument: forgejo or gitea"
+run = "scripts/test_forge_real.sh"
+
 [tasks.verify]
 description = "Full local verification (check and E2E tests in the browser)"
 depends = ["check", "test:e2e"]

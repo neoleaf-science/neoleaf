@@ -2,6 +2,14 @@ use super::*;
 
 use serde::Deserialize;
 
+/// Does the repository the server answered with carry exactly this name? (A redirect from an old name answers with another repository.)
+fn name_is_taken(answer: &serde_json::Value, wanted: &str) -> bool {
+    answer
+        .get("name")
+        .and_then(|n| n.as_str())
+        .is_none_or(|n| n.eq_ignore_ascii_case(wanted))
+}
+
 impl DriveClient {
     /// Sends the project to the trash: renames the repository with the deletion date and time at the end and adds the `deleted` tag.
     /// Returns the new project id.
@@ -37,15 +45,17 @@ impl DriveClient {
         let new_id = format!("{owner}__{original}");
 
         self.ensure_owner(&owner).await?;
-        if self
+        // Forgejo and Gitea keep a redirect from the old name of a renamed repository: asking for the original name then answers with
+        // the trashed repository itself, whose own name is different. Only a repository that really has that name blocks the restore.
+        let taken = self
             .gh_json(
                 self.http
                     .get(self.u(format!("https://api.github.com/repos/{owner}/{original}"))),
                 "check the name",
             )
             .await
-            .is_ok()
-        {
+            .is_ok_and(|v| name_is_taken(&v, &original));
+        if taken {
             return Err(format!(
                 "A repository named \"{original}\" already exists; rename or delete it before restoring."
             ));
@@ -109,5 +119,28 @@ impl DriveClient {
             .await
             .map_err(|e| format!("Error decoding the response: {e}"))?;
         Ok(res.names.unwrap_or(names))
+    }
+}
+
+#[cfg(test)]
+mod name_tests {
+    use super::name_is_taken;
+
+    #[test]
+    fn a_redirect_from_an_old_name_does_not_count_as_a_repository_with_that_name() {
+        let j = |s: &str| serde_json::from_str::<serde_json::Value>(s).unwrap();
+        assert!(name_is_taken(&j(r#"{"name":"tese"}"#), "tese"));
+        assert!(
+            name_is_taken(&j(r#"{"name":"Tese"}"#), "tese"),
+            "names are not case sensitive"
+        );
+        assert!(!name_is_taken(
+            &j(r#"{"name":"tese-deleted-20261030-120000"}"#),
+            "tese"
+        ));
+        assert!(
+            name_is_taken(&j(r#"{"id":1}"#), "tese"),
+            "an answer without a name is treated as taken, as before"
+        );
     }
 }

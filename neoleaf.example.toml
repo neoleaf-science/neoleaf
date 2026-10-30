@@ -25,6 +25,7 @@ privacy_url = "https://university.edu/latex/privacy"
 # (its sign-in address answers with a redirect to /).
 [providers.github]
 enabled = true
+# admins = [12345678]                   # optional: numeric ids of the administrators who sign in with this provider (open /admin)
 # client_id = "..."                     # optional: otherwise GITHUB_CLIENT_ID
 # client_secret_env = "MY_GH_SECRET"    # optional: NAME of the variable that holds the secret, otherwise GITHUB_CLIENT_SECRET
 
@@ -40,5 +41,6 @@ enabled = false
 # kind = "forgejo"                          # forgejo or gitea (gitlab is not supported yet)
 # url = "https://git.university.edu"        # https only (http only for localhost)
 # label = "Sign in with your university account"   # the whole text of the button, shown as written
+# admins = [34]                                    # numeric ids of this server's administrators of NeoLeaf (see /api/v1/user of the server)
 # client_id = "..."
 # client_secret_env = "GIT_UNIVERSITY_SECRET"      # NAME of the variable that holds the secret (the secret never goes in this file)

@@ -36,6 +36,10 @@ fn admin_ids_env() -> Option<String> {
 
 /// Prints one startup line saying how administrators are recognised (never prints ids, logins or e-mails).
 fn warn_admin_matching() {
+    // administrators written in neoleaf.toml (numeric ids) are the safe way already: nothing to warn about for GitHub
+    if !config_admins(crate::provider::Provider::GitHub).is_empty() {
+        return;
+    }
     match admin_ids_env() {
         Some(list) => {
             let bad = list
@@ -55,13 +59,33 @@ fn warn_admin_matching() {
     }
 }
 
+/// Administrator ids that `neoleaf.toml` lists for this provider (empty without the file or when it lists none).
+fn config_admins(provider: crate::provider::Provider) -> &'static [u64] {
+    crate::config::get().map_or(&[], |c| c.provider_admins(provider))
+}
+
 /// Checks whether the user has administrator privileges.
 pub fn is_admin(user: &GitHubUser) -> bool {
-    is_admin_with(
+    is_admin_in(
         user,
+        config_admins(user.provider),
         admin_ids_env().as_deref(),
         std::env::var("ADMIN_EMAILS").ok().as_deref(),
     )
+}
+
+/// Ids listed in `neoleaf.toml` for the provider decide first, for any provider: when the list is not empty only those numeric ids
+/// count. Without a list the old rule applies, which only ever recognises GitHub accounts (`is_admin_with`).
+fn is_admin_in(
+    user: &GitHubUser,
+    listed: &[u64],
+    github_ids: Option<&str>,
+    extra_admins: Option<&str>,
+) -> bool {
+    if !listed.is_empty() {
+        return user.id != 0 && listed.contains(&user.id);
+    }
+    is_admin_with(user, github_ids, extra_admins)
 }
 
 /// The rule behind `is_admin`, with the two settings passed in (so it can be tested without touching the environment).
@@ -530,5 +554,34 @@ mod tests {
         let stats = collect_system_stats().await;
         assert!(stats.cpu.cores >= 1);
         assert!(!stats.hostname.is_empty());
+    }
+
+    #[test]
+    fn ids_from_neoleaf_toml_decide_for_any_provider() {
+        use crate::provider::Provider;
+        let mut u = gh(42, "anyone", Some("a@b.c"));
+        // a list in the file: only those ids, on any provider
+        assert!(is_admin_in(&u, &[42], None, None));
+        assert!(!is_admin_in(&u, &[43], None, None));
+        assert!(
+            !is_admin_in(&gh(0, "x", None), &[0], None, None),
+            "id 0 never"
+        );
+        u.provider = Provider::Codeberg;
+        assert!(
+            is_admin_in(&u, &[42], None, None),
+            "listed ids count on Codeberg"
+        );
+        u.provider = Provider::from_stored("git-ifto").unwrap();
+        assert!(is_admin_in(&u, &[42], None, None));
+        // the same id on another provider is another person, and logins or e-mails never count when a list exists
+        assert!(!is_admin_in(&u, &[7], None, Some("anyone,a@b.c")));
+        // no list: the old rule, which recognises GitHub only
+        assert!(!is_admin_in(&u, &[], Some("42"), Some("anyone")));
+        u.provider = Provider::GitHub;
+        assert!(is_admin_in(&u, &[], Some("42"), None));
+        assert!(is_admin_in(&u, &[], None, Some("anyone")));
+        // a list in the file wins over the environment
+        assert!(!is_admin_in(&u, &[7], Some("42"), Some("anyone")));
     }
 }

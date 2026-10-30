@@ -8,6 +8,8 @@ use crate::auth::github::GitHubUser;
 
 /// Renders the admin panel: metrics, users, blocked users and the template catalog.
 pub fn render(stats: &SystemStats, user: &GitHubUser) -> String {
+    // the template catalog lives in GitHub repositories: only administrators who signed in with GitHub can use it
+    let templates = user.provider == crate::provider::Provider::GitHub;
     let users_rows = users_rows(stats, user);
     let blocked_rows = blocked_rows(stats);
 
@@ -15,7 +17,7 @@ pub fn render(stats: &SystemStats, user: &GitHubUser) -> String {
     let user_profile_modal = super::user_profile_modal_html(user);
 
     fill(
-        &page_template(),
+        &page_template(templates),
         &[
             ("USER_BUTTON", &user_button),
             ("USER_PROFILE_MODAL", &user_profile_modal),
@@ -60,7 +62,7 @@ pub fn render(stats: &SystemStats, user: &GitHubUser) -> String {
 }
 
 /// Page template (with `{{PLACEHOLDERS}}`) assembled from the static blocks, in page order.
-fn page_template() -> String {
+fn page_template(templates: bool) -> String {
     [
         shell::head(),
         styles::styles(),
@@ -70,7 +72,7 @@ fn page_template() -> String {
         r#"    <div class="admin-wrap">"#,
         shell::page_header(),
         "",
-        shell::tabs_nav(),
+        &shell::tabs_nav(templates),
         "",
         r#"        <div id="tab-overview">"#,
         shell::metric_cards(),

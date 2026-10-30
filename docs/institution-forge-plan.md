@@ -80,14 +80,27 @@ Each step is one delivery (one version). Order matters: step 1 changes no behavi
   - Public-site regression: without the file, no new route answers (404) and the home page is byte-identical.
 
 ### Step 3: administrators and blocking per provider
+
+**Status: done in 1.37.0.** `admins = [ids]` per provider in `neoleaf.toml` (any provider, numeric ids), the old GitHub rule untouched when no list is given, the Templates tab hidden for non-GitHub administrators. Blocking was already per provider and the login rules already came from the provider's dialect (step 1); `forge-provider.test.ts` now covers an administrator of the own server, a non-administrator, and block, sign-in refused and unblock by login.
 - `admins` per provider, admin page and block/unblock by provider, login validation by dialect.
 - Validation: unit tests of `is_admin` (id in list, id of another provider, login or e-mail never counts); E2E for the admin page with a custom-provider admin and a non-admin; `ADMIN_GITHUB_IDS` behavior unchanged.
 
 ### Step 4: the browser side
+
+**Status: done in 1.37.1.** Most of it landed with step 2 (`<id>.<owner>` folders, the storage list with the provider badge, no CI workflow offer outside GitHub). Step 4 added the browser tests and found one old bug: `BrowserGit.init` could be running for an unknown user while another call set it, so the "who opened this copy" record of `demo/<repo>` named the signed-in provider instead of the folder's own (fixed: the provider is read from the folder name). `forge-provider.test.ts` now covers copies of earlier versions (GitHub and Codeberg folders with the same owner and name), that only this provider's copy is listed as the account's, that "Clear" removes only that copy, and that opening the project again downloads it into the provider's own folder. Texts that still say "GitHub or Codeberg" (the confirm dialogs and the Clear tooltip) were left as they are: they are translated in 14 languages and say nothing wrong for the server of an institution.
 - Generalize `codeberg.<owner>` to `<providerId>.<owner>` in `browser-git.js`, `storage-manager.js` and the account modal; `ci-workflow.js` only offered for GitHub kinds.
 - Validation: E2E in the browser with a custom provider (open, edit, sync, delete local data); copies made by earlier versions (`<owner>` for GitHub, `codeberg.<owner>` for Codeberg) are still listed and removable; the i18n completeness test stays green.
 
 ### Step 5: real servers
+
+**Status: done in 1.37.2 for Forgejo and Gitea; GitHub Enterprise is still not verified on a real instance.** `scripts/dev_forge.sh` starts a real Forgejo 17.0.0 or Gitea 28.0.0 in Docker (pinned images, SQLite, two or three test accounts, an OAuth2 application) and `scripts/test_forge_real.sh` (`mise run test:forge`) runs `tests/e2e/specs/forge-real.test.ts` against each: the real login and authorization pages, creating a project (template files pushed with the OAuth token), the Git proxy clone, a commit pushed from the browser, a pull of a change made on the server, sharing with a non-administrator account (joins directly, role read back, role change, removal), tags, ZIP, delete and restore, and a push **after the 90-second OAuth token expired** (renewal with the refresh token). Both servers pass all 10 tests.
+
+What the real servers found that the fake one could not (all fixed in 1.37.2):
+1. **Restoring a project from the trash failed on Forgejo and Gitea.** Both keep a redirect from the old name of a renamed repository, so asking for the original name answered with the trashed repository and NeoLeaf thought the name was taken. Now only a repository that really has that name blocks the restore (`name_is_taken`).
+2. **A project created or imported in NeoLeaf (empty when first opened) could not pull.** `git init` leaves no fetch refspec and isomorphic-git answers `NoRefspecError`; the pull and the "remote changes" check silently never worked for those projects, on every provider including GitHub. The refspec is now added when it is missing (`ensureFetchRefspec`), for new and for existing local copies.
+3. `BrowserGit.isCloned()` started a project for a placeholder user (the GitHub-looking default of that file) when called before the editor had set the real one; it now uses the page's real user or returns false.
+
+Not covered by the real runs: GitHub Enterprise, GitLab, a Forgejo or Gitea behind HTTPS with a private CA, and an instance whose administrator restricts who can create repositories (see the open question about a default group).
 - Run a **real Forgejo and a real Gitea in Docker** (`mise run dev:forgejo`, `mise run dev:gitea`, pinned image tags, SQLite, admin and OAuth app created by script) and walk the whole flow against each: sign in, create project, edit, sync (clone and push with the OAuth token), invite a collaborator, delete and restore. Record the results in this file.
 - GitHub Enterprise cannot be reproduced locally: it is implemented from the documented API (same shapes as github.com) and marked **not verified on a real instance** until someone runs it.
 - Differences found (token lifetime and refresh, topics, collaborator invitation, rate limits) get a fix and a test each.

@@ -27,6 +27,16 @@
     return T('I could not download the project from GitHub') + ' (' + msg + ').';
   }
 
+  /** Copies made by `git.init` (a project that was empty when first opened) have the remote's address but no fetch refspec, and
+   *  isomorphic-git refuses to fetch or pull without one ("NoRefspecError"). Cloned copies already have it; this only fills the gap. */
+  async function ensureFetchRefspec(dir) {
+    const { fs } = initFs();
+    try {
+      if (await git.getConfig({ fs, dir, path: 'remote.origin.fetch' })) return;
+      await git.setConfig({ fs, dir, path: 'remote.origin.fetch', value: '+refs/heads/*:refs/remotes/origin/*' });
+    } catch (_) { /* a copy that cannot be read is dealt with by the caller */ }
+  }
+
   function initFs() {
     if (!fs) {
       const LFS = typeof LightningFS !== 'undefined' ? LightningFS : (typeof window !== 'undefined' ? window.LightningFS : null);
@@ -51,12 +61,19 @@
     return p === 'github' ? '' : p + '.';
   }
 
+  /** The provider a local folder belongs to, read from the folder name itself (`<provider>.<owner>`, or the bare owner for GitHub):
+   *  the user can change while a call is still running, the folder name cannot. */
+  function providerOfDir(dirOwner) {
+    const dot = dirOwner.indexOf('.');
+    return dot > 0 && /^[a-z][a-z0-9-]*$/.test(dirOwner.slice(0, dot)) ? dirOwner.slice(0, dot) : 'github';
+  }
+
   /** Which account opened this local copy (the Storage tab lists only the copies of the account that is signed in). */
   async function rememberAccount(pfs, dirOwner, repo) {
     try {
       if (!currentUser || !currentUser.login) return;
       await pfs.mkdir('/meta').catch(() => {});
-      const rec = { login: String(currentUser.login), provider: providerOf(currentUser), at: Date.now() };
+      const rec = { login: String(currentUser.login), provider: providerOfDir(dirOwner), at: Date.now() };
       await pfs.writeFile('/meta/' + encodeURIComponent(`${dirOwner}/${repo}`) + '.json', JSON.stringify(rec));
     } catch (_) { /* only a convenience: the list falls back to the owner's name */ }
   }
@@ -98,7 +115,12 @@
     async isCloned() {
       if (!currentRepoDir) {
         if (typeof projectOwner !== 'undefined' && typeof projectRepo !== 'undefined' && projectOwner && projectRepo) {
-          await this.init(projectOwner, projectRepo, typeof currentUser !== 'undefined' ? currentUser : null);
+          // `currentUser` here is this file's own placeholder (a GitHub-looking "user"): the signed-in person is the page's global one.
+          // Starting without them would open the project in the GitHub folder of whatever provider the account really belongs to.
+          let pageUser = null;
+          try { pageUser = (0, eval)('typeof currentUser !== "undefined" ? currentUser : null'); } catch (_) {}
+          if (!pageUser || !pageUser.provider) return false;
+          await this.init(projectOwner, projectRepo, pageUser);
         } else {
           return false;
         }
@@ -111,6 +133,7 @@
         // an empty `.git` skeleton (refs/ and objects/ left behind, no HEAD) is not a clone: treating it as one made
         // the redo of a stuck clone return without downloading anything
         await pfs.stat(`${currentRepoDir}/.git/HEAD`);
+        await ensureFetchRefspec(currentRepoDir); // also repairs copies made before this existed
         return true;
       } catch (_) {
         return false;
@@ -194,6 +217,7 @@
       try {
         await git.setConfig({ fs, dir: currentRepoDir, path: 'remote.origin.url', value: url });
       } catch (_) {}
+      await ensureFetchRefspec(currentRepoDir);
       return true;
     },
 

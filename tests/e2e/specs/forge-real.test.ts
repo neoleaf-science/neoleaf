@@ -27,6 +27,19 @@ const basic = (u: { login: string; password: string }) => 'Basic ' + Buffer.from
 /** A call to the forge's own API as `alice` (to look at what NeoLeaf did there). */
 const forge = (p: string, init: RequestInit = {}) => fetch(`${st.url}/api/v1${p}`, { ...init, headers: { Authorization: basic(st.alice), 'Content-Type': 'application/json', ...(init.headers || {}) } });
 
+/** The server shows a push in its commit list a moment later (Gitea updates it from a queue): wait for it. */
+async function lastCommitIs(message: string, timeoutMs = 20000) {
+  const end = Date.now() + timeoutMs;
+  let last = '';
+  while (Date.now() < end) {
+    const commits = await (await forge(`/repos/alice/${project}/commits?limit=1`)).json();
+    last = commits?.[0]?.commit?.message?.trim() ?? '';
+    if (last === message) return;
+    await sleep(500);
+  }
+  expect(last).toBe(message);
+}
+
 beforeAll(async () => {
   if (!KIND) return;
   const r = spawnSync(SCRIPT, ['state', KIND], { encoding: 'utf8' });
@@ -79,6 +92,7 @@ afterAll(() => {
 run(`NeoLeaf with a real ${KIND}`, () => {
   let ctx: Awaited<ReturnType<Awaited<ReturnType<typeof getBrowser>>['newContext']>>;
   let page: Awaited<ReturnType<typeof ctx.newPage>>;
+  let ctx0: typeof ctx;
 
   test('signing in goes through the real login and authorization pages and ends on the dashboard', async () => {
     ctx = await (await getBrowser()).newContext({ viewport: { width: 1400, height: 900 }, locale: 'en-US' });
@@ -118,14 +132,23 @@ run(`NeoLeaf with a real ${KIND}`, () => {
     expect(repo.topics || []).toContain('neoleaf');
   }, 120000);
 
-  test('the project opens through the Git proxy; its local copy is in the provider folder', async () => {
+  test('the project opens in a second browser through the Git proxy (a real clone); its local copy is in the provider folder', async () => {
+    // a clean browser profile, like a second device: it has nothing local, so the project is cloned from the real server
+    const cookie = (await ctx.cookies()).find(c => c.name === 'latex_session')!;
+    ctx0 = ctx;
+    ctx = await (await getBrowser()).newContext({ viewport: { width: 1400, height: 900 }, locale: 'en-US' });
+    await ctx.addCookies([{ name: cookie.name, value: cookie.value, url: BASE }]);
+    page = await ctx.newPage();
+    page.on('dialog', d => d.accept());
+    await page.addInitScript(() => { try { localStorage.setItem('ld-lang', 'en'); } catch (_) {} });
     await page.goto(`${BASE}/project/${id}`);
     await page.waitForSelector('.monaco-editor');
-    await page.waitForFunction(async () => {
-      const bg = (window as any).BrowserGit;
-      return !!bg && (await bg.isCloned()) && (await bg.listFiles()).filter((f: any) => !f.is_folder).length >= 1;
-    }, null, { timeout: 60000 });
-    const dirs = await page.evaluate(async () => new (window as any).LightningFS('neoleaf-git').promises.readdir('/repos'));
+    // ready when the editor itself says so: the clone has finished (`__cloning` is off) and the tree shows the files. `isCloned()` is already
+    // true while the clone is still running (HEAD exists right after `git init`), and a commit made then lands on a temporary branch
+    await page.waitForFunction(() => !(window as any).__cloning && !!document.querySelector('#file-tree .tree-row'), null, { timeout: 90000 });
+    await page.waitForFunction(async () => !!(await (window as any).BrowserGit.isCloned()), null, { timeout: 30000 });
+    // the page's own file system (a second LightningFS instance on the same database could interfere with the editor's writes)
+    const dirs = await page.evaluate(async () => (window as any).BrowserGit.getFs().pfs.readdir('/repos'));
     expect(dirs).toContain('git-real.alice');
   }, 120000);
 
@@ -137,8 +160,7 @@ run(`NeoLeaf with a real ${KIND}`, () => {
       await bg.commit(m);
       await bg.push();
     }, msg);
-    const commits = await (await forge(`/repos/alice/${project}/commits?limit=3`)).json();
-    expect(commits[0].commit.message.trim()).toBe(msg);
+    await lastCommitIs(msg);
     expect((await forge(`/repos/alice/${project}/contents/pushed-from-browser.txt`)).status).toBe(200);
   }, 60000);
 
@@ -207,8 +229,7 @@ run(`NeoLeaf with a real ${KIND}`, () => {
       await bg.commit(m);
       await bg.push();
     }, msg);
-    const commits = await (await forge(`/repos/alice/${project}/commits?limit=1`)).json();
-    expect(commits[0].commit.message.trim()).toBe(msg);
+    await lastCommitIs(msg);
   }, 400000);
 
   test('signing out ends the session', async () => {
@@ -216,5 +237,6 @@ run(`NeoLeaf with a real ${KIND}`, () => {
     const me = await (await page.request.get(BASE + '/api/user/profile')).json();
     expect(me.error).toBeTruthy();
     await ctx.close();
+    await ctx0.close();
   });
 });

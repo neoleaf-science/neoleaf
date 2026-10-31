@@ -95,6 +95,10 @@ run = "cd tests/e2e && bun test --timeout 180000"
 description = "E2E tests against a REAL Forgejo and a REAL Gitea in Docker (slow; pulls the pinned images the first time). Optional argument: forgejo or gitea"
 run = "scripts/test_forge_real.sh"
 
+[tasks."test:install"]
+description = "End-to-end test of the Docker install (init, compose, bundled Forgejo, sign-in, compile). Needs Docker and the binary from `mise run build:linux` (parent folder)"
+run = "cd tests/e2e && E2E_INSTALL=1 bun test specs/install-compose.test.ts --timeout 900000"
+
 [tasks.verify]
 description = "Full local verification (check and E2E tests in the browser)"
 depends = ["check", "test:e2e"]

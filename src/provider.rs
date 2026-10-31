@@ -195,19 +195,36 @@ impl Provider {
         }
     }
 
+    /// The address NeoLeaf's own requests use (token exchange, API, Git proxy). It is `web()` except for your own server that gave an
+    /// `internal_url` (a private address that only NeoLeaf can reach, while people use the public one).
+    pub fn server_web(self) -> String {
+        match self {
+            Provider::Custom(_) => self
+                .custom()
+                .map(|c| c.server_url.clone())
+                .unwrap_or_default(),
+            _ => self.web(),
+        }
+    }
+
     /// REST API address.
     pub fn api(self) -> String {
         match self {
             Provider::GitHub => crate::drive::client::github_api(),
             Provider::Codeberg => format!("{}/api/v1", codeberg_web()),
-            Provider::Custom(_) => format!("{}/api/v1", self.web()),
+            Provider::Custom(_) => format!("{}/api/v1", self.server_web()),
         }
     }
 
     /// OAuth client id: from `neoleaf.toml` when the file gives one, otherwise from the environment.
     pub fn client_id(self) -> String {
-        if let Some(id) = crate::config::get().and_then(|c| c.provider_client_id(self)) {
-            return id;
+        if let Some(c) = crate::config::get() {
+            if let Some(id) = c.provider_client_id(self) {
+                return id;
+            }
+            if let Some(v) = c.provider_id_env(self).and_then(|n| std::env::var(n).ok()) {
+                return v.trim().to_string();
+            }
         }
         match self {
             Provider::GitHub => std::env::var("GITHUB_CLIENT_ID"),

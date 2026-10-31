@@ -36,6 +36,14 @@ enabled = true
 admins = [${demoId}]
 client_id = "forge-client"
 client_secret_env = "FORGE_SECRET"
+[providers.git-pub]
+kind = "forgejo"
+url = "${fake.url.replace('127.0.0.1', 'localhost')}"
+internal_url = "${fake.url}"
+label = "Public address, private reach"
+enabled = true
+client_id = "forge-client"
+client_secret_env = "FORGE_SECRET"
 [providers.git-off]
 kind = "forgejo"
 url = "${fake.url}"
@@ -135,6 +143,25 @@ describe('your own Forgejo/Gitea server as a provider', () => {
     expect(html).toContain('<span>Entrar com a conta da instituição</span>');
     expect(html).not.toContain('git-off');
     expect(html).not.toContain('/auth/login/codeberg');
+  });
+
+  test('internal_url: people are sent to the public address, NeoLeaf itself reaches the server at the internal one', async () => {
+    const r1 = await fetch(`${BASE}/auth/login/git-pub`, { redirect: 'manual' });
+    const loc = r1.headers.get('location')!;
+    expect(loc.startsWith(fake.url.replace('127.0.0.1', 'localhost') + '/login/oauth/authorize')).toBe(true);
+    // the browser step is done by hand (the fake server answers on the internal address), then NeoLeaf exchanges the code on its own side
+    const state = (r1.headers.getSetCookie().find(c => c.startsWith('oauth_state=')) || '').split(';')[0];
+    const r2 = await fetch(loc.replace('localhost', '127.0.0.1') + '&login=demo', { redirect: 'manual' });
+    const cb = new URL(r2.headers.get('location')!);
+    expect(cb.pathname).toBe('/auth/callback/git-pub');
+    const r3 = await fetch(cb.toString(), { redirect: 'manual', headers: { cookie: state } });
+    const sid2 = (r3.headers.getSetCookie().find(c => c.startsWith('latex_session=')) || '').split(';')[0].split('=')[1] || '';
+    expect(sid2).not.toBe('');
+    const me = await (await fetch(`${BASE}/api/user/profile`, { headers: { cookie: `latex_session=${sid2}` } })).json();
+    expect(me.login).toBe('demo');
+    // the projects list also goes through the internal address
+    const home = await (await fetch(BASE + '/', { headers: { cookie: `latex_session=${sid2}` } })).text();
+    expect(home).toContain('demo__artigo-1');
   });
 
   test('a provider that is off, or one that does not exist, cannot be used by typing its address', async () => {

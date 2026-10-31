@@ -1,0 +1,52 @@
+# NeoLeaf for an institution: the server, Caddy (automatic HTTPS) and, if you have no Git server, a Forgejo of its own.
+# Written by `neoleaf init`, together with .env, neoleaf.toml and Caddyfile. Start with:   docker compose up -d
+# (with the bundled Forgejo, run ./setup-forgejo.sh once instead: it also creates the administrator and the OAuth application)
+services:
+  neoleaf:
+    image: ${NEOLEAF_IMAGE:-neoleaf:local}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NEOLEAF_CONFIG: /config/neoleaf.toml
+      SESSIONS_FILE: /data/sessions.json
+      BLOCKLIST_FILE: /data/blocked.json
+      TEMPLATES_FILE: /data/templates.json
+      TL_CACHE_DIR: /data/tlcache
+      NEOLEAF_WORKSPACE_DIR: /data/work
+    volumes:
+      - ./neoleaf.toml:/config/neoleaf.toml:ro
+      - ./brand:/config/brand:ro
+      - neoleaf-data:/data
+
+  caddy:
+    image: caddy:2.11.6
+    restart: unless-stopped
+    depends_on: [neoleaf]
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+  # Only with COMPOSE_PROFILES=forgejo (set by `neoleaf init` when you choose the bundled Git server).
+  forgejo:
+    profiles: ["forgejo"]
+    image: codeberg.org/forgejo/forgejo:17.0.0
+    restart: unless-stopped
+    environment:
+      FORGEJO__server__ROOT_URL: ${FORGE_PUBLIC_URL:-http://localhost}/
+      FORGEJO__server__DOMAIN: ${FORGE_DOMAIN:-localhost}
+      FORGEJO__database__DB_TYPE: sqlite3
+      FORGEJO__security__INSTALL_LOCK: "true"
+      FORGEJO__service__DISABLE_REGISTRATION: "true"
+      FORGEJO__mailer__ENABLED: "false"
+    volumes:
+      - forgejo-data:/data
+
+volumes:
+  neoleaf-data:
+  caddy-data:
+  caddy-config:
+  forgejo-data:

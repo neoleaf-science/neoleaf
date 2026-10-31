@@ -47,7 +47,7 @@ async fn token_request(
     params: &[(&str, &str)],
 ) -> Result<TokenResponse, RefreshError> {
     let resp = client
-        .post(format!("{}/login/oauth/access_token", prov.web()))
+        .post(format!("{}/login/oauth/access_token", prov.server_web()))
         .header("Accept", "application/json")
         .header("User-Agent", "NeoLeaf-LaTeX")
         .form(params)

@@ -42,11 +42,7 @@ jobs:
       - name: Package
         run: |
           NAME="neoleaf-server-${{ steps.v.outputs.version }}-linux-x86_64"
-          mkdir -p "dist/$NAME"
-          cp target/release/neoleaf .env.example LICENSE-MIT LICENSE-APACHE LICENSE-ART NOTICE LICENSES.md ART.md "dist/$NAME/"
-          [ -f docs/self-hosting.md ] && cp docs/self-hosting.md "dist/$NAME/SELF-HOSTING.md" || true
-          cp -r site "dist/$NAME/site"
-          git ls-files -z static/texlive | xargs -0 -I{} cp --parents {} "dist/$NAME/"
+          scripts/package_release_dir.sh "dist/$NAME"
           tar -C dist -czf "dist/$NAME.tar.gz" "$NAME"
           (cd dist && sha256sum "$NAME.tar.gz" > SHA256SUMS && cat SHA256SUMS)
           echo "ARCHIVE=dist/$NAME.tar.gz" >> "$GITHUB_ENV"
@@ -59,6 +55,14 @@ jobs:
           curl -fs http://127.0.0.1:3999/licenses | grep -q "Open-source licenses"
           curl -fs -o /dev/null http://127.0.0.1:3999/static/texlive/pdflatex.wasm
           kill %1 || true
+      - name: Docker install smoke test
+        run: |
+          # the image builds from the unpacked archive and `neoleaf init` writes a valid install (no containers are started here)
+          docker build -q -f smoke/install/Dockerfile -t neoleaf:smoke smoke
+          mkdir inst && chmod 777 inst
+          docker run --rm -v "$PWD/inst:/out" neoleaf:smoke ./neoleaf init --dir /out --url https://latex.example.edu --git bundled
+          test -f inst/neoleaf.toml && test -f inst/docker-compose.yml && test -f inst/.env
+          docker run --rm -v "$PWD/inst:/c:ro" -e NEOLEAF_CONFIG=/c/neoleaf.toml -e GIT_CLIENT_ID=x -e GIT_CLIENT_SECRET=y neoleaf:smoke ./neoleaf --check-config | grep -q "provider git"
       - uses: actions/attest-build-provenance@v2
         with:
           subject-path: ${{ env.ARCHIVE }}

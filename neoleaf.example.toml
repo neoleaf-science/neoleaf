@@ -42,5 +42,6 @@ enabled = false
 # url = "https://git.university.edu"        # https only (http only for localhost)
 # label = "Sign in with your university account"   # the whole text of the button, shown as written
 # admins = [34]                                    # numeric ids of this server's administrators of NeoLeaf (see /api/v1/user of the server)
-# client_id = "..."
+# internal_url = "http://forgejo:3000"            # optional: where NeoLeaf itself reaches the server, when that differs from the address people use
+# client_id = "..."                                # or client_id_env = "GIT_CLIENT_ID" (the NAME of a variable)
 # client_secret_env = "GIT_UNIVERSITY_SECRET"      # NAME of the variable that holds the secret (the secret never goes in this file)

@@ -49,12 +49,16 @@ struct RawLegal {
 struct RawProvider {
     enabled: Option<bool>,
     client_id: Option<String>,
+    /// NAME of the environment variable that holds the client id (instead of writing the id in the file)
+    client_id_env: Option<String>,
     client_secret_env: Option<String>,
     /// numeric ids of the administrators of this installation who sign in with this provider
     admins: Option<Vec<RawId>>,
     /// only for your own Git server: `forgejo` or `gitea`
     kind: Option<String>,
     url: Option<String>,
+    /// address NeoLeaf itself uses to reach the server when it differs from `url` (a private network, a container name)
+    internal_url: Option<String>,
     label: Option<String>,
 }
 
@@ -97,6 +101,7 @@ struct ProviderCfg {
     enabled: bool,
     admins: Vec<u64>,
     client_id: Option<String>,
+    client_id_env: Option<String>,
     client_secret_env: Option<String>,
 }
 
@@ -106,8 +111,10 @@ pub struct CustomProvider {
     pub id: String,
     /// text of the sign-in button, written by the administrator (shown as it is)
     pub label: String,
-    /// `https://git.example.edu` (no trailing slash)
+    /// `https://git.example.edu` (no trailing slash): the address people use, for their browser (sign-in page, links)
     pub url: String,
+    /// What NeoLeaf's own requests use (token, API, Git proxy). Same as `url` unless `internal_url` is set.
+    pub server_url: String,
     /// host part of `url`, for the "no reply" e-mail addresses
     pub host: String,
 }
@@ -131,6 +138,11 @@ impl Config {
 
     pub fn provider_client_id(&self, p: Provider) -> Option<String> {
         self.providers.get(&p).and_then(|c| c.client_id.clone())
+    }
+
+    /// Name of the environment variable that holds the client id, if the file says one.
+    pub fn provider_id_env(&self, p: Provider) -> Option<String> {
+        self.providers.get(&p).and_then(|c| c.client_id_env.clone())
     }
 
     /// Name of the environment variable that holds the client secret, if the file says one.
@@ -236,7 +248,8 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
     for (id, p) in ids {
         let builtin = matches!(id.as_str(), "github" | "codeberg");
         let prov = if builtin {
-            if p.kind.is_some() || p.url.is_some() || p.label.is_some() {
+            if p.kind.is_some() || p.url.is_some() || p.internal_url.is_some() || p.label.is_some()
+            {
                 return Err(format!(
                     "providers.{id}: kind, url and label are only for your own Git server (use another id, such as git-myuniversity)"
                 ));
@@ -261,6 +274,15 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
             }
             Some(_) => return Err(format!("providers.{id}.client_id: invalid value")),
         };
+        let client_id_env = match p.client_id_env.as_deref().map(str::trim) {
+            None | Some("") => None,
+            Some(v) if valid_env_name(v) => Some(v.to_string()),
+            Some(_) => {
+                return Err(format!(
+                    "providers.{id}.client_id_env: must be the NAME of an environment variable (letters, digits and _)"
+                ));
+            }
+        };
         let client_secret_env = match p.client_secret_env.as_deref().map(str::trim) {
             None | Some("") => None,
             Some(v) if valid_env_name(v) => Some(v.to_string()),
@@ -277,6 +299,7 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
                 enabled: p.enabled.unwrap_or(false),
                 admins,
                 client_id,
+                client_id_env,
                 client_secret_env,
             },
         );
@@ -361,6 +384,10 @@ fn parse_custom(id: &str, p: &RawProvider) -> Result<CustomProvider, String> {
         .map_or(host, |(h, _)| h)
         .trim_matches(['[', ']'])
         .to_ascii_lowercase();
+    let server_url = match p.internal_url.as_deref().map(str::trim) {
+        None | Some("") => url.clone(),
+        Some(u) => valid_internal_url(u, &format!("providers.{id}.internal_url"))?,
+    };
     let label = match p.label.as_deref().map(str::trim) {
         None | Some("") => id.to_string(),
         Some(l) if l.chars().count() <= 60 && !l.chars().any(char::is_control) => l.to_string(),
@@ -374,6 +401,7 @@ fn parse_custom(id: &str, p: &RawProvider) -> Result<CustomProvider, String> {
         id: id.to_string(),
         label,
         url,
+        server_url,
         host,
     })
 }
@@ -407,14 +435,30 @@ fn valid_email(s: &str) -> bool {
         })
 }
 
+/// Is the host of `rest` (what follows `http://`) this machine: `localhost`, `*.localhost`, `127.0.0.1` or `[::1]`, with or without a port or path?
+/// The comparison is on the whole name: `localhost.example.com` is not local.
+fn is_local_authority(rest: &str) -> bool {
+    let authority = rest.split(['/', '?', '#']).next().unwrap_or("");
+    if authority.contains('@') {
+        return false;
+    }
+    let host = if let Some(v6) = authority.strip_prefix('[') {
+        v6.split(']')
+            .next()
+            .map(|h| format!("[{h}]"))
+            .unwrap_or_default()
+    } else {
+        authority.split(':').next().unwrap_or("").to_string()
+    };
+    host == "localhost" || host.ends_with(".localhost") || host == "127.0.0.1" || host == "[::1]"
+}
+
 /// `https://...` (or `http://` only for a local address, for development).
 fn valid_url(v: Option<&str>, field: &str) -> Result<Option<String>, String> {
     let Some(u) = v.map(str::trim).filter(|u| !u.is_empty()) else {
         return Ok(None);
     };
-    let local = ["http://localhost", "http://127.0.0.1", "http://[::1]"]
-        .iter()
-        .any(|p| u.starts_with(p));
+    let local = u.strip_prefix("http://").is_some_and(is_local_authority);
     if !(u.starts_with("https://") || local)
         || u.len() > 2048
         || u.chars().any(|c| c.is_control() || c.is_whitespace())
@@ -425,6 +469,30 @@ fn valid_url(v: Option<&str>, field: &str) -> Result<Option<String>, String> {
         ));
     }
     Ok(Some(u.to_string()))
+}
+
+/// `internal_url`: where NeoLeaf reaches the server from its own side. Plain `http://` is allowed here, because this is the address of a
+/// private network (for example `http://forgejo:3000` between two containers), which never reaches a browser.
+fn valid_internal_url(u: &str, field: &str) -> Result<String, String> {
+    let bad = || {
+        format!(
+            "{field}: an http:// or https:// address of the server, without spaces, user, query or #"
+        )
+    };
+    let rest = u
+        .strip_prefix("https://")
+        .or_else(|| u.strip_prefix("http://"))
+        .ok_or_else(bad)?;
+    let host = rest.split('/').next().unwrap_or("");
+    if u.len() > 2048
+        || host.is_empty()
+        || host.contains('@')
+        || u.contains(['?', '#', '"', '\'', '<', '>', '\\'])
+        || u.chars().any(|c| c.is_control() || c.is_whitespace())
+    {
+        return Err(bad());
+    }
+    Ok(u.trim_end_matches('/').to_string())
 }
 
 /// Reads one logo from inside `dir`. The path must be relative with no `..`; after resolving symlinks it must still be inside `dir`.
@@ -553,8 +621,13 @@ pub fn summary(cfg: &Config) -> Vec<String> {
             (true, true) => "on",
             (true, false) => "ON BUT THE CLIENT ID OR SECRET IS MISSING (it will not be shown)",
         };
+        let internal = if c.server_url == c.url {
+            String::new()
+        } else {
+            format!(", reached by NeoLeaf at {}", c.server_url)
+        };
         out.push(format!(
-            "provider {} ({} at {}): {state}, {} administrator(s) listed",
+            "provider {} ({} at {}{internal}): {state}, {} administrator(s) listed",
             c.id,
             c.label,
             c.url,
@@ -785,6 +858,79 @@ mod tests {
             .collect::<Vec<_>>()
             .join(",");
         assert!(err(&format!("[providers.github]\nadmins = [{many}]")).contains("at most 100"));
+    }
+
+    #[test]
+    fn internal_url_is_what_neoleaf_reaches_and_url_is_what_people_use() {
+        let d = dir_with(&[]);
+        let c = parse(
+            r#"
+            [providers.git-x]
+            kind = "forgejo"
+            url = "https://git.uni.edu"
+            internal_url = "http://forgejo:3000/"
+            [providers.git-y]
+            kind = "forgejo"
+            url = "https://git2.uni.edu"
+            "#,
+            d.path(),
+        )
+        .unwrap();
+        let x = c.custom_provider("git-x").unwrap();
+        assert_eq!(
+            (x.url.as_str(), x.server_url.as_str()),
+            ("https://git.uni.edu", "http://forgejo:3000")
+        );
+        let y = c.custom_provider("git-y").unwrap();
+        assert_eq!(y.server_url, y.url, "no internal_url: the same address");
+        let err = |t: &str| {
+            parse(
+                &format!("[providers.git-x]\nkind=\"forgejo\"\nurl=\"https://g.edu\"\n{t}"),
+                d.path(),
+            )
+            .unwrap_err()
+        };
+        for bad in [
+            "internal_url = \"ftp://x\"",
+            "internal_url = \"http://u:p@x\"",
+            "internal_url = \"http://x/?a=1\"",
+            "internal_url = \"http://x y\"",
+            "internal_url = \"x:3000\"",
+        ] {
+            assert!(err(bad).contains("internal_url"), "{bad}");
+        }
+        assert!(
+            parse("[providers.github]\ninternal_url = \"http://x\"", d.path())
+                .unwrap_err()
+                .contains("only for your own Git server")
+        );
+    }
+
+    #[test]
+    fn plain_http_is_only_for_this_machine() {
+        let d = dir_with(&[]);
+        let url = |u: &str| {
+            parse(&format!("[legal]\nterms_url = \"{u}\""), d.path()).map(|c| c.legal.terms_url)
+        };
+        for ok in [
+            "http://localhost",
+            "http://localhost:8080/t",
+            "http://git.localhost:8080",
+            "http://127.0.0.1:3000",
+            "http://[::1]:3000/x",
+        ] {
+            assert!(url(ok).is_ok(), "{ok}");
+        }
+        for bad in [
+            "http://localhost.example.com",
+            "http://127.0.0.1.example.com",
+            "http://example.com",
+            "http://localhost@evil.com",
+            "http://evil.com/localhost",
+            "http://notlocalhost",
+        ] {
+            assert!(url(bad).is_err(), "{bad}");
+        }
     }
 
     #[test]

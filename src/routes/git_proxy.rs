@@ -210,7 +210,7 @@ async fn relay(cx: &Cx, suffix: &str, body: Option<topcoat::router::request::Byt
 
     let target_url = format!(
         "{}/{}/{}.git/{}",
-        session.user.provider.web(),
+        session.user.provider.server_web(),
         owner,
         repo,
         suffix

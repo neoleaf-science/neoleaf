@@ -28,6 +28,7 @@ mod deps;
 mod drive;
 mod ids;
 mod import;
+mod init;
 mod provider;
 mod routes;
 mod scholar;
@@ -68,6 +69,11 @@ pub(crate) fn trim_memory() {
 pub(crate) fn trim_memory() {}
 
 fn main() {
+    // `neoleaf init ...` writes the files of an institution install and exits (no server, no runtime)
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("init") {
+        std::process::exit(init::run(&args[1..]));
+    }
     tune_malloc();
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()

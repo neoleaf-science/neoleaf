@@ -58,7 +58,7 @@ fn logos(cfg: &Config) -> String {
             format!(r#"<img class="inst-logo" src="/brand/logo-dark" alt="{alt}">"#)
         }
         (None, None) => {
-            format!(r#"<img class="inst-logo" src="/static/img/logo.png" alt="{alt}">"#)
+            format!(r#"<img class="inst-logo" src="/static/img/neoleaf_logo_vet.svg" alt="{alt}">"#)
         }
     }
 }
@@ -176,7 +176,10 @@ mod tests {
         assert!(html.contains(r#"mailto:a+b@u.edu.br"#));
         assert!(html.contains("/auth/login/codeberg"));
         assert!(!html.contains(r#"href="/auth/login""#));
-        assert!(html.contains("/static/img/logo.png"), "default logo");
+        assert!(
+            html.contains("/static/img/neoleaf_logo_vet.svg"),
+            "default logo"
+        );
         assert!(!html.contains("--inst-accent:"), "no accent unless set");
     }
 

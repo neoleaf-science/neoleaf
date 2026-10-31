@@ -5,7 +5,7 @@ pub(super) fn top_bar() -> &'static str {
     <header class="top-bar">
         <div class="top-bar-left">
             <a href="/" class="btn home-logo-btn" title="Back to Projects" aria-label="Back to Projects">
-                <img src="/static/img/logo.png" alt="" class="home-logo">
+                <img src="/static/img/neoleaf_logo_vet.svg" alt="" class="home-logo">
                 <svg class="home-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
             </a>
             <span class="project-title" title="{{PROJECT_TOOLTIP}}">{{PROJECT_TITLE}}</span>

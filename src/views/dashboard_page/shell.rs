@@ -24,7 +24,7 @@ pub(super) fn body_and_top_bar() -> &'static str {
     r##"<body class="dashboard-body">
     <header class="top-bar">
         <div class="top-bar-left">
-            <span class="brand-title"><img src="/static/img/logo.png" alt="" class="brand-logo"> <span class="brand-gradient">NeoLeaf</span></span>
+            <span class="brand-title"><img src="/static/img/neoleaf_logo_vet.svg" alt="" class="brand-logo"> <span class="brand-gradient">NeoLeaf</span></span>
         </div>
         <div class="top-bar-right">
             {{USER_BUTTON}}

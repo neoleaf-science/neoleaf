@@ -19,7 +19,7 @@ pub(super) fn body_and_top_bar() -> &'static str {
     r##"<body class="dashboard-body">
     <header class="top-bar">
         <div class="top-bar-left">
-            <span class="brand-title"><img src="/static/img/logo.png" alt="" class="brand-logo"> <span class="brand-gradient">NeoLeaf</span></span>
+            <span class="brand-title"><img src="/static/img/neoleaf_logo_vet.svg" alt="" class="brand-logo"> <span class="brand-gradient">NeoLeaf</span></span>
             <span style="margin-left: 10px; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: 700; background: color-mix(in srgb, var(--green) 15%, var(--bg-primary)); color: var(--green); border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);">
                 🛡️ ADMIN
             </span>

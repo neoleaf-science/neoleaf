@@ -52,6 +52,10 @@ pub static FILES: &[(&str, &[u8])] = &[
         include_bytes!("../static/licenses/rust-server.txt"),
     ),
     ("img/logo.png", include_bytes!("../static/img/logo.png")),
+    (
+        "img/neoleaf_logo_vet.svg",
+        include_bytes!("../static/img/neoleaf_logo_vet.svg"),
+    ),
     ("js/agent.js", include_bytes!("../static/js/agent.js")),
     (
         "js/autocomplete.js",
@@ -384,6 +388,7 @@ pub fn find(dir: &str, name: &str) -> Option<Asset> {
         "css" => ("text/css; charset=utf-8", "no-cache"),
         "png" => ("image/png", "public, max-age=86400"),
         "webp" => ("image/webp", "public, max-age=86400"),
+        "svg" => ("image/svg+xml", "public, max-age=86400"),
         "txt" => ("text/plain; charset=utf-8", "no-cache"),
         // requested with the build version (?v=), so a new build is a new address
         "wasm" => ("application/wasm", "public, max-age=31536000, immutable"),
@@ -410,6 +415,11 @@ mod tests {
             "text/css; charset=utf-8"
         );
         assert_eq!(find("img", "logo.png").unwrap().content_type, "image/png");
+        let vet = find("img", "neoleaf_logo_vet.svg").expect("the vector logo is embedded");
+        assert_eq!(vet.content_type, "image/svg+xml");
+        // an image only: nothing in it can run
+        let text = std::str::from_utf8(vet.body).unwrap();
+        assert!(text.starts_with("<svg") && !text.contains("<script") && !text.contains("onload"));
         assert_eq!(
             find("vendor", "badness-engine_bg.wasm")
                 .unwrap()

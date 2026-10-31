@@ -12,7 +12,8 @@ fn head() -> &'static str {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Open-source licenses - NeoLeaf</title>
-    <link rel="icon" type="image/png" href="/static/img/favicon.png">
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/static/img/favicon.svg">
+    <link rel="icon" type="image/png" sizes="64x64" href="/static/img/favicon.png">
     <script src="/static/js/theme.js"></script>
     <link rel="stylesheet" href="/static/css/editor.css">
 "##

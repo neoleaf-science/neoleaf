@@ -53,6 +53,10 @@ pub static FILES: &[(&str, &[u8])] = &[
     ),
     ("img/logo.png", include_bytes!("../static/img/logo.png")),
     (
+        "img/favicon.svg",
+        include_bytes!("../static/img/favicon.svg"),
+    ),
+    (
         "img/neoleaf_logo_vet.svg",
         include_bytes!("../static/img/neoleaf_logo_vet.svg"),
     ),
@@ -415,11 +419,15 @@ mod tests {
             "text/css; charset=utf-8"
         );
         assert_eq!(find("img", "logo.png").unwrap().content_type, "image/png");
-        let vet = find("img", "neoleaf_logo_vet.svg").expect("the vector logo is embedded");
-        assert_eq!(vet.content_type, "image/svg+xml");
-        // an image only: nothing in it can run
-        let text = std::str::from_utf8(vet.body).unwrap();
-        assert!(text.starts_with("<svg") && !text.contains("<script") && !text.contains("onload"));
+        for name in ["neoleaf_logo_vet.svg", "favicon.svg"] {
+            let vet = find("img", name).expect("the vector image is embedded");
+            assert_eq!(vet.content_type, "image/svg+xml");
+            // an image only: nothing in it can run
+            let text = std::str::from_utf8(vet.body).unwrap();
+            assert!(
+                text.starts_with("<svg") && !text.contains("<script") && !text.contains("onload")
+            );
+        }
         assert_eq!(
             find("vendor", "badness-engine_bg.wasm")
                 .unwrap()

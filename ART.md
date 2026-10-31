@@ -7,7 +7,7 @@ These files, made by Tássio Virgínio, are licensed under the
 license (full text in [LICENSE-ART](LICENSE-ART)):
 
 - `static/img/neoleaf-mascot.png` (the mascot sprite sheet) and `static/vendor/neoleaf-mascot-agent.mjs` (its animation data);
-- the NeoLeaf logos: `logo_icon*`, `logo_neoleaf*`, `static/img/logo.png`, `static/img/neoleaf_logo_vet.svg` (the vector version of the logo), `static/img/favicon.png`.
+- the NeoLeaf logos: `logo_icon*`, `logo_neoleaf*`, `static/img/logo.png`, `static/img/neoleaf_logo_vet.svg` (the vector version of the logo), `static/img/favicon.png`, `static/img/favicon.svg` (the vector favicon).
 
 **How it was made:** the mascot (sprite sheet and animation data) and the logos were drawn by hand by the owner.
 

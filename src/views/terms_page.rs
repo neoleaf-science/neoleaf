@@ -27,7 +27,8 @@ fn head_start() -> &'static str {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Use - NeoLeaf</title>
-    <link rel="icon" type="image/png" href="/static/img/favicon.png">
+    <link rel="icon" type="image/svg+xml" sizes="any" href="/static/img/favicon.svg">
+    <link rel="icon" type="image/png" sizes="64x64" href="/static/img/favicon.png">
     <script src="/static/js/theme.js"></script>
     <script src="/static/js/i18n.js"></script>
     <link rel="stylesheet" href="/static/css/editor.css">

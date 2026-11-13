@@ -32,11 +32,11 @@ describe.skipIf(!process.env.E2E_WEBMCP_REAL)('browser agents with the real WebM
     expect(await tools()).toEqual([]);
   });
 
-  test('allowing it makes the seven tools discoverable by getTools()', async () => {
+  test('allowing it makes the nine tools discoverable by getTools()', async () => {
     await s.page.click('#ai-agent-toggle');
-    await poll(tools, t => t.length === 7);
+    await poll(tools, t => t.length === 9);
     const t = await tools();
-    expect(t.map((x: any) => x.name).sort()).toEqual(['add_comment', 'add_suggestion', 'compile_log', 'list_comments', 'list_files', 'read_file', 'search']);
+    expect(t.map((x: any) => x.name).sort()).toEqual(['add_comment', 'add_suggestion', 'compile', 'compile_log', 'list_comments', 'list_files', 'propose_file', 'read_file', 'search']);
     expect(t.find((x: any) => x.name === 'read_file').annotations).toMatchObject({ readOnlyHint: true, untrustedContentHint: true });
     expect(t.find((x: any) => x.name === 'add_suggestion').annotations).toMatchObject({ readOnlyHint: false });
   });

@@ -43,7 +43,7 @@
       hd['anthropic-version'] = ANTHROPIC_VERSION;
       hd['anthropic-dangerous-direct-browser-access'] = 'true';   // Anthropic's opt-in for calls made from a browser with the person's own key
     } else {
-      hd.Authorization = 'Bearer ' + s.key;
+      if (s.key) hd.Authorization = 'Bearer ' + s.key;   // a local model (Ollama, LM Studio) needs no key
     }
     return hd;
   }

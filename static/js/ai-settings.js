@@ -11,6 +11,8 @@
   const ACCOUNT = box().dataset.account || '';
   const KEY = 'neoleaf.ai.' + ACCOUNT;
   const MAX_NAME = 40;
+  const AUTO = 'neoleaf.ai.auto.' + ACCOUNT;   // session only: closing the tab turns it off
+  const autoApply = () => { try { return sessionStorage.getItem(AUTO) === '1'; } catch (_) { return false; } };
 
   // `dialect` is which API the provider speaks; `url` is where it lives (editable for "Other")
   const PROVIDERS = [
@@ -18,6 +20,9 @@
     { id: 'openai', label: 'OpenAI', dialect: 'openai', url: 'https://api.openai.com/v1' },
     { id: 'gemini', label: 'Google Gemini', dialect: 'openai', url: 'https://generativelanguage.googleapis.com/v1beta/openai' },
     { id: 'openrouter', label: 'OpenRouter', dialect: 'openai', url: 'https://openrouter.ai/api/v1' },
+    // local models: no key, the server runs on this computer (it must allow this site's address, CORS)
+    { id: 'ollama', label: 'Ollama (local model)', dialect: 'openai', url: 'http://localhost:11434/v1', local: true },
+    { id: 'lmstudio', label: 'LM Studio (local model)', dialect: 'openai', url: 'http://localhost:1234/v1', local: true },
     { id: 'custom', label: null, dialect: 'openai', url: '' },
   ];
   const providerOf = id => PROVIDERS.find(p => p.id === id) || null;
@@ -51,11 +56,11 @@
   function get() {
     const d = read();
     const p = providerOf(d.provider);
-    if (!d.consent || !p || typeof d.key !== 'string' || !d.key || typeof d.model !== 'string' || !d.model) return null;
+    if (!d.consent || !p || (!p.local && (typeof d.key !== 'string' || !d.key)) || typeof d.model !== 'string' || !d.model) return null;
     const baseUrl = (typeof d.baseUrl === 'string' && validUrl(d.baseUrl) ? d.baseUrl : p.url).replace(/\/+$/, '');
     if (!baseUrl) return null;
     const name = typeof d.name === 'string' && d.name.trim() && oneLine(d.name) ? d.name.trim().slice(0, MAX_NAME) : d.model;
-    return { provider: p.id, dialect: p.dialect, baseUrl, key: d.key, model: d.model, name };
+    return { provider: p.id, dialect: p.dialect, baseUrl, key: typeof d.key === 'string' ? d.key : '', model: d.model, name };
   }
 
   function forget() {
@@ -88,7 +93,7 @@
       p(T('When you ask something, the text of the project files the assistant reads is sent from this browser straight to that provider, under the provider\'s terms. It does not pass through NeoLeaf.')),
       p(T('The key is kept only in this browser, for your account, and is removed when you sign out. Prefer a key made only for NeoLeaf, with a spending limit at the provider.')),
       p(T('Using the provider is charged to your account there.')),
-      p(T('The assistant never changes a file by itself: it comments and suggests, and you accept or reject.')),
+      p(T('The assistant never changes a file by itself: it comments and suggests, and you accept or reject. You may allow it to apply its edits without asking, in this tab only.')),
       p(T('In a shared project your co-authors\' text is sent too. Anyone in the project can turn the assistant off for everyone.')),
       h('div', { class: 'ai-actions' },
         h('button', { class: 'btn btn-primary', id: 'ai-consent', onclick: () => { write({ ...read(), consent: true }); st.editing = true; render(); } }, T('I understand, continue'))));
@@ -106,7 +111,7 @@
     listBtn.addEventListener('click', async () => {
       const pr = providerOf(sel.value);
       const base = (pr.url || url.value.trim()).replace(/\/+$/, '');
-      if (!key.value.trim()) { listMsg.textContent = T('Paste the API key.'); return; }
+      if (!pr.local && !key.value.trim()) { listMsg.textContent = T('Paste the API key.'); return; }
       if (!validUrl(base)) { listMsg.textContent = T('The server address must start with https://'); return; }
       listBtn.disabled = true;
       listMsg.textContent = '';
@@ -121,10 +126,14 @@
     const name = h('input', { class: 'form-control', id: 'ai-name', type: 'text', autocomplete: 'off', maxlength: String(MAX_NAME), value: d.name || '' });
     const url = h('input', { class: 'form-control', id: 'ai-url', type: 'url', autocomplete: 'off', spellcheck: 'false', value: d.baseUrl || '' });
     const urlRow = h('label', { class: 'ai-field', id: 'ai-url-row' }, h('span', {}, T('Server address')), url);
+    const keyRow = h('label', { class: 'ai-field', id: 'ai-key-row' }, h('span', {}, T('API key')), key);
+    const localHint = h('div', { class: 'ai-hint', id: 'ai-local-hint' }, T('A local model needs no key. The program must be running on this computer and must allow this site\'s address (CORS), for example with OLLAMA_ORIGINS for Ollama.'));
     const syncUrl = () => {
       const pr = providerOf(sel.value);
       urlRow.style.display = pr.url ? 'none' : '';
       if (pr.url) url.value = '';
+      keyRow.style.display = pr.local ? 'none' : '';
+      localHint.style.display = pr.local ? '' : 'none';
     };
     sel.addEventListener('change', syncUrl);
     syncUrl();
@@ -133,7 +142,7 @@
       const pr = providerOf(sel.value);
       const k = key.value.trim(), m = model.value.trim(), n = name.value.trim(), u = url.value.trim();
       st.draft = { provider: pr.id, key: k, model: m, name: n, baseUrl: u };
-      if (!k) st.error = T('Paste the API key.');
+      if (!k && !pr.local) st.error = T('Paste the API key.');
       else if (!m || !oneLine(m)) st.error = T('Write the model name.');
       else if (!pr.url && !validUrl(u)) st.error = T('The server address must start with https://');
       else if ([...n].length > MAX_NAME || !oneLine(n)) st.error = T('The name can have up to 40 characters, on one line.');
@@ -149,7 +158,7 @@
       h('h3', { class: 'ai-title' }, T('AI assistant')),
       h('label', { class: 'ai-field' }, h('span', {}, T('Provider')), sel),
       urlRow,
-      h('label', { class: 'ai-field' }, h('span', {}, T('API key')), key),
+      keyRow, localHint,
       h('label', { class: 'ai-field' }, h('span', {}, T('Model')), model, list),
       h('div', { class: 'ai-field' }, listBtn, ' ', listMsg),
       h('label', { class: 'ai-field' }, h('span', {}, T('Name of the assistant (optional)')), name,
@@ -176,6 +185,11 @@
         out.textContent = AIProviders.describe(e);
       } finally { testBtn.disabled = false; }
     });
+    const auto = h('input', { type: 'checkbox', id: 'ai-auto-apply', checked: autoApply() });
+    auto.addEventListener('change', () => {
+      if (auto.checked && !window.confirm(T('The assistant will change your files as soon as it proposes a change, without asking. You can undo each change with Ctrl+Z. Continue?'))) { auto.checked = false; return; }
+      try { if (auto.checked) sessionStorage.setItem(AUTO, '1'); else sessionStorage.removeItem(AUTO); } catch (_) { auto.checked = false; }
+    });
     return h('div', { class: 'ai-card', id: 'ai-ready' },
       h('div', { class: 'ai-who' }, h('b', { id: 'ai-ready-name' }, s.name), ' ', h('span', { class: 'ai-badge', title: s.model }, T('AI'))),
       h('div', { class: 'ai-meta' }, labelOf(providerOf(s.provider)) + ' · ' + s.model),
@@ -183,6 +197,7 @@
         testBtn,
         h('button', { class: 'btn cmt-btn', id: 'ai-change', onclick: () => { st.editing = true; render(); } }, T('Change settings')),
         h('button', { class: 'btn cmt-btn', id: 'ai-forget', onclick: () => { if (window.confirm(T('Forget the key saved in this browser?'))) forget(); } }, T('Forget the key')),
+        h('label', { class: 'ai-field', style: 'margin:0' }, auto, ' ', T('Apply the assistant\'s edits without asking (this tab only)')),
         h('button', { class: 'btn cmt-btn', id: 'ai-project-off', onclick: () => { if (window.confirm(T('Turn the AI assistant off in this project, for everyone? The setting is saved in the project and reaches the others with the next push.'))) setProjectSwitch(true); } }, T('Do not allow the assistant in this project'))),
       out);
   }
@@ -221,5 +236,5 @@
     render();
   }
 
-  window.AISettings = { get, show, forget, account: () => ACCOUNT, allowedInProject: async () => { await loadProjectSwitch(); return st.projectOff === false; } };
+  window.AISettings = { get, show, forget, autoApply, account: () => ACCOUNT, allowedInProject: async () => { await loadProjectSwitch(); return st.projectOff === false; } };
 })();

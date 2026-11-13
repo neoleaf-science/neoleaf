@@ -6,11 +6,13 @@
 // .neoleaf/ and .git are not in it); text files only; at most MAX_READ characters per answer and MAX_TOTAL per question; files over
 // MAX_FILE bytes are named but never sent. The file that is open in the editor is read from the editor (unsaved text and live edits
 // included), the others from the local clone, so a quote always refers to what is on the screen.
-// Depends on globals: BrowserGit, Project, editor, currentFileId, __PS.
+// Two more tools work on whole files: compile (runs the project's compiler and returns the log) and propose_file (a DRAFT that creates
+// a file or replaces the whole of one; applied only by the person's click, or by the session switch the person turned on).
+// Depends on globals: BrowserGit, Project, editor, currentFileId, __PS, recompileLatex.
 function makeTools() {
   const MAX_READ = 60000, MAX_TOTAL = 400000, MAX_FILE = 1024 * 1024, MAX_HITS = 50, MAX_LOG = 20000, MAX_SELECTION = 4000;
   // the same limits comments.json has (project-store.js): a draft that could not be kept is never offered
-  const MAX_DRAFTS = 20, MAX_QUOTE = 2000, MAX_TEXT = 4000;
+  const MAX_DRAFTS = 20, MAX_QUOTE = 2000, MAX_TEXT = 4000, MAX_WRITE = 200000, COMPILE_WAIT_MS = 240000;
 
   const TEXT_EXTRA = ['ipynb', 'gitignore', 'latexmkrc', 'log', 'html', 'css', 'js', 'r', 'jl', 'sh', 'tikz', 'pgf', 'gp', 'svg'];
   const ext = p => { const n = p.split('/').pop(); const i = n.lastIndexOf('.'); return i < 0 ? '' : n.slice(i + 1).toLowerCase(); };
@@ -72,6 +74,64 @@ function makeTools() {
     };
     const a = pos(first), b = pos(first + quote.length);
     return { count, range: { sl: a.line, sc: a.col, el: b.line, ec: b.col } };
+  }
+
+  /** A short fingerprint of a text, so a file draft can tell that the file changed after it was proposed (never sent anywhere). */
+  const fingerprint = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h << 5) + h + t.charCodeAt(i)) | 0; return t.length + ':' + (h >>> 0).toString(36); };
+
+  /** A path for a file that may not exist yet: relative, plain segments, no hidden folder, a text file type. */
+  function newPathOk(path) {
+    if (typeof path !== 'string' || !path || path.length > 200) return false;
+    if (/[\u0000-\u001f\u007f\\]/.test(path) || path.startsWith('/') || path.endsWith('/')) return false;
+    return path.split('/').every(s => s && s !== '.' && s !== '..' && !s.startsWith('.') && s.trim() === s) && isText(path);
+  }
+
+  /** Keeps a whole-file proposal (create or replace) as a draft. The file is not touched until the person applies it. */
+  async function proposeFile(a) {
+    if (drafts.length >= MAX_DRAFTS) throw new ToolError(`At most ${MAX_DRAFTS} proposals per question were reached. Stop proposing and tell the person what is left.`);
+    if (!newPathOk(a.path)) throw new ToolError('The path must be relative, with no "..", no hidden folder, and the name of a text file (for example sections/intro.tex).');
+    if (typeof a.content !== 'string') throw new ToolError('Give the whole new content of the file.');
+    if (a.content.length > MAX_WRITE) throw new ToolError(`The file is longer than ${MAX_WRITE} characters. Split it into several files.`);
+    const exists = (await files()).find(x => x.path === a.path);
+    let base = '', isNew = true;
+    if (exists) {
+      const f = await fileOf(a.path);
+      base = await textOf(f.path);
+      isNew = false;
+      if (base === a.content) throw new ToolError('The content is the same as the file: there is nothing to change.');
+    }
+    if (drafts.some(d => d.kind === 'file' && d.file === a.path)) throw new ToolError('This file already has a proposal in this question. Do not propose it again.');
+    const text = typeof a.text === 'string' ? a.text.trim().slice(0, MAX_TEXT) : '';
+    drafts.push({ id: 'd' + (drafts.length + 1), kind: 'file', file: a.path, quote: '', replacement: a.content, text, range: { sl: 1, sc: 1, el: 1, ec: 1 }, isNew, base: fingerprint(base), lines: [base ? base.split('\n').length : 0, a.content.split('\n').length], status: 'pending' });
+    return `Draft ${isNew ? 'new file' : 'replacement of the whole file'} saved for ${a.path}. The person will review it; nothing was changed.`;
+  }
+
+  /** The error lines of a TeX log (those that start with "! ", with the two lines after them), so the model sees them first. */
+  function errorsOf(log) {
+    const ls = log.split('\n'), out = [];
+    for (let i = 0; i < ls.length && out.length < 10; i++) if (ls[i].startsWith('! ')) out.push(ls.slice(i, i + 3).join('\n'));
+    return out.length ? 'Errors found in the log:\n' + out.join('\n---\n') + '\n\nEnd of the log:\n' : '';
+  }
+
+  /** Runs the project's compiler (the engine and main file the person chose) and answers with the result and the end of the log. */
+  async function compile() {
+    if (typeof recompileLatex !== 'function') throw new ToolError('The compiler is not available in this page.');
+    if (window.PyUI && PyUI.active()) throw new ToolError('A Python file is open: close it or open a document, then compile.');
+    const btn = document.getElementById('compile-btn');
+    if (btn && btn.disabled) throw new ToolError('A compilation is already running. Try again when it ends.');
+    const done = new Promise((resolve, reject) => {
+      const on = e => { if (e.detail && e.detail.phase === 'done') { clearTimeout(t); window.removeEventListener('ld-compile', on); resolve(); } };
+      const t = setTimeout(() => { window.removeEventListener('ld-compile', on); reject(new ToolError('The compilation did not finish in time. Call compile_log later.')); }, COMPILE_WAIT_MS);
+      window.addEventListener('ld-compile', on);
+    });
+    const before = window.lastCompileResult && window.lastCompileResult.at;
+    recompileLatex();
+    await done;
+    const r = window.lastCompileResult;
+    if (!r || r.at === before) throw new ToolError('The compilation ended without a result. Call compile_log.');
+    const log = String(r.log || '');
+    const tail = log.length > MAX_LOG ? '[the beginning of the log was left out]\n' + log.slice(-MAX_LOG) : log;
+    return deliver('compile', `Compilation ${r.success ? 'succeeded' : 'failed'}. Main file: ${r.mainFile || '?'}\n\n${errorsOf(log)}${tail}`).out;
   }
 
   /** Checks a proposal against the file as it is on the screen and keeps it as a draft. */
@@ -167,7 +227,7 @@ function makeTools() {
         if (!r) return deliver('compile_log', 'The project was not compiled in this session yet.').out;
         const log = String(r.log || '');
         const tail = log.length > MAX_LOG ? '[the beginning of the log was left out]\n' + log.slice(-MAX_LOG) : log;
-        return deliver('compile_log', `Compilation ${r.success ? 'succeeded' : 'failed'}. Main file: ${r.mainFile || '?'}\n\n${tail}`).out;
+        return deliver('compile_log', `Compilation ${r.success ? 'succeeded' : 'failed'}. Main file: ${r.mainFile || '?'}\n\n${errorsOf(log)}${tail}`).out;
       },
     },
     list_comments: {
@@ -198,6 +258,16 @@ function makeTools() {
       description: 'Proposes replacing a passage of a file with new text (an empty replacement deletes it; to insert, quote the line after which the text goes and repeat it in the replacement). It is only a draft: the person decides whether to accept it. Quote the passage exactly as read_file shows it, as short as it can be while appearing only once in the file, and keep each suggestion small.',
       schema: { type: 'object', properties: { path: { type: 'string' }, quote: { type: 'string', description: 'The exact passage to replace' }, replacement: { type: 'string', description: 'The new text for that passage' }, text: { type: 'string', description: 'Why, in one or two sentences (optional)' } }, required: ['path', 'quote', 'replacement'], additionalProperties: false },
       run: a => propose('suggestion', a),
+    },
+    propose_file: {
+      description: 'Proposes the WHOLE content of a file: it creates the file when the path is new, or replaces the file when it exists. Use it for new files, or for large rewrites; for small changes prefer add_suggestion. It is only a draft: nothing changes until the person applies it. Read the file first when it exists, and send its complete new content.',
+      schema: { type: 'object', properties: { path: { type: 'string', description: 'Path of the file, relative to the project (for example sections/intro.tex)' }, content: { type: 'string', description: 'The complete new content of the file' }, text: { type: 'string', description: 'Why, in one or two sentences (optional)' } }, required: ['path', 'content'], additionalProperties: false },
+      run: a => proposeFile(a),
+    },
+    compile: {
+      description: 'Compiles the project with the engine and main file the person chose, and returns whether it worked plus the end of the compiler log. Use it after changes are applied to check that the document still builds. It may take up to a few minutes.',
+      schema: { type: 'object', properties: {}, additionalProperties: false },
+      run: () => compile(),
     },
     changed_files: {
       description: 'The files that were added, changed or deleted since the last commit of the project.',
@@ -241,7 +311,10 @@ function makeTools() {
     }
   }
 
-  return { defs, run, begin, sent, drafts: () => drafts.map(d => ({ ...d, range: { ...d.range } })), total: () => total, limits: { MAX_READ, MAX_TOTAL, MAX_FILE, MAX_DRAFTS, MAX_QUOTE, MAX_TEXT } };
+  /** The person (or the session switch) decided a draft: remembered here so a new copy of the list keeps the verdict. */
+  function mark(id, status) { const d = drafts.find(x => x.id === id); if (d) d.status = status; }
+
+  return { defs, run, begin, sent, mark, fingerprint, drafts: () => drafts.map(d => ({ ...d, range: { ...d.range } })), total: () => total, limits: { MAX_READ, MAX_TOTAL, MAX_FILE, MAX_DRAFTS, MAX_QUOTE, MAX_TEXT } };
 }
 // the conversation uses this one; a browser agent (ai-webmcp.js) makes its own with AITools.create(), so the two never share a budget or drafts
 window.AITools = makeTools();

@@ -1,8 +1,8 @@
 // Browser agents (WebMCP, docs/ai-assistant-plan.md). WebMCP is a proposed web standard (Chrome origin trial) with which a page offers
 // tools to an AI agent that runs in the person's browser: an assistant built into the browser, or an extension. This file registers
-// five reading tools (list_files, read_file, search, compile_log, list_comments) and two that only make DRAFTS (add_comment,
-// add_suggestion), the same ones the in-page assistant has (ai-tools.js, own instance: the two never share a budget or drafts).
-// There is no tool that writes a file: a draft appears as a card in the AI tab and only the person's click applies or keeps it.
+// five reading tools (list_files, read_file, search, compile_log, list_comments), compile (runs the project's compiler) and three that only
+// make DRAFTS (add_comment, add_suggestion, propose_file), the same ones the in-page assistant has (ai-tools.js, own instance: the two never share a budget or drafts).
+// There is no tool that writes a file by itself: a draft appears as a card in the AI tab and only the person's click applies or keeps it.
 //
 // Off by default and per account (`neoleaf.ai.webmcp.<account>` in localStorage, removed with every `neoleaf.ai.` entry when signing
 // out). Nothing is registered unless the browser offers `document.modelContext` (the current API; `navigator.modelContext` is the old
@@ -18,7 +18,7 @@
   // which tools are offered, and what they say about themselves (the browser and the agent use these hints)
   const OFFERED = {
     list_files: { readOnly: true }, read_file: { readOnly: true }, search: { readOnly: true }, compile_log: { readOnly: true }, list_comments: { readOnly: true },
-    add_comment: { readOnly: false }, add_suggestion: { readOnly: false },
+    add_comment: { readOnly: false }, add_suggestion: { readOnly: false }, propose_file: { readOnly: false }, compile: { readOnly: false },
   };
 
   const tools = AITools.create();
@@ -46,8 +46,9 @@
     if (n) b.setAttribute('data-badge', String(n)); else b.removeAttribute('data-badge');
   }
 
-  async function execute(name, args) {
-    if (!isOn()) throw new Error('Browser agents are not allowed by the person in this browser.');
+  // `via` is 'bridge' for a call that came from an AI app through the local MCP bridge (ai-bridge.js), which has its own consent
+  async function execute(name, args, via) {
+    if (!(isOn() || (via === 'bridge' && window.AIBridge && AIBridge.isOn()))) throw new Error('Browser agents are not allowed by the person in this browser.');
     if (!(await AISettings.allowedInProject())) throw new Error('This project does not allow AI tools. Nothing was read.');
     if (Date.now() - st.last > IDLE_MS) { tools.begin(); st.taken = 0; }
     st.last = Date.now();
@@ -85,7 +86,15 @@
   // ------------------------------------------------------------ the card in the AI tab
   function paint() {
     if (!st.el) return;
-    if (!supported()) { st.el.replaceChildren(); st.el.style.display = 'none'; return; }
+    if (window.AIBridge) AIBridge.onChange(paint);
+    const bridge = window.AIBridge ? AIBridge.card() : '';
+    // the bridge works with any browser; the browser's own WebMCP only where the browser offers it
+    if (!supported()) {
+      const own = st.items.length ? h('div', { class: 'ai-list', id: 'ai-agent-drafts' }, h('div', { class: 'ai-who' }, h('b', {}, T('Proposals from a browser agent')), ' ', h('span', { class: 'ai-badge', title: AGENT.model }, T('AI'))), ...st.items.map(d => AIChat.draftCard(AGENT, d, () => { badge(); paint(); }))) : '';
+      st.el.replaceChildren(bridge, own);
+      st.el.style.display = bridge || own ? '' : 'none';
+      return;
+    }
     st.el.style.display = '';
     const on = isOn();
     const toggle = h('button', { class: on ? 'btn cmt-btn' : 'btn btn-primary', id: 'ai-agent-toggle', type: 'button' }, on ? T('Stop allowing browser agents') : T('Allow browser agents'));
@@ -105,12 +114,15 @@
     const list = st.items.length ? h('div', { class: 'ai-list', id: 'ai-agent-drafts' },
       h('div', { class: 'ai-who' }, h('b', {}, T('Proposals from a browser agent')), ' ', h('span', { class: 'ai-badge', title: AGENT.model }, T('AI'))),
       ...st.items.map(d => AIChat.draftCard(AGENT, d, repaint))) : '';
-    st.el.replaceChildren(card, list);
+    st.el.replaceChildren(card, bridge, list);
   }
 
   /** Called by ai-settings.js each time the panel is drawn: the element is kept across draws. */
   function mount(el) { st.el = el; paint(); }
 
-  window.AIWebMCP = { mount, supported, isOn, register, calls: () => st.calls, proposals: () => st.items.map(d => ({ ...d })) };
+  /** What the local bridge publishes to AI apps: the offered tools, with whether each one only reads. */
+  const defs = () => tools.defs().filter(d => OFFERED[d.name]).map(d => ({ name: d.name, description: d.description, schema: d.schema, readOnly: OFFERED[d.name].readOnly }));
+
+  window.AIWebMCP = { mount, supported, isOn, register, defs, run: execute, calls: () => st.calls, proposals: () => st.items.map(d => ({ ...d })) };
   register();
 })();

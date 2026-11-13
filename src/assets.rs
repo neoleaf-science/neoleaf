@@ -61,6 +61,7 @@ pub static FILES: &[(&str, &[u8])] = &[
         include_bytes!("../static/img/neoleaf_logo_vet.svg"),
     ),
     ("js/agent.js", include_bytes!("../static/js/agent.js")),
+    ("js/ai-bridge.js", include_bytes!("../static/js/ai-bridge.js")),
     ("js/ai-chat.js", include_bytes!("../static/js/ai-chat.js")),
     (
         "js/ai-providers.js",

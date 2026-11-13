@@ -29,9 +29,9 @@ beforeAll(async () => {
 afterAll(async () => { await s.context.close(); });
 
 describe('AI tools: reading the project', () => {
-  test('the tool list has seven reading tools and two that only make drafts, each with a closed schema', async () => {
+  test('the tool list has the reading tools, the compiler and three that only make drafts, each with a closed schema', async () => {
     const defs = await s.page.evaluate(() => (window as any).AITools.defs());
-    expect(defs.map((d: any) => d.name)).toEqual(['list_files', 'read_file', 'search', 'open_file_and_selection', 'compile_log', 'list_comments', 'add_comment', 'add_suggestion', 'changed_files']);
+    expect(defs.map((d: any) => d.name)).toEqual(['list_files', 'read_file', 'search', 'open_file_and_selection', 'compile_log', 'list_comments', 'add_comment', 'add_suggestion', 'propose_file', 'compile', 'changed_files']);
     for (const d of defs) {
       expect(d.schema.additionalProperties).toBe(false);
       expect(d.description.length).toBeGreaterThan(20);

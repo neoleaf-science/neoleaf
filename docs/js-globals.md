@@ -14,6 +14,14 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `window.availableEngines` | window | (only itself) |
 | `window.compileOnAgent` | window | pdf-panel.js |
 
+## `ai-bridge.js`
+
+Wrapped in an IIFE: it only exposes the `window.*` names below.
+
+| Name | Kind | Used by |
+|---|---|---|
+| `window.AIBridge` | window | ai-webmcp.js |
+
 ## `ai-chat.js`
 
 Wrapped in an IIFE: it only exposes the `window.*` names below.
@@ -51,7 +59,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.AIWebMCP` | window | ai-settings.js |
+| `window.AIWebMCP` | window | ai-bridge.js, ai-settings.js |
 
 ## `autocomplete.js`
 
@@ -107,7 +115,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.BrowserGit` | window | ai-tools.js, ci-workflow.js, collab.js, editor-core.js, editor-toolbar.js, file-tree-ops.js, file-tree.js, git-blame.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, git-sync.js, history.js, md-preview.js, mindmap.js, notebook.js, project-build.js, project-store-build.js, project-store-texmf.js, project-store.js, project-tools.js, py-ui.js, references.js, spellcheck.js, storage-manager.js, submission.js |
+| `window.BrowserGit` | window | ai-tools.js, ci-workflow.js, collab.js, comments.js, editor-core.js, editor-toolbar.js, file-tree-ops.js, file-tree.js, git-blame.js, git-conflicts.js, git-review-modals.js, git-review-open.js, git-review.js, git-status.js, git-sync.js, history.js, md-preview.js, mindmap.js, notebook.js, project-build.js, project-store-build.js, project-store-texmf.js, project-store.js, project-tools.js, py-ui.js, references.js, spellcheck.js, storage-manager.js, submission.js |
 | `window.CloneError` | window | (only itself) |
 | `window.__BG` | window | browser-git-compare.js, browser-git-sync.js, ci-workflow.js |
 
@@ -447,7 +455,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | Name | Kind | Used by |
 |---|---|---|
 | `window.LDI18n` | window | comments.js, history.js, pdf-panel.js, project-tools.js, spellcheck.js |
-| `window.T` | window | agent.js, ai-chat.js, ai-providers.js, ai-settings.js, ai-webmcp.js, autocomplete.js, badness.js, bib-complete.js, browser-git-compare.js, browser-git.js, ci-workflow.js, collab.js, comments.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, editor-ui.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review.js, git-status.js, history.js, latex-language.js, mascot.js, math-preview.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-import.js, project-tools.js, py-ui.js, references.js, search.js, share.js, storage-manager.js, submission.js, theme.js, typst-language.js |
+| `window.T` | window | agent.js, ai-bridge.js, ai-chat.js, ai-providers.js, ai-settings.js, ai-webmcp.js, autocomplete.js, badness.js, bib-complete.js, browser-git-compare.js, browser-git.js, ci-workflow.js, collab.js, comments.js, compile-lualatex.js, compile-pdflatex.js, compile-typst.js, compile-xelatex.js, editor-core.js, editor-ui.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-blame.js, git-conflicts.js, git-review.js, git-status.js, history.js, latex-language.js, mascot.js, math-preview.js, mindmap.js, outline.js, package-install.js, pdf-panel.js, pdf-view.js, project-build.js, project-import.js, project-tools.js, py-ui.js, references.js, search.js, share.js, storage-manager.js, submission.js, theme.js, typst-language.js |
 | `window.alert` | window | ai-chat.js, ai-settings.js, comments.js, editor-ui.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, git-status.js, mermaid-preview.js, pdf-panel.js, project-tools.js, storage-manager.js, submission.js |
 | `window.confirm` | window | comments.js, editor-ui.js, file-tree-ops.js, git-conflicts.js, history.js, notebook.js, project-tools.js, py-ui.js, search.js, share.js |
 | `window.prompt` | window | agent.js, ai-chat.js, editor-ui.js, notebook-frame.js, notebook.js |
@@ -544,7 +552,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `compileAndShowXe` | function | (only itself) |
 | `compileAndShowLua` | function | (only itself) |
 | `compileAndShowPdflatex` | function | (only itself) |
-| `recompileLatex` | function | editor-core.js |
+| `recompileLatex` | function | ai-tools.js, editor-core.js |
 | `renderCompileResult` | function | agent.js, compile-typst.js |
 | `copyCompilerLog` | function | (only itself) |
 | `pdfMeta` | variable | project-store.js |
@@ -653,7 +661,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.PyUI` | window | editor-ui.js, md-preview.js, pdf-panel.js |
+| `window.PyUI` | window | ai-tools.js, editor-ui.js, md-preview.js, pdf-panel.js |
 
 ## `ref-sources.js`
 
@@ -685,13 +693,13 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 
 | Name | Kind | Used by |
 |---|---|---|
-| `window.fetch` | window | agent.js, ai-providers.js, browser-git-compare.js, browser-git.js, csv-preview.js, editor-ui.js, export-menu.js, font-packs.js, git-review.js, git-status.js, md-preview.js, mermaid-preview.js, notebook.js, pdf-view.js, project-import.js, project-store-texmf.js, py-runner.js, ref-sources.js, share.js, spellcheck-worker.js, typst-worker.js |
+| `window.fetch` | window | agent.js, ai-bridge.js, ai-providers.js, browser-git-compare.js, browser-git.js, csv-preview.js, editor-ui.js, export-menu.js, font-packs.js, git-review.js, git-status.js, md-preview.js, mermaid-preview.js, notebook.js, pdf-view.js, project-import.js, project-store-texmf.js, py-runner.js, ref-sources.js, share.js, spellcheck-worker.js, typst-worker.js |
 
 ## `share.js`
 
 | Name | Kind | Used by |
 |---|---|---|
-| `h` | function | ai-chat.js, ai-settings.js, ai-webmcp.js, collab.js, comments.js, csv-preview.js, editor-toolbar.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, file-tree.js, git-blame.js, git-review-open.js, git-status.js, history.js, mermaid-preview.js, mindmap.js, notebook.js, outline.js, package-install.js, pdf-view.js, project-build.js, project-store.js, project-tools.js, py-runner.js, py-ui.js, ref-sources.js, references.js, search.js, splitters.js, synctex.js, tabs.js |
+| `h` | function | ai-bridge.js, ai-chat.js, ai-settings.js, ai-tools.js, ai-webmcp.js, collab.js, comments.js, csv-preview.js, editor-toolbar.js, export-menu.js, file-tree-menu.js, file-tree-ops.js, file-tree.js, git-blame.js, git-review-open.js, git-status.js, history.js, mermaid-preview.js, mindmap.js, notebook.js, outline.js, package-install.js, pdf-view.js, project-build.js, project-store.js, project-tools.js, py-runner.js, py-ui.js, ref-sources.js, references.js, search.js, splitters.js, synctex.js, tabs.js |
 | `avatarFor` | function | (only itself) |
 | `showShareError` | function | (only itself) |
 | `openShare` | function | (only itself) |
@@ -791,7 +799,7 @@ Wrapped in an IIFE: it only exposes the `window.*` names below.
 | `externalFont` | function | (only itself) |
 | `prepare` | function | (only itself) |
 | `position` | function | autocomplete.js, context-language.js, csv-preview.js, git-review.js, latex-language.js, math-preview.js, notebook.js, typst-language.js |
-| `compile` | function | ci-workflow.js, py-runner.js |
+| `compile` | function | ai-tools.js, ai-webmcp.js, ci-workflow.js, py-runner.js |
 | `VERSION` | variable | i18n.js |
 | `query` | variable | badness-worker.js, ref-sources.js |
 | `asset` | variable | (only itself) |

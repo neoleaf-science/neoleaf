@@ -259,6 +259,37 @@
     load();
   }
 
-  window.Comments = { load, render, decorate, startComment, applyReplacement };
+  /**
+   * Applies a whole-file draft ({ file, replacement, isNew, base }) the way a person's edit would be applied: an existing file is replaced
+   * through the editor (undoable, and live editing sees it), a new file is written to the local clone and shown in the tree.
+   * `fingerprint` is AITools.fingerprint: a file that changed since it was proposed is not overwritten. Resolves to null when applied,
+   * or to the reason it was not.
+   */
+  async function applyFile(d, ai, fingerprint) {
+    const entries = () => (window.FT && FT.entries()) || [];
+    if (window.FT && FT.refreshFromBrowserGit) await FT.refreshFromBrowserGit();
+    const entry = entries().find(e => e.path === d.file);
+    if (d.isNew) {
+      if (entry) return T('The file changed since the proposal. Discard it and ask again.');
+      await BrowserGit.writeFile(d.file, d.replacement);
+      if (window.FT && FT.refreshFromBrowserGit) await FT.refreshFromBrowserGit();
+      if (typeof checkGitStatus === 'function') checkGitStatus();
+      return null;
+    }
+    if (!entry) return T('File "{0}" not found in the project', d.file);
+    return new Promise(resolve => {
+      const gave = setTimeout(() => resolve(T('The file could not be opened.')), 9000);
+      withFile(d.file, 1, () => {
+        clearTimeout(gave);
+        const model = editor.getModel();
+        if (fingerprint(model.getValue()) !== d.base) { resolve(T('The file changed since the proposal. Discard it and ask again.')); return; }
+        window.__aiEdit = ai || null;
+        try { editor.executeEdits('ld-ai-file', [{ range: model.getFullModelRange(), text: d.replacement }]); } finally { window.__aiEdit = null; }
+        resolve(null);
+      });
+    });
+  }
+
+  window.Comments = { load, render, decorate, startComment, applyReplacement, applyFile };
   if (typeof editor !== 'undefined' && editor) hook(); else window.addEventListener('editor-ready', hook, { once: true });
 })();

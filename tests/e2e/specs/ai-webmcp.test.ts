@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 import { newSession, openProject, poll, type Session } from '../helpers';
 
-// Browser agents (WebMCP, docs/ai-assistant-plan.md): the page offers seven tools to an AI agent that runs in the person's browser,
+// Browser agents (WebMCP, docs/ai-assistant-plan.md): the page offers nine tools to an AI agent that runs in the person's browser,
 // through document.modelContext. Off by default; nothing is registered unless the person allows it; the tools only read or make
 // drafts (a click of the person applies them). The browser API is faked here: the init script keeps what the page registers.
 
@@ -18,7 +18,7 @@ const FAKE_API = () => {
   };
 };
 
-const OFFERED = ['add_comment', 'add_suggestion', 'compile_log', 'list_comments', 'list_files', 'read_file', 'search'];
+const OFFERED = ['add_comment', 'add_suggestion', 'compile', 'compile_log', 'list_comments', 'list_files', 'propose_file', 'read_file', 'search'];
 const names = (s: Session): Promise<string[]> => s.page.evaluate(() => [...(window as any).__wm.keys()].sort());
 const call = (s: Session, name: string, args: any): Promise<{ ok: boolean; value: string }> =>
   s.page.evaluate(async ({ name, args }) => {
@@ -67,16 +67,16 @@ describe('with WebMCP in the browser', () => {
     expect(await s.page.evaluate(() => (window as any).__wmLog)).toEqual([]);
   });
 
-  test('allowing it asks first, then registers exactly the seven tools, with honest hints', async () => {
+  test('allowing it asks first, then registers exactly the nine tools, with honest hints', async () => {
     await s.page.click('#ai-agent-toggle');
-    await poll(() => names(s), n => n.length === 7);
+    await poll(() => names(s), n => n.length === 9);
     expect(dialogs.some(d => d.includes('not through NeoLeaf') && d.includes('Extensions'))).toBe(true);
     expect(await names(s)).toEqual(OFFERED);
     const tools = await s.page.evaluate(() => Object.fromEntries([...(window as any).__wm].map(([k, t]: any) => [k, { a: t.annotations, schema: t.inputSchema.type, d: !!t.description }])));
     for (const n of ['list_files', 'read_file', 'search', 'compile_log', 'list_comments']) {
       expect(tools[n].a).toEqual({ readOnlyHint: true, untrustedContentHint: true, consequentialHint: false });
     }
-    for (const n of ['add_comment', 'add_suggestion']) expect(tools[n].a).toEqual({ readOnlyHint: false, untrustedContentHint: false, consequentialHint: false });
+    for (const n of ['add_comment', 'add_suggestion', 'propose_file', 'compile']) expect(tools[n].a).toEqual({ readOnlyHint: false, untrustedContentHint: false, consequentialHint: false });
     expect(Object.values(tools).every((t: any) => t.schema === 'object' && t.d)).toBe(true);
     expect(await s.page.evaluate(() => localStorage.getItem('neoleaf.ai.webmcp.github.1'))).toBe('1');
     expect(await s.page.locator('#ai-agent-toggle').innerText()).toBe('Stop allowing browser agents');
@@ -154,7 +154,7 @@ describe('with WebMCP in the browser', () => {
 
   test('it stays allowed after a reload (the tools are registered again), and stopping removes them', async () => {
     await openProject(s.page);
-    await poll(() => names(s), n => n.length === 7, 20000);
+    await poll(() => names(s), n => n.length === 9, 20000);
     await s.page.click('#tab-ai-btn');
     await s.page.waitForSelector('#ai-agent-toggle');
     await s.page.click('#ai-agent-toggle');

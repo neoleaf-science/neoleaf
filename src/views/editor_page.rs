@@ -97,6 +97,7 @@ fn ai_blocks(enabled: bool, user: &crate::auth::github::GitHubUser) -> (String, 
     <script src="/static/js/ai-tools.js"></script>
     <script src="/static/js/ai-settings.js"></script>
     <script src="/static/js/ai-chat.js"></script>
+    <script src="/static/js/ai-bridge.js"></script>
     <script src="/static/js/ai-webmcp.js"></script>
 "##;
     (tab.to_string(), panel, scripts.to_string())
@@ -167,6 +168,7 @@ mod tests {
             "ai-tools",
             "ai-chat",
             "ai-webmcp",
+            "ai-bridge",
             "tab-ai-btn",
             "ai-container",
             "AI assistant",

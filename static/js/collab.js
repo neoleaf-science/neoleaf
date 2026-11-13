@@ -222,7 +222,19 @@
 
   // authorship: what THIS person typed since the last save (each browser records its own part in .neoleaf/history/)
   let authorStat = { added: 0, removed: 0, preview: '', since: '' };
+  // text the person accepted from the AI assistant is counted apart (window.__aiEdit is set by comments.js while it applies the edit)
+  let aiStat = { added: 0, removed: 0, preview: '', since: '', ai: null };
   function countLocalChange(e) {
+    if (window.__aiEdit) {
+      for (const c of e.changes) {
+        aiStat.added += c.text.length;
+        aiStat.removed += c.rangeLength;
+        if (!aiStat.preview && c.text.trim()) aiStat.preview = c.text.trim().slice(0, 120);
+      }
+      aiStat.ai = { name: String(window.__aiEdit.name || '').slice(0, 40), model: String(window.__aiEdit.model || '').slice(0, 120) };
+      if (!aiStat.since) aiStat.since = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+      return;
+    }
     for (const c of e.changes) {
       authorStat.added += c.text.length;
       authorStat.removed += c.rangeLength;
@@ -236,11 +248,13 @@
     clearTimeout(saveTimer);
     if (!window.BrowserGit || !room || typeof editor === 'undefined' || !editor) return;
     const val = editor.getValue();
-    const stat = authorStat;
+    const stat = authorStat, aiPart = aiStat;
     authorStat = { added: 0, removed: 0, preview: '', since: '' };
+    aiStat = { added: 0, removed: 0, preview: '', since: '', ai: null };
     const file = room;
     BrowserGit.writeFile(file, val).then(async () => {
       if ((stat.added || stat.removed) && window.Project) await Project.recordAuthorship({ fileId: file, file: file.split('/').pop(), ...stat });
+      if (aiPart.ai && (aiPart.added || aiPart.removed) && window.Project) await Project.recordAuthorship({ fileId: file, file: file.split('/').pop(), ...aiPart });
       status('saved', 'Saved in browser');
       if (typeof checkGitStatus === 'function') checkGitStatus();
     }).catch(() => {});

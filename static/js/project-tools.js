@@ -366,6 +366,8 @@
         const head = h('div', { class: 'au-head' },
           h('div', { class: 'perm-avatar', style: 'width:24px;height:24px;font-size:11px;' }, (who.trim()[0] || '?').toUpperCase()),
           h('span', {}, who),
+          e.ai ? h('span', { class: 'ai-badge', title: e.ai.model || '' }, T('AI')) : '',
+          e.ai ? h('span', { class: 'pk-meta' }, T('accepted from AI: {0}', e.ai.name || e.ai.model || '')) : '',
           h('span', { class: 'au-add' }, `+${e.added || 0}`),
           h('span', { class: 'au-rem' }, `−${e.removed || 0}`),
           all && e.file ? h('span', { class: 'pk-meta' }, e.file) : '',

@@ -136,7 +136,8 @@ export async function stopServer() {
 }
 
 export async function getBrowser() {
-  browser ??= await chromium.launch({ headless: process.env.HEADED !== '1', args: ['--no-sandbox', '--disable-dev-shm-usage'] });
+  // E2E_BROWSER_EXE and E2E_BROWSER_ARGS (space separated) run the tests in another Chromium based browser, for what the bundled build lacks (specs/ai-webmcp-real.test.ts)
+  browser ??= await chromium.launch({ headless: process.env.HEADED !== '1', ...(process.env.E2E_BROWSER_EXE ? { executablePath: process.env.E2E_BROWSER_EXE } : {}), args: ['--no-sandbox', '--disable-dev-shm-usage', ...(process.env.E2E_BROWSER_ARGS ? process.env.E2E_BROWSER_ARGS.split(' ') : [])] });
   return browser;
 }
 

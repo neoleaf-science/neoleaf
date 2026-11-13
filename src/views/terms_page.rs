@@ -61,7 +61,7 @@ fn header() -> &'static str {
     r##"        <header class="legal-header">
             <div class="legal-badge">📄 Terms of Service</div>
             <h1>Terms of Service</h1>
-            <p class="legal-updated" data-i18n-html>Last updated: October 2026 · NeoLeaf (<code>https://neoleaf.science</code>)</p>
+            <p class="legal-updated" data-i18n-html>Last updated: November 2026 · NeoLeaf (<code>https://neoleaf.science</code>)</p>
         </header>
 
 "##
@@ -123,6 +123,8 @@ fn section_4() -> &'static str {
                 <li>Keep the security and integrity of your access credentials and your GitHub or Codeberg account;</li>
                 <li>Not use the platform to store, distribute or disseminate content that violates third-party rights, other people's intellectual property or that contains malicious code;</li>
                 <li>Not attempt intentional overload, malicious reverse engineering or attacks on the servers and real-time collaboration systems.</li>
+                <li>If you use the optional AI assistant: use your own key and follow the terms of the provider you chose; you are responsible for what you send to it, including text written by your co-authors, and for the cost it generates. NeoLeaf does not operate or control the AI provider and is not responsible for it or for what it returns.</li>
+                <li>If you allow browser agents: you are responsible for the agents and extensions you use with NeoLeaf and for what they read and propose. NeoLeaf does not operate or control them.</li>
             </ul>
         </div>
 
@@ -138,6 +140,9 @@ fn section_5() -> &'static str {
             </p>
             <p>
                 Although we strive to keep the platform always accessible, fast and reliable, we do not guarantee that operation will be uninterrupted or free of temporary errors. Since NeoLeaf uses GitHub or Codeberg as primary storage, we recommend that users keep their commits and pushes synchronized regularly.
+            </p>
+            <p>
+                The AI assistant is an optional aid and its answers can be wrong or incomplete. It never changes your files by itself: check every suggestion before you accept it.
             </p>
         </div>
 

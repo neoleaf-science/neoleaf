@@ -55,10 +55,10 @@
         const first = th.messages[0];
         const who = first ? (first.author.name || first.author.email) : '';
         if (th.kind === 'suggestion') {
-          const hover = '**' + T('Suggestion') + '**: ' + who + (first ? '\n\n' + first.text : '') + '\n\n' + T('Ctrl+click to open');
+          const hover = '**' + T('Suggestion') + (th.ai ? ' (' + T('AI') + ')' : '') + '**: ' + who + (first ? '\n\n' + first.text : '') + '\n\n' + T('Ctrl+click to open');
           items.push({ range: rng, options: { inlineClassName: 'ld-sug-old', hoverMessage: { value: hover }, linesDecorationsClassName: 'ld-sug-bar', after: { content: th.suggestion.replacement || '⌫', inlineClassName: 'ld-sug-new' } } });
         } else {
-          const hover = '**' + who + '**: ' + (first ? first.text : '') + '\n\n' + T('Ctrl+click to open');
+          const hover = '**' + who + (th.ai ? ' (' + T('AI') + ')' : '') + '**: ' + (first ? first.text : '') + '\n\n' + T('Ctrl+click to open');
           items.push({ range: rng, options: { inlineClassName: 'ld-cmt', hoverMessage: { value: hover }, linesDecorationsClassName: 'ld-cmt-bar' } });
         }
         list.push(th.id);
@@ -90,7 +90,9 @@
     const body = [];
     const where = h('a', { class: 'cmt-where', href: '#', title: T('Go to the passage'), onclick: ev => { ev.preventDefault(); go(th); } },
       (th.kind === 'suggestion' ? '✏️ ' : '💬 ') + th.file + ':' + th.range.sl);
-    body.push(h('div', { class: 'cmt-head' }, where, th.resolved ? h('span', { class: 'cmt-badge' }, th.kind === 'suggestion' && th.suggestion.status !== 'pending' ? (th.suggestion.status === 'accepted' ? T('accepted') : T('rejected')) : T('resolved')) : ''));
+    // a thread the AI assistant proposed (and a person kept) always carries the grey AI mark; the model is on hover
+    const aiMark = th.ai ? h('span', { class: 'ai-badge', title: th.ai.model || '' }, T('AI')) : '';
+    body.push(h('div', { class: 'cmt-head' }, h('span', {}, where, ' ', aiMark), th.resolved ? h('span', { class: 'cmt-badge' }, th.kind === 'suggestion' && th.suggestion.status !== 'pending' ? (th.suggestion.status === 'accepted' ? T('accepted') : T('rejected')) : T('resolved')) : ''));
     if (th.kind === 'suggestion') {
       body.push(h('div', { class: 'cmt-diff' }, h('div', { class: 'cmt-del' }, '− ' + th.quote), h('div', { class: 'cmt-add' }, '+ ' + (th.suggestion.replacement || ''))));
     } else if (th.quote) {
@@ -150,14 +152,34 @@
     });
   }
 
-  function accept(th) {
-    withFile(th.file, th.range.sl, async () => {
-      const model = editor.getModel();
-      const rng = locate(model, th);
-      if (!rng || model.getValueInRange(rng) !== th.quote) { alert(T('The passage changed since the suggestion. Reject it or edit the text manually.')); return; }
-      editor.executeEdits('ld-suggestion', [{ range: rng, text: th.suggestion.replacement || '' }]);
-      await post({ op: 'decide', thread: th.id, status: 'accepted' });
+  /**
+   * Replaces a passage of a file with new text, the way accepting a suggestion does. `th` is { file, range, quote, suggestion: { replacement } };
+   * `ai` ({ name, model }) marks the edit as coming from the AI assistant, so the authorship log does not count it as typed by the person.
+   * Resolves to null when it was applied, or to the reason it was not.
+   */
+  async function applyReplacement(th, ai) {
+    const has = () => ((window.FT && FT.entries()) || []).some(e => e.path === th.file);
+    // the file may have arrived (a pull, an import) after the tree was last drawn
+    if (!has() && window.FT && FT.refreshFromBrowserGit) await FT.refreshFromBrowserGit();
+    return new Promise(resolve => {
+      if (!has()) { resolve(T('File "{0}" not found in the project', th.file)); return; }
+      const gave = setTimeout(() => resolve(T('The file could not be opened.')), 9000);
+      withFile(th.file, th.range.sl, () => {
+        clearTimeout(gave);
+        const model = editor.getModel();
+        const rng = locate(model, th);
+        if (!rng || model.getValueInRange(rng) !== th.quote) { resolve(T('The passage changed since the suggestion. Reject it or edit the text manually.')); return; }
+        window.__aiEdit = ai || null;
+        try { editor.executeEdits('ld-suggestion', [{ range: rng, text: th.suggestion.replacement || '' }]); } finally { window.__aiEdit = null; }
+        resolve(null);
+      });
     });
+  }
+
+  async function accept(th) {
+    const why = await applyReplacement(th, th.ai);
+    if (why) { alert(why); return; }
+    await post({ op: 'decide', thread: th.id, status: 'accepted' });
   }
 
   // ------------------------------------------------------------ create
@@ -237,6 +259,6 @@
     load();
   }
 
-  window.Comments = { load, render, decorate, startComment };
+  window.Comments = { load, render, decorate, startComment, applyReplacement };
   if (typeof editor !== 'undefined' && editor) hook(); else window.addEventListener('editor-ready', hook, { once: true });
 })();

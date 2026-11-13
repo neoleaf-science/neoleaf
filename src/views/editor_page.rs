@@ -27,6 +27,7 @@ pub fn render(
     let current_user_js = current_user_json(user);
     let user_button = super::user_topbar_button(user, true);
     let user_profile_modal = super::user_profile_modal_html(user);
+    let (ai_tab, ai_panel, ai_scripts) = ai_blocks(crate::config::ai_enabled(), user);
     super::fill(
         &template,
         &[
@@ -41,6 +42,9 @@ pub fn render(
                     None => project_name.to_string(),
                 }),
             ),
+            // the title alone (empty when the project has none), for the edit box; the pencil is the owner's (saving needs admin access)
+            ("PROJECT_DISPLAY_TITLE", &esc(project_title.unwrap_or(""))),
+            ("TITLE_EDIT", &title_edit_button(project_id, user)),
             ("PROJECT_ID", &project_id_js),
             ("DRIVE_FOLDER_URL", &esc(drive_folder_url)),
             ("PROVIDER_ID", user.provider.id()),
@@ -55,8 +59,47 @@ pub fn render(
             ("TREE_JSON", &tree_json_js),
             ("INITIAL_CONTENT", &escaped_initial_content),
             ("ACTIVE_FILE_ID", &active_id_js),
+            ("AI_TAB", &ai_tab),
+            ("AI_PANEL", &ai_panel),
+            ("AI_SCRIPTS", &ai_scripts),
         ],
     )
+}
+
+/// The AI assistant's tab, panel and scripts (docs/ai-assistant-plan.md). When the assistant is off the three are empty: the page
+/// then has no AI element, loads no AI script and carries no AI text. The account (provider and numeric id) is what the browser
+/// keys the person's settings by, so two people on one browser never share a key.
+/// The pencil that edits the display title. Saving needs admin access to the repository, so only the owner sees it
+/// (the project id is `owner__repo`); the server decides again when the title is saved.
+fn title_edit_button(project_id: &str, user: &crate::auth::github::GitHubUser) -> String {
+    let owner = project_id.split("__").next().unwrap_or("");
+    if owner.is_empty() || !owner.eq_ignore_ascii_case(&user.login) {
+        return String::new();
+    }
+    r##"<button type="button" id="edit-title-btn" class="btn title-edit-btn" onclick="editProjectTitle()" title="Edit title" aria-label="Edit title">✏️</button>"##.to_string()
+}
+
+fn ai_blocks(enabled: bool, user: &crate::auth::github::GitHubUser) -> (String, String, String) {
+    if !enabled {
+        return (String::new(), String::new(), String::new());
+    }
+    let tab = r##"                    <button id="tab-ai-btn" class="tab-btn" onclick="switchTab('ai')" title="AI assistant (uses your own key)">✨ AI</button>
+"##;
+    let panel = format!(
+        r##"            <!-- AI assistant (settings and conversation; calls go from the browser to the provider the person chose) -->
+            <div id="ai-container" class="comments-container" data-account="{}.{}"></div>
+
+"##,
+        user.provider.id(),
+        user.id
+    );
+    let scripts = r##"    <script src="/static/js/ai-providers.js"></script>
+    <script src="/static/js/ai-tools.js"></script>
+    <script src="/static/js/ai-settings.js"></script>
+    <script src="/static/js/ai-chat.js"></script>
+    <script src="/static/js/ai-webmcp.js"></script>
+"##;
+    (tab.to_string(), panel, scripts.to_string())
 }
 
 /// Page template with `{{...}}` placeholders, built from the blocks in document order.
@@ -102,4 +145,45 @@ fn current_user_json(user: &crate::auth::github::GitHubUser) -> String {
         })
         .to_string(),
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_ai_blocks_are_empty_when_the_assistant_is_off() {
+        let user = crate::auth::github::GitHubUser {
+            id: 42,
+            ..Default::default()
+        };
+        let (tab, panel, scripts) = ai_blocks(false, &user);
+        assert!(tab.is_empty() && panel.is_empty() && scripts.is_empty());
+        // the template itself has no AI text either: only the three placeholders
+        let page = template();
+        for word in [
+            "ai-settings",
+            "ai-providers",
+            "ai-tools",
+            "ai-chat",
+            "ai-webmcp",
+            "tab-ai-btn",
+            "ai-container",
+            "AI assistant",
+        ] {
+            assert!(!page.contains(word), "{word} is in the page template");
+        }
+        let (tab, panel, scripts) = ai_blocks(true, &user);
+        assert!(tab.contains("tab-ai-btn") && scripts.contains("/static/js/ai-settings.js") && scripts.contains("/static/js/ai-webmcp.js"));
+        assert!(panel.contains(r#"data-account="github.42""#));
+    }
+
+    #[test]
+    fn only_the_owner_gets_the_pencil_that_edits_the_title() {
+        let mut user = crate::auth::github::GitHubUser::default();
+        user.login = "Alice".into();
+        assert!(title_edit_button("alice__thesis", &user).contains("edit-title-btn"));
+        assert!(title_edit_button("bob__thesis", &user).is_empty());
+        assert!(title_edit_button("", &user).is_empty());
+    }
 }

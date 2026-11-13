@@ -63,6 +63,12 @@ show a button. Without the file the server behaves exactly as described above.
   that provider (a login or an e-mail can change hands, an id cannot; the id is `id` in the server's `/api/v1/user`, or in `https://api.github.com/users/<login>`).
   When a provider has a list, only those ids count for it; without a list, GitHub keeps the old rule (`ADMIN_GITHUB_IDS`, then `ADMIN_EMAILS`) and every other provider has no
   administrator. Administrators who signed in with your own server or Codeberg see the Overview and Users tabs; the template catalog lives in GitHub repositories, so its tab is for GitHub administrators.
+- **AI assistant** (`[ai] enabled = true`): the editor has an optional assistant. Each person pastes their own key of an AI provider (Anthropic, OpenAI, Gemini, OpenRouter or any
+  OpenAI-compatible server) in the AI tab, and the questions and the text of the project files the assistant reads go **from their browser straight to that provider**, never through your
+  server; your server never sees the key. The assistant cannot change a file: it makes drafts of comments and suggestions that the person accepts or discards. With a `neoleaf.toml`
+  it is off unless you switch it on; without the file (the public site) it is on. `NEOLEAF_AI=off` in the environment switches it off on any install. Anyone in a project can turn it off for that
+  project (`"ai": "off"` in `.neoleaf/config.json`). The built-in Privacy and Terms pages describe it; if you point `[legal]` at your own pages, they must cover it. Calls go to the provider from each
+  person's browser, so people behind a proxy need access to the provider's address.
 - Not covered yet: GitLab, and the name and logo outside the sign-in screen.
 
 ## 6. Install with Docker (institutions)

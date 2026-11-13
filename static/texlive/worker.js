@@ -1,4 +1,8 @@
 (async ()=>{
+    // NeoLeaf patch: the engine glue (.js) and its .wasm must come from the same build. The page gives this worker "?v=<build>"; the same version goes
+    // on the engine files, so a browser that kept an older glue for hours never pairs it with a newer .wasm (that is an "FS error" or a memory error).
+    const BUILD_QUERY = new URL(import.meta.url).search;
+    const withBuild = (u)=>(!BUILD_QUERY || u.includes("?") ? u : u + BUILD_QUERY);
     const proxyMarker = Symbol("Comlink.proxy");
     const createEndpoint = Symbol("Comlink.endpoint");
     const releaseProxy = Symbol("Comlink.releaseProxy");
@@ -745,7 +749,7 @@
             })).default;
             if (this.config.enginePath) {
                 try {
-                    const r = await fetch(this.config.enginePath);
+                    const r = await fetch(withBuild(this.config.enginePath));
                     if (r.ok) {
                         this.wasmModule = await WebAssembly.compile(await r.arrayBuffer());
                     }
@@ -1113,7 +1117,7 @@ ${this.stderrBuf}`);
                 throw new Error("resolveEngineGlueUrl: config missing");
             }
             if (this.config.enginePath) {
-                return this.config.enginePath.replace(/\.wasm$/, ".js");
+                return withBuild(this.config.enginePath.replace(/\.wasm$/, ".js"));
             }
             throw new Error(`texlive-wasm: config.enginePath is required. Download the engine artifacts ('npx @typeward/texlive-wasm download-assets') and pass e.g. enginePath: '/texlive-wasm/${this.engineId}/emscripten/${this.engineId}.wasm'.`);
         }

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Downloads BibTeX for WebAssembly (bibtexu) and the Unicode data (ICU) used by the browser compiler.
 
-Same version as the rest of the compiler (texlive-wasm v0.2.4-alpha). Checks the SHA-256 of each file against the published
-`checksums.json` and installs into static/texlive/:
+Same version as the rest of the compiler (texlive-wasm v0.4.0-alpha). Checks the SHA-256 of each file against the values
+fixed in this file and installs into static/texlive/:
 
     static/texlive/bibtexu/emscripten/bibtexu.js|wasm
     static/texlive/icudt78l.dat
@@ -18,8 +18,14 @@ import sys
 import tarfile
 import urllib.request
 
-TAG = "v0.2.4-alpha"
-BASE = f"https://github.com/typeward/texlive-wasm/releases/download/{TAG}"
+TAG = "v0.4.0-alpha"
+# The original repository (typeward/texlive-wasm) is gone; the same packages are republished in this fork (2026-11).
+BASE = f"https://github.com/tassiovirginio/texlive-wasm/releases/download/{TAG}"
+# SHA-256 of each package, fixed here: a download is checked against these, never against a file fetched with it.
+SUMS = {
+    "bibtexu-emscripten.tar.gz": {"sha256": "c49f1d7b9c3241ef8f2c22e2917fb6cc72f142dda70e13f29fd09b3572ace958"},
+    "icudt78l.dat.gz": {"sha256": "1f46a8db78150eb1628b5e43f02a344f8f08cd399779632858b96ef7cd3a6c6c"},
+}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEST = os.path.join(ROOT, "static/texlive")
 CACHE = os.path.expanduser("~/.cache/latexdrive-fonts")
@@ -47,7 +53,7 @@ def download(name, expected):
 
 
 def main():
-    sums = json.loads(get(f"{BASE}/checksums.json"))["assets"]
+    sums = SUMS
 
     engine = download("bibtexu-emscripten.tar.gz", sums["bibtexu-emscripten.tar.gz"]["sha256"])
     with tarfile.open(fileobj=io.BytesIO(engine), mode="r:gz") as tar:

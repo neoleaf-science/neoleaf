@@ -61,6 +61,17 @@ pub static FILES: &[(&str, &[u8])] = &[
         include_bytes!("../static/img/neoleaf_logo_vet.svg"),
     ),
     ("js/agent.js", include_bytes!("../static/js/agent.js")),
+    ("js/ai-chat.js", include_bytes!("../static/js/ai-chat.js")),
+    (
+        "js/ai-providers.js",
+        include_bytes!("../static/js/ai-providers.js"),
+    ),
+    ("js/ai-tools.js", include_bytes!("../static/js/ai-tools.js")),
+    ("js/ai-webmcp.js", include_bytes!("../static/js/ai-webmcp.js")),
+    (
+        "js/ai-settings.js",
+        include_bytes!("../static/js/ai-settings.js"),
+    ),
     (
         "js/autocomplete.js",
         include_bytes!("../static/js/autocomplete.js"),

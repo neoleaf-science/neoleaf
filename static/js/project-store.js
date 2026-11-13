@@ -115,6 +115,7 @@
     if (typeof cfg.styleCheck !== 'boolean') cfg.styleCheck = DEFAULT_CONFIG.styleCheck;
     if (!FORMAT_WRAPS.includes(cfg.formatWrap)) cfg.formatWrap = DEFAULT_CONFIG.formatWrap;
     cfg.formatLineWidth = Math.max(40, Math.min(200, parseInt(cfg.formatLineWidth, 10) || DEFAULT_CONFIG.formatLineWidth));
+    cfg.ai = cfg.ai === 'off' ? 'off' : 'on';   // the AI assistant is allowed unless someone in the project turned it off
     return cfg;
   }
 
@@ -130,6 +131,9 @@
       formatWrap: FORMAT_WRAPS.includes(p.formatWrap) ? p.formatWrap : 'reflow',
       formatLineWidth: Math.max(40, Math.min(200, parseInt(p.formatLineWidth, 10) || 80)),
     };
+    // a project rule, never a personal default: kept when the settings window (which does not know it) saves
+    const ai = p.ai !== undefined ? p.ai : ((await readJson('.neoleaf/config.json')) || {}).ai;
+    if (ai === 'off' && p.scope !== 'global') cfg.ai = 'off';
     if (p.scope === 'global') lsSet('neoleaf.globalConfig', { engine: cfg.engine, autoInstall: cfg.autoInstall, autoSync: cfg.autoSync, autoSyncInterval: cfg.autoSyncInterval, spellCheck: cfg.spellCheck, spellLanguage: cfg.spellLanguage, styleCheck: cfg.styleCheck, formatWrap: cfg.formatWrap, formatLineWidth: cfg.formatLineWidth });
     else await writeJson('.neoleaf/config.json', cfg);
     return { success: true };
@@ -160,10 +164,19 @@
       if (nums.some(n => n < 1 || n > 10000000)) throw new Error('Invalid passage');
       const quote = cleanText(op.quote, 2000, false);
       const text = cleanText(op.text, MAX_COMMENT_TEXT, tk === 'comment');
+      // a thread the AI assistant proposed and a person kept: the person is the author (so delete and the other rules keep working),
+      // `ai` says who proposed it and with which model, and the first message is written in the assistant's name
+      let ai = null;
+      if (op.ai !== undefined && op.ai !== null) {
+        const a = op.ai;
+        if (!a || typeof a !== 'object' || typeof a.name !== 'string' || typeof a.model !== 'string' || [...a.name].length > 40 || [...a.model].length > 120 || /[\u0000-\u001f\u007f]/.test(a.name + a.model) || !a.name.trim()) throw new Error('Invalid AI mark');
+        ai = { name: a.name.trim(), model: a.model };
+      }
+      const writer = ai ? { name: ai.name + ' \u00b7 AI', email: '', ai: true } : me;
       const thread = {
-        id: shortId(), file, kind: tk, createdAt: now, author: me, resolved: false,
+        id: shortId(), file, kind: tk, createdAt: now, author: me, resolved: false, ...(ai ? { ai } : {}),
         range: { sl: nums[0], sc: nums[1], el: nums[2], ec: nums[3] }, quote,
-        messages: text.trim() ? [{ id: shortId(), author: me, text, at: now }] : [],
+        messages: text.trim() ? [{ id: shortId(), author: writer, text, at: now }] : [],
       };
       if (tk === 'suggestion') {
         if (!quote) throw new Error('Select the passage to be changed');
@@ -210,7 +223,7 @@
       const me = author();
       const path = `.neoleaf/history/${me.email.replace(/[^A-Za-z0-9._@+-]/g, '_')}.json`;
       const hist = (await readJson(path)) || { version: 1, entries: [] };
-      hist.entries.push({ time: nowIso(), since: entry.since || nowIso(), fileId: entry.fileId, file: entry.file, user: me, added: entry.added, removed: entry.removed, preview: entry.preview || '' });
+      hist.entries.push({ time: nowIso(), since: entry.since || nowIso(), fileId: entry.fileId, file: entry.file, user: me, added: entry.added, removed: entry.removed, preview: entry.preview || '', ...(entry.ai ? { ai: entry.ai } : {}) });
       if (hist.entries.length > MAX_HISTORY) hist.entries.splice(0, hist.entries.length - MAX_HISTORY);
       await writeJson(path, hist, false);
     } catch (_) { /* no local clone: nothing is recorded */ }

@@ -336,16 +336,24 @@
     }
     try { if (typeof caches !== 'undefined') for (const k of await caches.keys()) await caches.delete(k); } catch (_) {}
     try { sessionStorage.clear(); } catch (_) {}
+    try {   // the AI assistant's settings (the provider key) and conversations, of every account
+      for (const k of Object.keys(localStorage)) if (k.startsWith('neoleaf.ai.')) localStorage.removeItem(k);
+    } catch (_) {}
     try {   // projects created or imported in this browser that were not opened yet
       await Promise.race([new Promise(res => { const r = indexedDB.deleteDatabase('neoleaf-handoff'); r.onsuccess = r.onerror = r.onblocked = () => res(); }), new Promise(res => setTimeout(res, 1500))]);
     } catch (_) {}
   }
 
-  function riskText(risk) {
+  function hasAiKey() {
+    try { return Object.keys(localStorage).some(k => k.startsWith('neoleaf.ai.')); } catch (_) { return false; }
+  }
+
+  function riskText(risk, always) {
     let msg = '';
     if (risk.mine.length) msg += tr('These copies have changes that are not on GitHub or Codeberg and will be lost:\n{0}', risk.mine.map(n => '  - ' + n).join('\n')) + '\n';
     if (risk.others) msg += tr('{0} copy(ies) of other accounts also have changes that are not on GitHub or Codeberg.', risk.others) + '\n';
     if (risk.packages) msg += tr('The extra packages you uploaded for all projects exist only in this browser and will be deleted.') + '\n';
+    if ((msg || always) && hasAiKey()) msg += tr('The AI provider key saved in this browser will be removed too.') + '\n';
     return msg;
   }
 
@@ -355,7 +363,7 @@
     try {
       const risk = await atRisk();
       let msg = tr('Delete ALL local data of NeoLeaf in this browser, for every account? Nothing is deleted on GitHub or Codeberg.');
-      const extra = riskText(risk);
+      const extra = riskText(risk, true);
       if (extra) msg += '\n\n' + extra;
       if (!window.confirm(msg)) return;
       await wipeAll();

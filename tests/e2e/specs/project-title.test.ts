@@ -103,6 +103,37 @@ describe('project display title', () => {
     fake.setDescription(OWNER, REPO, 'NeoLeaf: Another title');
   });
 
+  test('the editor has its own pencil: it sets, shows and removes the title without leaving the editor', async () => {
+    fake.setDescription(OWNER, REPO, '');
+    await s.page.goto(`${BASE_URL}/project/${DEMO_PROJECT}`);
+    await s.page.waitForSelector('#edit-title-btn');
+    expect(await s.page.locator('.project-title').innerText()).toBe(REPO);
+    answers = ['  Editor   Title  '];
+    await s.page.click('#edit-title-btn');
+    await s.page.waitForFunction(() => document.querySelector('.project-title')!.textContent === 'Editor Title', null, { timeout: 15000 });
+    expect(fake.description(OWNER, REPO)).toBe('NeoLeaf: Editor Title');
+    expect(await s.page.locator('.project-title').getAttribute('title')).toBe(`Editor Title (${REPO})`);
+    expect(await s.page.title()).toBe('Editor Title - NeoLeaf Editor');
+    expect(dialogs.at(-1)!.message).toContain('Project title');
+    // the box starts with the current title, and the PDF keeps the repository name
+    let seen = '';
+    s.page.once('dialog', d => { seen = d.defaultValue(); });
+    answers = [null];
+    await s.page.click('#edit-title-btn');
+    await s.page.waitForTimeout(300);
+    expect(seen).toBe('Editor Title');
+    expect(await s.page.locator('#download-pdf-btn').getAttribute('download')).toBe(REPO + '.pdf');
+    await s.page.reload();
+    await s.page.waitForSelector('.project-title');
+    expect(await s.page.locator('.project-title').innerText()).toBe('Editor Title');
+    answers = [''];
+    await s.page.click('#edit-title-btn');
+    await s.page.waitForFunction(r => document.querySelector('.project-title')!.textContent === r, REPO, { timeout: 15000 });
+    expect(fake.description(OWNER, REPO)).toBe('');
+    expect(await s.page.title()).toBe(REPO + ' - NeoLeaf Editor');
+    fake.setDescription(OWNER, REPO, 'NeoLeaf: Another title');
+  });
+
   test('a title that is too long is refused by the server', async () => {
     const r = await s.page.evaluate(async (id: string) => (await fetch(`/api/project/${id}/title`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: 'x'.repeat(81) }) })).json(), DEMO_PROJECT);
     expect(r.error).toContain('at most 80 characters');

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Downloads the LuaLaTeX engine for WebAssembly and the texmf-core-lualatex package.
 
-Same version as the rest of the compiler (texlive-wasm v0.2.4-alpha). Checks the SHA-256 of each file against the published
-`checksums.json` and installs into static/texlive/:
+Same version as the rest of the compiler (texlive-wasm v0.4.0-alpha). Checks the SHA-256 of each file against the values
+fixed in this file and installs into static/texlive/:
 
     static/texlive/lualatex/emscripten/lualatex.js|wasm
     static/texlive/texmf-core-lualatex.tar.gz
@@ -17,8 +17,14 @@ import sys
 import tarfile
 import urllib.request
 
-TAG = "v0.2.4-alpha"
-BASE = f"https://github.com/typeward/texlive-wasm/releases/download/{TAG}"
+TAG = "v0.4.0-alpha"
+# The original repository (typeward/texlive-wasm) is gone; the same packages are republished in this fork (2026-11).
+BASE = f"https://github.com/tassiovirginio/texlive-wasm/releases/download/{TAG}"
+# SHA-256 of each package, fixed here: a download is checked against these, never against a file fetched with it.
+SUMS = {
+    "lualatex-emscripten.tar.gz": {"sha256": "0f3544e344bfdf04067bc04ae446c3bcaf34ab784ba2beb5ab867f221699d708"},
+    "texmf-core-lualatex.tar.gz": {"sha256": "5585f6e44f1575fe5b2a4c2bcf4e3eaead9f5b4488f831864cc585a9f07c01de"},
+}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEST = os.path.join(ROOT, "static/texlive")
 CACHE = os.path.expanduser("~/.cache/latexdrive-fonts")
@@ -64,7 +70,7 @@ def unpack_engine(archive_bytes, subdir):
 
 
 def main():
-    sums = json.loads(get(f"{BASE}/checksums.json"))["assets"]
+    sums = SUMS
 
     lua = download("lualatex-emscripten.tar.gz", sums["lualatex-emscripten.tar.gz"]["sha256"])
     unpack_engine(lua, "lualatex")

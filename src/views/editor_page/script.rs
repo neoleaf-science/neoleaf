@@ -59,7 +59,7 @@ pub(super) fn script_tags() -> &'static str {
     <script src="/static/js/submission.js"></script>
     <script src="/static/js/math-preview.js"></script>
     <script src="/static/js/project-tools.js"></script>
-"##
+{{AI_SCRIPTS}}"##
 }
 
 /// Inline page script: project constants, file switching, PDF download, shortcuts modal.

@@ -62,7 +62,7 @@ fn header() -> &'static str {
     r##"        <header class="legal-header">
             <div class="legal-badge">🔒 General Data Protection Law (LGPD)</div>
             <h1>Privacy Policy</h1>
-            <p class="legal-updated" data-i18n-html>Last updated: October 2026 · NeoLeaf (<code>https://neoleaf.science</code>)</p>
+            <p class="legal-updated" data-i18n-html>Last updated: November 2026 · NeoLeaf (<code>https://neoleaf.science</code>)</p>
         </header>
 
 "##
@@ -95,6 +95,9 @@ fn section_2() -> &'static str {
             </div>
             <p>
                 Unlike legacy cloud platforms, the NeoLeaf server does not process or inspect the academic or intellectual content of your texts to generate the PDF. Your data stays under your control and on your Git infrastructure.
+            </p>
+            <p data-i18n-html>
+                The optional <strong>AI assistant</strong> works the same way: it only runs if you turn it on and paste your own key from an AI provider, and it talks to that provider straight from your browser. NeoLeaf does not receive, store or log your key, your questions, the answers or the text of your files.
             </p>
         </div>
 
@@ -158,6 +161,8 @@ fn section_5() -> &'static str {
                 <li data-i18n-html><code>latex_session</code>: Cryptographic identifier of the active session, generated on the server with the <code>HttpOnly</code>, <code>Secure</code> and <code>SameSite=Lax</code> attributes (expires 30 days after sign-in).</li>
                 <li data-i18n-html><code>oauth_state</code>: Temporary token protecting against cross-site request forgery (CSRF) attacks, valid for 10 minutes during sign-in.</li>
                 <li data-i18n-html><code>ld_lang</code> / <code>ld_theme</code> (or LocalStorage): Records your visual preferences (light/dark theme) and selected language.</li>
+                <li data-i18n-html><code>neoleaf.ai.*</code> (LocalStorage): Only if you use the AI assistant: the provider, your API key, the model, the name you gave the assistant and the conversation, kept in your browser for your account. NeoLeaf never receives them. Signing out or <em>Delete all local data</em> removes them, and <em>Forget the key</em> removes the key.</li>
+                <li data-i18n-html><code>neoleaf.ai.webmcp.*</code> (LocalStorage): Only if you use browser agents: whether you allowed them. Signing out or <em>Delete all local data</em> removes it.</li>
                 <li data-i18n-html><code>IndexedDB (Browser)</code>: The local copy of the projects you open (files and Git history), kept on your own computer so the editor is fast. <strong>NeoLeaf does not encrypt this copy.</strong> Anyone who can use your browser profile can read it with the browser's developer tools. On a shared computer, use a separate browser profile or a private window, turn on your operating system's disk encryption, and use <em>Sign out</em>: it deletes all NeoLeaf data stored in the browser (your language and theme choices stay). You can also see and remove local copies at any time in your profile, in the Storage tab.</li>
             </ul>
         </div>
@@ -177,6 +182,8 @@ fn section_6() -> &'static str {
                 <li data-i18n-html><strong>Oracle Cloud Infrastructure</strong>: Application server where the NeoLeaf binary runs in a restricted and protected way.</li>
             </ul>
             <p data-i18n-html><strong>Services your browser contacts directly,</strong> not through NeoLeaf, and only in these cases: the editor libraries (Monaco and PDF.js) are delivered by Cloudflare's cdnjs; the home page loads the Green Web Foundation badge (app.greenweb.org) to show that the hosting runs on green energy; the spell check dictionaries are downloaded from GitHub (raw.githubusercontent.com, with the jsDelivr mirror as a backup), only after you agree, and kept in your browser; when you open a Typst project, one font (New Computer Modern) is downloaded from GitHub (raw.githubusercontent.com, with the jsDelivr mirror as a backup) and kept in your browser, and the Typst packages a document imports (packages.typst.org) are downloaded when you compile it; and in the References tab your searches go from your browser to the paper services you use, and when you complete a bibliography entry from its DOI the DOI goes to Crossref (or to OpenAlex if Crossref does not know it) (Crossref, OpenAlex, PubMed, Europe PMC, DOAJ, HAL, Zenodo, OpenAIRE and Unpaywall; arXiv and DBLP are queried through the NeoLeaf server, which does not log the query). These services receive your IP address and, in the References tab, the search text or the DOI, and they have their own privacy policies. NeoLeaf does not send them your project files.</p>
+            <p data-i18n-html><strong>AI providers (optional).</strong> If you turn on the AI assistant and give it your own key, your browser sends the questions you write, the passages you select and the text of the project files the assistant reads (which can include your co-authors' text) directly to the provider you chose (Anthropic, OpenAI, Google, OpenRouter or another server you name). This does not pass through NeoLeaf, and NeoLeaf does not choose or control the provider: its own terms and privacy policy apply to that data, and the use is charged to your account there. The assistant never changes a file by itself.</p>
+            <p data-i18n-html><strong>Browser agents (optional).</strong> If you turn on <em>Browser agents</em> in the AI tab (offered only when your browser supports WebMCP), an AI agent that runs in your browser, such as an assistant built into the browser or an extension, can call tools of NeoLeaf to read the files of the open project and to propose comments and suggestions. What it reads goes to that agent, which NeoLeaf does not choose, receive anything from or control; the agent's own terms apply. An extension that can run scripts in the page could use the same tools while the option is on. The option is off by default, you can turn it off at any time, and the tools never change a file by themselves.</p>
         </div>
 
 "##

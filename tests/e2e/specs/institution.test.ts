@@ -182,6 +182,7 @@ describe('with neoleaf.toml', () => {
     expect(ok.status).toBe(0);
     expect(ok.stdout).toContain('provider github: on');
     expect(ok.stdout).toContain('provider codeberg: off');
+    expect(ok.stdout).toContain('ai assistant: off'); // an institution gets the AI assistant only when its file asks for it
     expect(ok.stdout).not.toContain('inst-secret');
     const bad = path.join(dir, 'bad.toml');
     for (const [text, msg] of [

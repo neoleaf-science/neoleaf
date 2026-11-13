@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Downloads Biber for WebAssembly (Perl 5.42 + biber 2.19 compiled to wasm), used by biblatex in the browser.
 
-Same version as the rest of the compiler (texlive-wasm v0.2.4-alpha). Checks the SHA-256 of the package against the published
-`checksums.json` and installs into static/texlive/biber/emscripten/:
+Same version as the rest of the compiler (texlive-wasm v0.4.0-alpha). Checks the SHA-256 of the package against the values
+fixed in this file and installs into static/texlive/biber/emscripten/:
 
     biber.js, biber.wasm (9 MB), biber-vfs.tar.gz (14 MB: Perl and the biber modules), NOTICE e LICENSE.TL
 
@@ -19,8 +19,13 @@ import sys
 import tarfile
 import urllib.request
 
-TAG = "v0.2.4-alpha"
-BASE = f"https://github.com/typeward/texlive-wasm/releases/download/{TAG}"
+TAG = "v0.4.0-alpha"
+# The original repository (typeward/texlive-wasm) is gone; the same packages are republished in this fork (2026-11).
+BASE = f"https://github.com/tassiovirginio/texlive-wasm/releases/download/{TAG}"
+# SHA-256 of each package, fixed here: a download is checked against these, never against a file fetched with it.
+SUMS = {
+    "biber-emscripten.tar.gz": {"sha256": "2f3f72e1f91664f592ce0eb34fe01456c63b468e184a9effaf46849287c53ea4"},
+}
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEST = os.path.join(ROOT, "static/texlive/biber/emscripten")
 CACHE = os.path.expanduser("~/.cache/latexdrive-fonts")
@@ -35,7 +40,7 @@ def get(url):
 
 
 def main():
-    expected = json.loads(get(f"{BASE}/checksums.json"))["assets"][NAME]["sha256"]
+    expected = SUMS[NAME]["sha256"]
     os.makedirs(CACHE, exist_ok=True)
     path = os.path.join(CACHE, f"{TAG}-{NAME}")
     if os.path.exists(path) and hashlib.sha256(open(path, "rb").read()).hexdigest() == expected:

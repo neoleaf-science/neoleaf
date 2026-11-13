@@ -24,7 +24,14 @@ const MAX_LOGO_BYTES: u64 = 512 * 1024;
 struct RawFile {
     brand: Option<RawBrand>,
     legal: Option<RawLegal>,
+    ai: Option<RawAi>,
     providers: Option<HashMap<String, RawProvider>>,
+}
+
+#[derive(Debug, Default, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RawAi {
+    enabled: Option<bool>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -126,6 +133,8 @@ pub const MAX_CUSTOM_PROVIDERS: usize = 8;
 pub struct Config {
     pub brand: Brand,
     pub legal: Legal,
+    /// `[ai] enabled = true`: the AI assistant of the editor is offered (off unless the file says so)
+    pub ai_enabled: bool,
     providers: HashMap<Provider, ProviderCfg>,
     custom: Vec<CustomProvider>,
 }
@@ -180,6 +189,20 @@ impl Config {
 static CONFIG: OnceLock<Option<Config>> = OnceLock::new();
 
 /// The loaded configuration, or `None` when the server runs without the file (the normal case of the public site).
+/// Is the AI assistant of the editor offered? The public site and any install without a `neoleaf.toml` offer it, since it only ever
+/// runs when a person turns it on with their own key (docs/ai-assistant-plan.md). An institution install decides in its file
+/// (`[ai] enabled = true`, off unless it says so). `NEOLEAF_AI=off` switches it off on any install.
+pub fn ai_enabled() -> bool {
+    ai_enabled_for(
+        get(),
+        std::env::var("NEOLEAF_AI").is_ok_and(|v| v.eq_ignore_ascii_case("off")),
+    )
+}
+
+fn ai_enabled_for(cfg: Option<&Config>, forced_off: bool) -> bool {
+    !forced_off && cfg.is_none_or(|c| c.ai_enabled)
+}
+
 pub fn get() -> Option<&'static Config> {
     CONFIG.get().and_then(|c| c.as_ref())
 }
@@ -314,6 +337,7 @@ pub fn parse(text: &str, dir: &Path) -> Result<Config, String> {
             contact_email,
         },
         legal,
+        ai_enabled: raw.ai.and_then(|a| a.enabled).unwrap_or(false),
         providers,
         custom,
     })
@@ -596,6 +620,10 @@ pub fn summary(cfg: &Config) -> Vec<String> {
         "privacy_url: {}",
         cfg.legal.privacy_url.as_deref().unwrap_or("built-in page")
     ));
+    out.push(format!(
+        "ai assistant: {}",
+        if cfg.ai_enabled { "on" } else { "off" }
+    ));
     for p in [Provider::GitHub, Provider::Codeberg] {
         let on = cfg.provider_enabled(p);
         let keys = !p.client_id().is_empty() && !p.client_secret().is_empty();
@@ -651,6 +679,24 @@ mod tests {
             std::fs::write(p, bytes).unwrap();
         }
         d
+    }
+
+    #[test]
+    fn the_ai_assistant_is_on_without_a_file_and_off_in_an_institution_unless_it_asks() {
+        let d = dir_with(&[]);
+        let off = parse("", d.path()).unwrap();
+        let on = parse("[ai]\nenabled = true", d.path()).unwrap();
+        assert!(!off.ai_enabled && on.ai_enabled);
+        assert!(!parse("[ai]\nenabled = false", d.path()).unwrap().ai_enabled);
+        assert!(parse("[ai]\nkey = \"x\"", d.path()).is_err());
+        // the public site (no file) has it, an institution only when its file says so
+        assert!(ai_enabled_for(None, false));
+        assert!(ai_enabled_for(Some(&on), false));
+        assert!(!ai_enabled_for(Some(&off), false));
+        // NEOLEAF_AI=off wins over everything
+        assert!(!ai_enabled_for(None, true) && !ai_enabled_for(Some(&on), true));
+        assert!(summary(&on).iter().any(|l| l == "ai assistant: on"));
+        assert!(summary(&off).iter().any(|l| l == "ai assistant: off"));
     }
 
     #[test]

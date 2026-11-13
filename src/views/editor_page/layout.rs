@@ -8,7 +8,7 @@ pub(super) fn top_bar() -> &'static str {
                 <img src="/static/img/neoleaf_logo_vet.svg" alt="" class="home-logo">
                 <svg class="home-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h5v-6h4v6h5V10"/></svg>
             </a>
-            <span class="project-title" title="{{PROJECT_TOOLTIP}}">{{PROJECT_TITLE}}</span>
+            <span class="project-title" id="project-title" data-repo="{{PROJECT_NAME}}" data-title="{{PROJECT_DISPLAY_TITLE}}" title="{{PROJECT_TOOLTIP}}">{{PROJECT_TITLE}}</span>{{TITLE_EDIT}}
             <div class="save-status">
                 <span id="status-dot" class="status-dot"></span>
                 <span id="status-text">Synced</span>
@@ -128,7 +128,7 @@ pub(super) fn pdf_panel() -> &'static str {
                     <button id="tab-comments-btn" class="tab-btn" onclick="switchTab('comments')">
                         💬 Comments <span id="comments-badge" style="display: none; background: var(--accent-color); color: var(--on-accent); padding: 1px 6px; font-size: 10px; margin-left: 4px;"></span>
                     </button>
-                    <button id="tab-logs-btn" class="tab-btn" onclick="switchTab('logs')">
+{{AI_TAB}}                    <button id="tab-logs-btn" class="tab-btn" onclick="switchTab('logs')">
                         📝 Logs <span id="error-badge" style="display: none; background: var(--danger-color); color: white; padding: 1px 6px; border-radius: 10px; font-size: 10px; margin-left: 4px;"></span>
                     </button>
                 </div>
@@ -164,7 +164,7 @@ pub(super) fn pdf_panel() -> &'static str {
             <!-- Comments and suggestions -->
             <div id="comments-container" class="comments-container"></div>
 
-            <!-- Compiler Logs Drawer -->
+{{AI_PANEL}}            <!-- Compiler Logs Drawer -->
             <div id="logs-container" class="logs-container">
                 <div id="diagnostics-list" style="margin-bottom: 16px;"></div>
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 6px;">

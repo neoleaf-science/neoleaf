@@ -20,12 +20,15 @@ describe('fonts that come with extra packages (browser engines)', () => {
     const s = await newSession();
     try {
       const urls: string[] = [];
-      s.page.on('request', r => { if (/\/static\/texlive\/(texlive|worker)\.js/.test(r.url())) urls.push(r.url()); });
+      s.page.on('request', r => { if (/\/static\/texlive\/(texlive|worker|pdflatex)\.(js|wasm)/.test(r.url())) urls.push(r.url()); });
       await openProject(s.page);
       await s.page.click('#compile-btn');
       await s.page.waitForFunction(() => !!document.querySelector('#pdf-viewer canvas'), null, { timeout: 180000 });
       expect(urls.some(u => /\/static\/texlive\/texlive\.js\?v=\w+/.test(u))).toBe(true);
       expect(urls.some(u => /\/static\/texlive\/worker\.js\?v=\w+/.test(u))).toBe(true);
+      // the engine glue and its wasm are one build: an older glue kept by the browser with a newer wasm fails with "FS error"
+      expect(urls.some(u => /\/static\/texlive\/pdflatex\.js\?v=\w+/.test(u))).toBe(true);
+      expect(urls.some(u => /\/static\/texlive\/pdflatex\.wasm\?v=\w+/.test(u))).toBe(true);
     } finally { await s.context.close(); }
   }, 240000);
 
@@ -62,4 +65,22 @@ describe('fonts that come with extra packages (browser engines)', () => {
       expect(r.pdf).toBeGreaterThan(5000);
     }, 1000000);
   });
+});
+
+describe('font packs next to the core bundle', () => {
+  let s: Session;
+  beforeAll(async () => { s = await newSession(); await openProject(s.page); });
+  afterAll(async () => { await s.context.close(); });
+
+    test('a document with T1 and Times loads its font pack next to the core without an FS error', async () => {
+      const doc = '\\\\documentclass{article}\\\\usepackage[T1]{fontenc}\\\\usepackage{mathptmx}\\\\begin{document}Times text, with accents: ação. \\\\textbf{Bold}\\\\end{document}';
+      await s.page.evaluate(c => (globalThis as any).eval(`editor.setValue('${c}')`), doc);
+      await s.page.evaluate(() => { const w = window as any; const o = w.renderCompileResult; w.__res = null; w.renderCompileResult = (x: any) => { w.__res = x; return o(x); }; });
+      await s.page.click('#compile-btn');
+      await s.page.waitForFunction(() => !!(window as any).__res, null, { timeout: 900000 });
+      const r = await s.page.evaluate(() => { const x = (window as any).__res; return { success: x.success, pdf: (x.pdfBytes || []).length, log: String(x.log || '').slice(-600) }; });
+      expect(r.log).not.toContain('FS error');
+      expect(r.success).toBe(true);
+      expect(r.pdf).toBeGreaterThan(5000);
+    }, 1000000);
 });
